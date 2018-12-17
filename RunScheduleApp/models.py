@@ -5,10 +5,10 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class WorkoutPlan(models.Model):
-    plan_name = models.CharField(max_length=64)
-    description = models.TextField(null=True)
-    date_range = DateRangeField()
-    is_active = models.BooleanField(default=True)
+    plan_name = models.CharField(max_length=64, verbose_name='Nazwa planu')
+    description = models.TextField(null=True, verbose_name='Opis')
+    date_range = DateRangeField(verbose_name='Termin')
+    is_active = models.BooleanField(default=True, verbose_name='Ustaw jako bieżący')
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
