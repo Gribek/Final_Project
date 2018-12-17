@@ -1,0 +1,13 @@
+{% extends "RunScheduleApp/base.html" %}
+
+{% block content %}
+    {% for workout in workout_plan %}
+    <p>{{ workout.plan_name }}</p>
+    <p>{{ workout.description }}</p>
+    <p>{{ workout.date_range.lower|date:"d M Y"  }}</p>
+    <p>{{ workout.date_range.upper|date:"d M Y" }}</p>
+    {% empty %}
+        Brak aktywnego planu
+    {% endfor %}
+
+{% endblock %}
