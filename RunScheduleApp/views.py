@@ -26,4 +26,4 @@ class WorkoutPlanView(View):  # zapytaj o poprawność tego i czy dodać warunek
             form.instance.owner = get_user(request)
             form.save()
             return HttpResponse('Dodano plan')
-
+        return render(request, 'RunScheduleApp/workout_plan_add.html', {'form': form})

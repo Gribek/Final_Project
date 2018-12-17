@@ -1,15 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Dodaj nowy plan</title>
-</head>
-<body>
+{% extends "RunScheduleApp/base.html" %}
+
+{% block content %}
     <form method="post">
         {{ form.as_p }}
         <input type="submit" value="Dodaj plan">
         {% csrf_token %}
     </form>
-
+{% endblock %}
 </body>
 </html>
