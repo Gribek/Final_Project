@@ -3,14 +3,15 @@
 {% block content %}
 
     {% if workout_plan %}
-    <p>{{ workout_plan.plan_name }}</p>
-    <p>{{ workout_plan.description }}</p>
-    <p>{{ workout_plan.date_range.lower|date:"d M Y"  }}</p>
-    <p>{{ workout_plan.date_range.upper|date:"d M Y" }}</p>
+        <p>{{ workout_plan.plan_name }}</p>
+        <p>{{ workout_plan.description }}</p>
+        <p>{{ workout_plan.date_range.lower|date:"d M Y" }}</p>
+        <p>{{ workout_plan.date_range.upper|date:"d M Y" }}</p>
     {% else %}
         Brak aktywnego planu
     {% endif %}
 
     {{ calendar }}
+
 
 {% endblock %}

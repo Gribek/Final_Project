@@ -20,7 +20,7 @@ from RunScheduleApp.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # url(r'^check_user/', get_user),
+    url(r'^$', MainPageView.as_view()),
     url(r'^workout/', CurrentWorkoutPlanView.as_view()),
     url(r'^workout_plan_add/', WorkoutPlanAdd.as_view()),
     # url(r'^current_workout_plan/', CurrentWorkoutPlanView.as_view()),

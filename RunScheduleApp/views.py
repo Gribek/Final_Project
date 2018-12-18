@@ -10,7 +10,9 @@ from RunScheduleApp.forms import *
 
 
 # Create your views here.
-
+class MainPageView(View):
+    def get(self, request):
+        return render(request, "RunScheduleApp/main_page.html")
 
 def get_user(request):
     current_user = request.user

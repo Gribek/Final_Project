@@ -6,7 +6,19 @@
     </head>
         <body>
         {% block header %}
-            <h2>Tu będzie tytuł</h2>
+            <div style="text-align: right">
+                 {% if request.user.is_authenticated %}
+                    Witaj, {{ request.user.username }} <a href="/logout"><button>Wyloguj</button></a>
+                {% else %}
+                    <p>Nie jesteś zalogowany <a href="/login"><button>Zaloguj</button></a></p>
+                {% endif %}
+            </div>
+            <h2>RunWorkoutApp</h2>
+            <div>
+                <a href="/"><button>Strona główna</button></a>
+                <a href="/workout"><button>Mój aktualny plan</button></a>
+                <a href="/"><button>Moje plany</button></a>
+            </div>
         {% endblock %}
         {% block content %}
 
