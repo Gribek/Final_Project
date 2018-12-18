@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path
@@ -22,10 +23,14 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', MainPageView.as_view()),
     url(r'^workout/', CurrentWorkoutPlanView.as_view()),
+    url(r'^workout_list$', WorkoutsList.as_view()),
     url(r'^workout_plan_add/', WorkoutPlanAdd.as_view()),
+    url(r'^workout_plan_edit/(?P<plan_id>\d+)$', WorkoutPlanEdit.as_view()),
     # url(r'^current_workout_plan/', CurrentWorkoutPlanView.as_view()),
-    url(r'^workout_plan/(?P<id>\d+)$', WorkoutPlanView.as_view()),
+    url(r'^plan_details/(?P<id>\d+)$', PlanDetailsView.as_view()),
     url(r'^daily_training_add/(?P<id>\d+)$', DailyTrainingAdd.as_view()),
+    url(r'^daily_training_delete/(?P<id>\d+)$', DailyTrainingDelete.as_view()),
+    url(r'^daily_training_edit/(?P<plan_id>\d+)/(?P<id>\d+)$', DailyTrainingEdit.as_view()),
     url(r'^login$', LoginView.as_view()),
     url(r'^logout$', LogoutView.as_view()),
     url(r'^registration$', RegistrationView.as_view()),

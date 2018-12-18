@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 from django.views import View
 from datetime import datetime
 from calendar import HTMLCalendar
+
 from RunScheduleApp.forms import *
 
 
@@ -33,25 +34,47 @@ class WorkoutPlanAdd(View):
             # if form.instance.is_active == True:
             #     pass TODO(napisać funkcję deaktywującą inne plany)
             form.save()
-            return HttpResponse('Dodano plan')
+            return redirect('/workout')
         return render(request, 'RunScheduleApp/workout_plan_add.html', {'form': form})
 
 
-class WorkoutPlanView(View):
+class WorkoutPlanEdit(View):
+    def get(self, request, plan_id):
+        workout_plan = WorkoutPlan.objects.get(pk=plan_id)
+        if workout_plan.owner != get_user(request):
+            raise PermissionDenied
+        form = WorkoutPlanEditForm(instance=workout_plan)
+        return render(request, 'RunScheduleApp/workout_plan_edit.html', {'form': form})
+
+    def post(self, request, plan_id):
+        workout_plan = WorkoutPlan.objects.get(pk=plan_id)
+        form = WorkoutPlanEditForm(request.POST, instance=workout_plan)
+        if form.is_valid():
+            form.save()
+            return redirect(f'/plan_details/{plan_id}')
+        return render(request, 'RunScheduleApp/workout_plan_edit.html', {'form': form, 'plan_id': plan_id})
+
+
+class PlanDetailsView(View):
     def get(self, request, id):
         workout_plan = WorkoutPlan.objects.get(pk=id)
         if workout_plan.owner != get_user(request):
             raise PermissionDenied
-        return render(request, "RunScheduleApp/workout_plan.html", {'workout_plan': workout_plan})
+        return render(request, "RunScheduleApp/plan_details.html", {'workout_plan': workout_plan})
 
+
+class WorkoutsList(View):
+    def get(self, request):
+        workout_plans = WorkoutPlan.objects.filter(owner=get_user(request))
+        return render(request, "RunScheduleApp/workoutplan_list.html", {'workout_plans': workout_plans})
 
 class DailyTrainingAdd(View):
     def get(self, request, id):
         workout_plan = WorkoutPlan.objects.get(pk=id)
         if workout_plan.owner != get_user(request):
             return HttpResponse('Nie możesz dodać treningu do nie swojego planu!')
-        form = DailyTrainingForm(initial={'workout_plan': workout_plan.plan_name})
-        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form})
+        form = DailyTrainingForm()
+        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'workout_plan': workout_plan})
 
     def post(self, request, id):
         new_training = DailyTraining()
@@ -60,9 +83,36 @@ class DailyTrainingAdd(View):
             workout = WorkoutPlan.objects.get(pk=id)
             form.instance.workout_plan = workout
             form.save()
-            return redirect(f'/daily_training_add/{id}')
+            return redirect(f'/plan_details/{id}')
         # return HttpResponse('Not valid')
         return render(request, "RunScheduleApp/daily_training_add.html", {'form': form})
+
+
+class DailyTrainingEdit(View):
+    def get(self, request, plan_id, id):
+        workout_plan = WorkoutPlan.objects.get(pk=plan_id)
+        if workout_plan.owner != get_user(request):
+            raise PermissionDenied
+        daily_training = DailyTraining.objects.get(pk=id)
+        form = DailyTrainingForm(instance=daily_training)
+        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form})
+
+    def post(self, request, plan_id, id):
+        daily_training = DailyTraining.objects.get(pk=id)
+        form = DailyTrainingForm(request.POST, instance=daily_training)
+        if form.is_valid():
+            form.save()
+            return redirect(f'/plan_details/{plan_id}')
+        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form})
+
+
+class DailyTrainingDelete(View):
+    def get(self, request, id):
+        daily_training = DailyTraining.objects.get(pk=id)
+        if daily_training.workout_plan.owner != get_user(request):
+            raise PermissionDenied
+        daily_training.delete()
+        return redirect(f"/plan_details/{daily_training.workout_plan.id}")
 
 
 class CurrentWorkoutPlanView(View):
@@ -182,8 +232,12 @@ class PasswordChangeView(View):
             new_password = form.cleaned_data.get("new_password")
             if not request.user.is_authenticated:
                 return redirect("/")
-            current_user = request.user
+            current_user = request.user  # TODO zapytaj o pobieranie usera
             current_user.set_password(new_password)
             current_user.save()
             return redirect("/login")
         return render(request, "RunScheduleApp/password_change.html", {'form': form})
+
+
+class EditUserView(View):  # TODO dodać edycję profilu uzytkownika
+    pass

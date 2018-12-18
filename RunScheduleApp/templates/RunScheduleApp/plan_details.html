@@ -1,0 +1,30 @@
+{% extends "RunScheduleApp/base.html" %}
+
+{% block content %}
+    <h4>Nazwa planu: {{ workout_plan.plan_name }}</h4>
+    {% if workout_plan.description %}
+    <p>Opis: {{ workout_plan.description }}</p>
+    {% endif %}
+    <p>Data rozpoczęcia: {{ workout_plan.date_range.lower|date:"d M Y"  }}</p>
+    <p>Data zakończenia: {{ workout_plan.date_range.upper|date:"d M Y" }}</p>
+
+    <h4>Zaplanowane treningi:</h4>
+    <ul>
+        {% for training in workout_plan.dailytraining_set.all|dictsort:"day" %}
+            <li>
+                {{ training.day|date:"d M Y" }}; {{ training }}
+                <a href="/daily_training_edit/{{ workout_plan.id }}/{{ training.id }}">Edytuj</a>
+                <a href="/daily_training_delete/{{ training.id }}"><button>Usuń</button></a>
+            </li>
+        {% empty %}
+            Brak dodanych treningów
+        {% endfor %}
+    </ul>
+    <p>
+        <a href="/daily_training_add/{{ workout_plan.id }}"><button>Zaplanuj trening</button></a>
+        <a href="/workout_plan_edit/{{ workout_plan.id }}"><button>Edytuj plan</button></a>
+        <a href="/workout"><button>Powrót</button></a>
+    </p>
+
+
+{% endblock %}

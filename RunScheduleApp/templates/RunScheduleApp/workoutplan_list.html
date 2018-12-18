@@ -1,0 +1,17 @@
+{% extends "RunScheduleApp/base.html" %}
+
+{% block content %}
+
+    <ul>
+        {% for plan in workout_plans %}
+            <li>{{ plan.plan_name }} {{ plan.date_range.lower|date:"d.m.Y" }} - {{ plan.date_range.upper|date:"d.m.Y" }}
+                {% if plan.is_active %} <span style="color: red"><i>Twój aktualny plan</i></span> {% endif %} </li>
+        {% empty %}
+            Brak dodanych planów
+        {% endfor %}
+    </ul>
+    <div>
+         <a href="/workout_plan_add"><button>Dodaj plan</button></a>
+    </div>
+
+{% endblock %}

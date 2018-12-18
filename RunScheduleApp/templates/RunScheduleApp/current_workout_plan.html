@@ -1,17 +1,26 @@
 {% extends "RunScheduleApp/base.html" %}
 
 {% block content %}
+    <div>
+        {% if workout_plan %}
+            <h3>Twój bierzący plan: {{ workout_plan.plan_name }}</h3>
+        {% else %}
+            <p>Brak aktywnego planu <a href="/workout_list">
+                <button>Wybierz plan</button>
+            </a></p>
+        {% endif %}
+    </div>
 
-    {% if workout_plan %}
-        <p>{{ workout_plan.plan_name }}</p>
-        <p>{{ workout_plan.description }}</p>
-        <p>{{ workout_plan.date_range.lower|date:"d M Y" }}</p>
-        <p>{{ workout_plan.date_range.upper|date:"d M Y" }}</p>
-    {% else %}
-        <p>Brak aktywnego planu <a href="/workout_plan_add"><button>Dodaj nowy plan</button></a></p>
-    {% endif %}
+    <div>
+        {{ calendar }}
+    </div>
 
-    {{ calendar }}
 
+    <div>
+        {% if workout_plan %}
+        <a href="/plan_details/{{ workout_plan.id }}"><button>Szczegóły planu</button></a>
+        <a href="/workout_list"><button>Zmień plan</button></a>
+        {% endif %}
+    </div>
 
 {% endblock %}

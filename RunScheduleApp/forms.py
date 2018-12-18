@@ -18,19 +18,36 @@ class WorkoutPlanForm(ModelForm):
             'date_range': RangeWidget(DatePicker())
         }
 
+class WorkoutPlanEditForm(ModelForm):
+    class Meta:
+        model = WorkoutPlan
+        exclude = ['owner', 'is_active']
+        widgets = {
+            'date_range': RangeWidget(DatePicker())
+        }
+
 
 class DailyTrainingForm(ModelForm):
     class Meta:
         TRAINING_TYPES = (  # TODO dopisz rodzaje treningu
             ('', '-----'),
+            ('TR', 'TR'),
             ('OWB', 'OWB'),
             ('WB', 'WB'),
-            ('KROS', 'KROS'),
+            ('WB2', 'WB2'),
+            ('WB3', 'WB3'),
+            ('KROS pas', 'KROS pas'),
+            ('KROS akt', 'KROS akt'),
+            ('SB', 'SB'),
+            ('BNP', 'BNP'),
+            ('WT', 'WT'),
         )
         ADDITIONAL_TRAINING = (  # TODO dopisz dodatkowe
             ('', '-----'),
             ('P', 'P'),
             ('M3', 'M3'),
+            ('GR', 'GR'),
+            ('GS', 'GS'),
         )
         model = DailyTraining
         exclude = ['accomplished', 'workout_plan']

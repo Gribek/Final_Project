@@ -3,8 +3,10 @@
 {% block content %}
     <form method="post">
         {{ form.as_p }}
-        <input type="submit" value="Dodaj plan">
-        <a href="/workout_list"><button>Anuluj</button></a>
+        <input type="submit" value="Zapisz zmiany">
+         <a href="/plan_details/{{ plan_id }}"><button>Anuluj</button></a>
         {% csrf_token %}
     </form>
+
+
 {% endblock %}
