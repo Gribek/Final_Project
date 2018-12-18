@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -102,8 +103,61 @@ class WorkoutCalendar(HTMLCalendar):
         if day == self.workout_plan.date_range.upper.day:
             return '<td bgcolor= "red" class="%s">%d</td>' % (self.cssclasses[weekday], day)
         if str(day) in self.training_dict_days:
-            return '<td bgcolor= "pink" class="%s">%d<br>%s</td>' % (self.cssclasses[weekday], day, self.training_dict_days[str(day)])
+            return '<td bgcolor= "pink" class="%s">%d<br>%s</td>' % (
+                self.cssclasses[weekday], day, self.training_dict_days[str(day)])
         if day == 0:
             return '<td class="noday">&nbsp;</td>'  # day outside month
         else:
             return '<td class="%s"><a href="%s">%d</a></td>' % (self.cssclasses[weekday], day, day)
+
+
+####### * * * * * Logowanie * * * * * #######
+
+class LoginView(View):
+
+    def get(self, request):
+        form = LoginForm()
+        return render(request, "RunScheduleApp/login.html", {'form': form})
+
+    def post(self, request):
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get("user")
+            password = form.cleaned_data.get("password")
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                next = request.GET.get("next")
+                if next is not None:
+                    return redirect(next)
+                return redirect("/")
+            else:
+                return render(request, "RunScheduleApp/login.html", {'form': form})
+
+
+class LogoutView(View):
+    def get(self, request):
+        if request.user.is_authenticated:
+            logout(request)
+            return redirect('/')
+        else:
+            return HttpResponse("Nie jesteś zalogowany")
+
+
+class RegistrationView(View):
+    def get(self, request):
+        form = RegistrationForm()
+        return render(request, "RunScheduleApp/registration.html", {'form': form})
+
+    def post(self, request):
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            name = form.cleaned_data.get('name')
+            surname = form.cleaned_data.get('surname')
+            email = form.cleaned_data.get('email')
+            User.objects.create_user(username=username, password=password, email=email, first_name=name,
+                                     last_name=surname)
+            return redirect('/')
+        return render(request, "RunScheduleApp/registration.html", {'form': form})

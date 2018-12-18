@@ -7,6 +7,7 @@ from django.forms import ModelForm, DateInput
 class DatePicker(DateInput):
     input_type = 'date'
 
+
 class WorkoutPlanForm(ModelForm):
     class Meta:
         model = WorkoutPlan
@@ -15,15 +16,16 @@ class WorkoutPlanForm(ModelForm):
             'date_range': RangeWidget(DatePicker())
         }
 
+
 class DailyTrainingForm(ModelForm):
     class Meta:
-        TRAINING_TYPES = (
+        TRAINING_TYPES = (  # TODO dopisz rodzaje treningu
             ('', '-----'),
             ('OWB', 'OWB'),
             ('WB', 'WB'),
             ('KROS', 'KROS'),
         )
-        ADDITIONAL_TRAINING = (
+        ADDITIONAL_TRAINING = (  # TODO dopisz dodatkowe
             ('', '-----'),
             ('P', 'P'),
             ('M3', 'M3'),
@@ -37,4 +39,28 @@ class DailyTrainingForm(ModelForm):
             'additional_quantity': forms.TextInput(attrs={'placeholder': 'Np. 6x100'})
         }
 
-        # training_type = forms.ChoiceField(choices=TRAINING_TYPES, widgets=forms.RadioSelect)
+
+class LoginForm(forms.Form):
+    user = forms.CharField(label="Użytkownik")
+    password = forms.CharField(label="Hasło", widget=forms.PasswordInput)
+
+
+class RegistrationForm(forms.Form):
+    username = forms.CharField(label="Nazwa użytkownika")
+    password = forms.CharField(label="Hasło", widget=forms.PasswordInput)
+    repeat_password = forms.CharField(label="Powtórz hasło" ,widget=forms.PasswordInput)
+    name = forms.CharField(label="Imię")
+    surname = forms.CharField(label="Nazwisko")
+    email = forms.EmailField(label="e-mail", widget=forms.EmailInput)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        field1 = cleaned_data.get('password')
+        field2 = cleaned_data.get('repeat_password')
+        username = cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            self.add_error("username", "Ten użytkownik już jest w bazie!")
+        if field1 != field2:
+            self.add_error("repeat_password", "Password i repeat password muszą być takie same")
+
+        return cleaned_data
