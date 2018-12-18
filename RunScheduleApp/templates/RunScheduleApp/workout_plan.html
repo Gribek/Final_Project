@@ -6,4 +6,16 @@
     <p>{{ workout_plan.date_range.lower|date:"d M Y"  }}</p>
     <p>{{ workout_plan.date_range.upper|date:"d M Y" }}</p>
 
+    <p>Zaplanowane treningi:</p>
+    <ul>
+        {% for training in workout_plan.dailytraining_set.all %}
+            <li>
+                {{ training.day|date:"d M Y" }} {{ training }}
+            </li>
+        {% empty %}
+            Brak dodanych treningów
+        {% endfor %}
+    </ul>
+
+
 {% endblock %}
