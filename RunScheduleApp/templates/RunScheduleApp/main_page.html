@@ -5,5 +5,12 @@
         <h3>Super opis strony</h3>
         {% lorem %}
     </div>
-
+    {% if not request.user.is_authenticated %}
+        <div>
+            <p>Żeby w pełni korzystać ze strony należy się zalogować
+                <a href="/login"><button>Zaloguj</button></a></p>
+            <p>Jeśli nie masz jeszcze konta
+                <a href="/registration"><button>Zarejestruj się</button></a></p>
+        </div>
+    {% endif %}
 {% endblock %}

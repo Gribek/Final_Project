@@ -1,5 +1,7 @@
 from django.contrib.postgres.forms import RangeWidget
 from django import forms
+from django.core.exceptions import ValidationError
+
 from RunScheduleApp.models import *
 from django.forms import ModelForm, DateInput
 
@@ -64,3 +66,15 @@ class RegistrationForm(forms.Form):
             self.add_error("repeat_password", "Password i repeat password muszą być takie same")
 
         return cleaned_data
+
+class PasswordChangeForm(forms.Form):
+    new_password = forms.CharField(label="Nowe hasło", widget=forms.PasswordInput)
+    repeat_password = forms.CharField(label="Powtórz nowe hasło", widget=forms.PasswordInput)
+
+    def clean(self):
+        cleaned_date = super().clean()
+        field1 = cleaned_date.get('new_password')
+        field2 = cleaned_date.get('repeat_password')
+        if field1 != field2:
+            raise ValidationError("Wpisane hasła muszą być takie same")
+        return cleaned_date

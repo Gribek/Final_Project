@@ -14,6 +14,7 @@ class MainPageView(View):
     def get(self, request):
         return render(request, "RunScheduleApp/main_page.html")
 
+
 def get_user(request):
     current_user = request.user
     return current_user
@@ -113,7 +114,7 @@ class WorkoutCalendar(HTMLCalendar):
             return '<td class="%s"><a href="%s">%d</a></td>' % (self.cssclasses[weekday], day, day)
 
 
-####### * * * * * Logowanie * * * * * #######
+####### * * * * * Użytkownicy * * * * * #######
 
 class LoginView(View):
 
@@ -161,5 +162,28 @@ class RegistrationView(View):
             email = form.cleaned_data.get('email')
             User.objects.create_user(username=username, password=password, email=email, first_name=name,
                                      last_name=surname)
-            return redirect('/')
+            return redirect('/login')
         return render(request, "RunScheduleApp/registration.html", {'form': form})
+
+
+class UserProfileView(View):
+    def get(self, request):
+        return render(request, "RunScheduleApp/user_profile.html")
+
+
+class PasswordChangeView(View):
+    def get(self, request):
+        form = PasswordChangeForm()
+        return render(request, "RunScheduleApp/password_change.html", {'form': form})
+
+    def post(self, request):
+        form = PasswordChangeForm(request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data.get("new_password")
+            if not request.user.is_authenticated:
+                return redirect("/")
+            current_user = request.user
+            current_user.set_password(new_password)
+            current_user.save()
+            return redirect("/login")
+        return render(request, "RunScheduleApp/password_change.html", {'form': form})
