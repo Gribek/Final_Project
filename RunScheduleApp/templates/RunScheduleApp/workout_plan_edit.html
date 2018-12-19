@@ -4,6 +4,7 @@
     <form method="post">
         {{ form.as_p }}
         <input type="submit" value="Zapisz zmiany">
+        <button type="reset">Reset</button>
          <a href="/plan_details/{{ plan_id }}"><button>Anuluj</button></a>
         {% csrf_token %}
     </form>

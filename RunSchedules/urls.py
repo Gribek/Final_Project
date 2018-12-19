@@ -29,6 +29,7 @@ urlpatterns = [
     # url(r'^current_workout_plan/', CurrentWorkoutPlanView.as_view()),
     url(r'^plan_details/(?P<id>\d+)$', PlanDetailsView.as_view()),
     url(r'^daily_training_add/(?P<id>\d+)$', DailyTrainingAdd.as_view()),
+    url(r'^daily_training_add/(?P<id>\d+)/(?P<date>.+)$', DailyTrainingAdd.as_view()),
     url(r'^daily_training_delete/(?P<id>\d+)$', DailyTrainingDelete.as_view()),
     url(r'^daily_training_edit/(?P<plan_id>\d+)/(?P<id>\d+)$', DailyTrainingEdit.as_view()),
     url(r'^login$', LoginView.as_view()),
