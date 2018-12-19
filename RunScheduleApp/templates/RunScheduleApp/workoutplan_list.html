@@ -12,7 +12,10 @@
         {% endfor %}
     </ul>
     <div>
-         <a href="/workout_plan_add"><button>Dodaj plan</button></a>
+        <a href="/workout_plan_add"><button>Dodaj plan</button></a>
+        {% if workout_plans %}
+        <a href="/select_active_plan"><button>Zmień aktualny plan</button></a>
+        {% endif %}
     </div>
 
 {% endblock %}

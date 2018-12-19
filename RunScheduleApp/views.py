@@ -135,17 +135,33 @@ class DailyTrainingDelete(View):
         daily_training.delete()
         return redirect(f"/plan_details/{daily_training.workout_plan.id}")
 
-#
-# class SelectActivePlanView(View):
-#     def get(self, request):
-#         all_user_plans = WorkoutPlan.objects.filter(owner=request.user)
-#
-#         plan_dict = {}
-#         for plan in all_user_plans:
-#             plan_dict.update({f'{plan.plan_name}': plan.id})
-#         plan_tuple = tuple(plan_dict)
-#         form = SelectActivePlanFrom(choices=plan_tuple)
-#         return render(request, "RunScheduleApp/select_plan.html", {'form': form})
+
+class SelectActivePlanView(View):
+    def get_user_plans_tuple(self, request):
+        all_user_plans = WorkoutPlan.objects.filter(owner=request.user)
+        plan_name_array = []
+        plan_id_array = []
+        for plan in all_user_plans:
+            plan_id_array.append(plan.plan_name)
+            plan_name_array.append(plan.id)
+        return tuple(zip(plan_name_array, plan_id_array))
+
+    def get(self, request):
+        PLANS_TUPLE = self.get_user_plans_tuple(request)
+        form = SelectActivePlanFrom(choices=PLANS_TUPLE)
+        return render(request, "RunScheduleApp/select_plan.html", {'form': form})
+
+    def post(self, request):
+        PLANS_TUPLE = self.get_user_plans_tuple(request)
+        form = SelectActivePlanFrom(request.POST, choices=PLANS_TUPLE)
+        if form.is_valid():
+            new_active_plan_id = form.cleaned_data.get('active_plan')
+            WorkoutPlan.objects.filter(owner=request.user).filter(is_active=True).update(is_active=False)
+            new_active_plan = WorkoutPlan.objects.get(pk=new_active_plan_id)
+            new_active_plan.is_active = True
+            new_active_plan.save()
+            return redirect("/workout_list")
+        return render(request, "RunScheduleApp/select_plan.html", {'form': form})
 
 
 class CurrentWorkoutPlanView(View):

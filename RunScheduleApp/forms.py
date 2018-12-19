@@ -96,11 +96,11 @@ class PasswordChangeForm(forms.Form):
             raise ValidationError("Wpisane hasła muszą być takie same")
         return cleaned_date
 
-# class SelectActivePlanFrom(forms.Form):
-#
-#     def __init__(self, *args, **kwargs):
-#         choices = kwargs.pop('choices')
-#         super(SelectActivePlanFrom, self).__init__(*args, **kwargs)
-#         self.fields['plans'].choices = choices
-#
-#     plans = forms.ChoiceField(choices=[])
+class SelectActivePlanFrom(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        self.choices = kwargs.pop('choices')
+        super(SelectActivePlanFrom, self).__init__(*args, **kwargs)
+        self.fields['active_plan'].choices = self.choices
+
+    active_plan = forms.ChoiceField(choices=[], label="Wybierz plan")

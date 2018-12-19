@@ -37,5 +37,5 @@ urlpatterns = [
     url(r'^registration$', RegistrationView.as_view()),
     url(r'^profile$', UserProfileView.as_view()),
     url(r'^password_change$', PasswordChangeView.as_view()),
-    # url(r'^select_plan$', SelectActivePlanView.as_view()),
+    url(r'^select_active_plan$', SelectActivePlanView.as_view()),
 ]
