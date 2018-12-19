@@ -8,6 +8,13 @@
     <p>Data rozpoczęcia: {{ workout_plan.date_range.lower|date:"d M Y"  }}</p>
     <p>Data zakończenia: {{ workout_plan.date_range.upper|date:"d M Y" }}</p>
 
+    <p>
+        <a href="/daily_training_add/{{ workout_plan.id }}"><button>Zaplanuj trening</button></a>
+        <a href="/workout_plan_edit/{{ workout_plan.id }}"><button>Edytuj plan</button></a>
+        <a href="/workout/{{ get_month_counter }}"><button>Powrót do bieżącego planu</button></a>
+        <a href="/workout_list"><button>Powrót do listy planów</button></a>
+    </p>
+
     <h4>Zaplanowane treningi:</h4>
     <ul>
         {% for training in workout_plan.dailytraining_set.all|dictsort:"day" %}
@@ -20,12 +27,7 @@
             Brak dodanych treningów
         {% endfor %}
     </ul>
-    <p>
-        <a href="/daily_training_add/{{ workout_plan.id }}"><button>Zaplanuj trening</button></a>
-        <a href="/workout_plan_edit/{{ workout_plan.id }}"><button>Edytuj plan</button></a>
-        <a href="/workout/{{ get_month_counter }}"><button>Powrót do bieżącego planu</button></a>
-        <a href="/workout_list"><button>Powrót do listy planów</button></a>
-    </p>
+
 
 
 {% endblock %}

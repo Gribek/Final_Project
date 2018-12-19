@@ -12,24 +12,25 @@
     </div>
     <div>
         {% if workout_plan %}
-        <a href="/plan_details/{{ workout_plan.id }}"><button>Szczegóły planu</button></a>
-        <a href="/workout_list"><button>Zmień plan</button></a>
-        {% endif %}
-    </div>
+            <a href="/plan_details/{{ workout_plan.id }}"><button>Szczegóły planu</button></a>
+            <a href="/workout_list"><button>Zmień plan</button></a>
 
-    <div>
-        {{ calendar }}
-    </div>
-    <div>
+            </div>
 
-        {% if month_counter != '0' %}
-        <a href="/workout/0"><button>Początek planu</button></a>
-        <a href="/workout/{{ month_counter|add:'-1' }}"><button>Poprzedni miesiąc</button></a>
-        {% endif %}
-        <a href="/workout/{{ present_mont_counter }}"><button>Obecny miesiąc</button></a>
-        {% if month_counter != max_month_counter %}
-        <a href="/workout/{{ month_counter|add:1 }}"><button>Następny miesiąc</button></a>
-        <a href="/workout/{{ max_month_counter }}"><button>Koniec planu</button></a>
+            <div>
+                {{ calendar }}
+            </div>
+            <div>
+
+            {% if month_counter != '0' %}
+            <a href="/workout/0"><button>Początek planu</button></a>
+            <a href="/workout/{{ month_counter|add:'-1' }}"><button>Poprzedni miesiąc</button></a>
+            {% endif %}
+            <a href="/workout/{{ present_mont_counter }}"><button>Obecny miesiąc</button></a>
+            {% if month_counter != max_month_counter %}
+            <a href="/workout/{{ month_counter|add:1 }}"><button>Następny miesiąc</button></a>
+            <a href="/workout/{{ max_month_counter }}"><button>Koniec planu</button></a>
+            {% endif %}
         {% endif %}
     </div>
 
