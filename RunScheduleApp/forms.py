@@ -38,7 +38,6 @@ class DailyTrainingForm(ModelForm):
             ('WB3', 'WB3'),
             ('KROS pas', 'KROS pas'),
             ('KROS akt', 'KROS akt'),
-            ('SB', 'SB'),
             ('BNP', 'BNP'),
             ('WT', 'WT'),
         )
@@ -46,8 +45,9 @@ class DailyTrainingForm(ModelForm):
             ('', '-----'),
             ('P', 'P'),
             ('M3', 'M3'),
-            ('GR', 'GR'),
-            ('GS', 'GS'),
+            ('SB', 'SB'),
+            # ('GR', 'GR'),
+            # ('GS', 'GS'),
         )
         model = DailyTraining
         exclude = ['accomplished', 'workout_plan']

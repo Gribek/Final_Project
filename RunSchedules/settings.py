@@ -63,6 +63,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'RunScheduleApp.context_processor.pass_month_counter_to_base_html',
             ],
         },
     },
