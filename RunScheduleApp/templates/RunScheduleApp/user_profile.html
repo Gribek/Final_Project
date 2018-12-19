@@ -4,10 +4,10 @@
     <p>Nazwa użytkownika: {{ request.user.username }}</p>
     <p>Imię: {{ request.user.first_name }}</p>
     <p>Nazwisko: {{ request.user.last_name }}</p>
-    <p>e-mail: {{ request.user.email }}</p>
+    <p>Adres e-mail: {{ request.user.email }}</p>
 
     <div>
-        <a href="/"><button>Edytuj dane</button></a>
+        <a href="/edit_profile"><button>Edytuj dane</button></a>
         <a href="/password_change"><button>Zmień hasło</button></a>
     </div>
 {% endblock %}

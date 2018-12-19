@@ -36,6 +36,7 @@ urlpatterns = [
     url(r'^logout$', LogoutView.as_view()),
     url(r'^registration$', RegistrationView.as_view()),
     url(r'^profile$', UserProfileView.as_view()),
+    url(r'^edit_profile$', EditUserView.as_view()),
     url(r'^password_change$', PasswordChangeView.as_view()),
     url(r'^select_active_plan$', SelectActivePlanView.as_view()),
 ]

@@ -186,19 +186,20 @@ class CurrentWorkoutPlanView(View):
             if month_number == 0:  # poprawka na grudzień dla którego reszta z dzielenia przez 12 jest zawsze 0
                 month_number = 12
 
-        # tworzenie słownika z treningami w danym miesiącu i roku
+        # tworzenie słownika z treningami w danym miesiącu danego roku
         trainings = workout_plan.dailytraining_set.filter(day__year=year_number).filter(
             day__month=month_number).order_by('day')
         training_dict = {}
         for training in trainings:
             training_dict.update({f'{training.day.day}': training.name()})
 
-        # pobieramy maksymalny month_counter
+        # pobieramy maksymalny month_counter i lucznik dla aktualnego miesiąca
         max_month_counter = get_max_month_counter(plan_start_date, plan_end_date)
         present_mont_counter = get_month_counter(plan_start_date)
+
+        # Wywołujemy klase WorkoutCalendar, dziedziczącą po HTMLCalendar, którego metody zostały nadpisane
         cal = WorkoutCalendar(workout_plan, training_dict, month_number, year_number).formatmonth(year_number,
                                                                                                   month_number)
-
         ctx = {'workout_plan': workout_plan,
                'calendar': mark_safe(cal),
                'month_counter': month_counter,
@@ -350,5 +351,15 @@ class PasswordChangeView(View):
         return render(request, "RunScheduleApp/password_change.html", {'form': form})
 
 
-class EditUserView(View):  # TODO dodać edycję profilu uzytkownika
-    pass
+class EditUserView(View):
+    def get(self, request):
+        current_user = request.user
+        form = EditUserForm(instance=current_user)
+        return render(request, "RunScheduleApp/edit_user_profile.html", {'form': form})
+
+    def post(self, request):
+        form = EditUserForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect("/profile")
+        return render(request, "RunScheduleApp/edit_user_profile.html", {'form': form})

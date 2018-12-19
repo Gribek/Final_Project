@@ -18,6 +18,7 @@ class WorkoutPlanForm(ModelForm):
             'date_range': RangeWidget(DatePicker())
         }
 
+
 class WorkoutPlanEditForm(ModelForm):
     class Meta:
         model = WorkoutPlan
@@ -67,10 +68,10 @@ class LoginForm(forms.Form):
 class RegistrationForm(forms.Form):
     username = forms.CharField(label="Nazwa użytkownika")
     password = forms.CharField(label="Hasło", widget=forms.PasswordInput)
-    repeat_password = forms.CharField(label="Powtórz hasło" ,widget=forms.PasswordInput)
+    repeat_password = forms.CharField(label="Powtórz hasło", widget=forms.PasswordInput)
     name = forms.CharField(label="Imię")
     surname = forms.CharField(label="Nazwisko")
-    email = forms.EmailField(label="e-mail", widget=forms.EmailInput)
+    email = forms.EmailField(label="Adres e-mail:", widget=forms.EmailInput)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -84,6 +85,7 @@ class RegistrationForm(forms.Form):
 
         return cleaned_data
 
+
 class PasswordChangeForm(forms.Form):
     new_password = forms.CharField(label="Nowe hasło", widget=forms.PasswordInput)
     repeat_password = forms.CharField(label="Powtórz nowe hasło", widget=forms.PasswordInput)
@@ -95,6 +97,17 @@ class PasswordChangeForm(forms.Form):
         if field1 != field2:
             raise ValidationError("Wpisane hasła muszą być takie same")
         return cleaned_date
+
+class EditUserForm(ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+        widgets = {'email': forms.EmailInput()}
+        labels = {
+            'first_name': ('Imię:'),
+            'last_name': ('Nazwisko:'),
+            'email': ('Adres e-mail:'),
+        }
 
 class SelectActivePlanFrom(forms.Form):
 
