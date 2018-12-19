@@ -98,6 +98,7 @@ class PasswordChangeForm(forms.Form):
             raise ValidationError("Wpisane hasła muszą być takie same")
         return cleaned_date
 
+
 class EditUserForm(ModelForm):
     class Meta:
         model = User
@@ -108,6 +109,7 @@ class EditUserForm(ModelForm):
             'last_name': ('Nazwisko:'),
             'email': ('Adres e-mail:'),
         }
+
 
 class SelectActivePlanFrom(forms.Form):
 

@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -23,6 +24,7 @@ def get_month_counter(plan_start_date):
     return month_counter
 
 
+# oblicza max_countera dla ostatniego miesiąca aktualnego planu
 def get_max_month_counter(plan_start_date, plan_end_date):
     day_now = datetime.today().date()
     month_max_counter = (plan_end_date.year - day_now.year) * 12 + plan_end_date.month - day_now.month
@@ -79,7 +81,7 @@ class PlanDetailsView(View):
                       {'workout_plan': workout_plan, 'month_counter': month_counter})
 
 
-class WorkoutsList(View):
+class WorkoutsList(LoginRequiredMixin, View):
     def get(self, request):
         workout_plans = WorkoutPlan.objects.filter(owner=get_user(request))
         return render(request, "RunScheduleApp/workoutplan_list.html", {'workout_plans': workout_plans})
@@ -164,11 +166,8 @@ class SelectActivePlanView(View):
         return render(request, "RunScheduleApp/select_plan.html", {'form': form})
 
 
-class CurrentWorkoutPlanView(View):
+class CurrentWorkoutPlanView(LoginRequiredMixin, View):
     def get(self, request, month_counter):
-        logged_user = get_user(request)
-        if logged_user.is_anonymous == True:
-            return redirect('/login')
         if not WorkoutPlan.objects.filter(owner=get_user(request)).filter(is_active=True).exists():
             return render(request, "RunScheduleApp/current_workout_plan.html", {'workout_plan': ''})
         workout_plan = WorkoutPlan.objects.filter(owner=get_user(request)).filter(is_active=True)[0]
@@ -324,11 +323,23 @@ class RegistrationView(View):
             email = form.cleaned_data.get('email')
             User.objects.create_user(username=username, password=password, email=email, first_name=name,
                                      last_name=surname)
+            # new_user = User.objects.get(username=username)
+            # permission_list = (
+            #     'RunScheduleApp.add_dailytraining',
+            #     'RunScheduleApp.change_dailytraining',
+            #     'RunScheduleApp.delete_dailytraining',
+            #     'RunScheduleApp.view_dailytraining',
+            #     'RunScheduleApp.add_workoutplan',
+            #     'RunScheduleApp.change_workoutplan',
+            #     'RunScheduleApp.delete_workoutplan',
+            #     'RunScheduleApp.view_workoutplan',
+            # )
+            # new_user.user_permissions.add(permission_list)
             return redirect('/login')
         return render(request, "RunScheduleApp/registration.html", {'form': form})
 
 
-class UserProfileView(View):
+class UserProfileView(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, "RunScheduleApp/user_profile.html")
 
