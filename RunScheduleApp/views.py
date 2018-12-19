@@ -86,7 +86,7 @@ class WorkoutsList(View):
 
 
 class DailyTrainingAdd(View):
-    def get(self, request, id, date = None):
+    def get(self, request, id, date=None):
         if date is not None:
             date_format = datetime.strptime(date, "%Y-%m-%d").date()
         else:
@@ -97,7 +97,7 @@ class DailyTrainingAdd(View):
         form = DailyTrainingForm(initial={'day': date_format})
         return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'workout_plan': workout_plan})
 
-    def post(self, request, id, date = None):
+    def post(self, request, id, date=None):
         new_training = DailyTraining()
         form = DailyTrainingForm(request.POST, instance=new_training)
         if form.is_valid():
@@ -134,6 +134,18 @@ class DailyTrainingDelete(View):
             raise PermissionDenied
         daily_training.delete()
         return redirect(f"/plan_details/{daily_training.workout_plan.id}")
+
+#
+# class SelectActivePlanView(View):
+#     def get(self, request):
+#         all_user_plans = WorkoutPlan.objects.filter(owner=request.user)
+#
+#         plan_dict = {}
+#         for plan in all_user_plans:
+#             plan_dict.update({f'{plan.plan_name}': plan.id})
+#         plan_tuple = tuple(plan_dict)
+#         form = SelectActivePlanFrom(choices=plan_tuple)
+#         return render(request, "RunScheduleApp/select_plan.html", {'form': form})
 
 
 class CurrentWorkoutPlanView(View):
@@ -206,7 +218,8 @@ class WorkoutCalendar(HTMLCalendar):
             else:
                 date = self.create_date_string(day)
                 edit_day_link = f"/daily_training_add/{self.workout_plan.id}/{date}"
-                return '<td bgcolor= "green" class="%s"><a href="%s">%d</a></td>' % (self.cssclasses[weekday], edit_day_link, day)
+                return '<td bgcolor= "green" class="%s"><a href="%s">%d</a></td>' % (
+                    self.cssclasses[weekday], edit_day_link, day)
         # dzień końcowy treningu
         if day == self.workout_plan_end_date.day \
                 and self.workout_plan_end_date.month == self.month_number \
@@ -218,7 +231,8 @@ class WorkoutCalendar(HTMLCalendar):
             else:
                 date = self.create_date_string(day)
                 edit_day_link = f"/daily_training_add/{self.workout_plan.id}/{date}"
-                return '<td bgcolor= "red" class="%s"><a href="%s">%d</a></td>' % (self.cssclasses[weekday], edit_day_link, day)
+                return '<td bgcolor= "red" class="%s"><a href="%s">%d</a></td>' % (
+                    self.cssclasses[weekday], edit_day_link, day)
         # obsługuje pola w tabeli "poza" miesiącem
         if day == 0:
             return '<td class="noday">&nbsp;</td>'
@@ -226,7 +240,7 @@ class WorkoutCalendar(HTMLCalendar):
         if str(day) in self.training_dict:
             edit_day_link = self.create_day_edit_link(day)
             return '<td bgcolor= "pink" class="%s"><a href="%s">%d</a><br>%s</td>' % (
-                self.cssclasses[weekday],edit_day_link, day, self.training_dict[str(day)])
+                self.cssclasses[weekday], edit_day_link, day, self.training_dict[str(day)])
         # dni nietreningowe
         else:
             date = self.create_date_string(day)
