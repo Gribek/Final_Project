@@ -1,12 +1,9 @@
 {% extends "RunScheduleApp/base.html" %}
 
 {% block content %}
-    <div>
-        <h3>Super opis strony</h3>
-        {% lorem %}
-    </div>
+
     {% if not request.user.is_authenticated %}
-        <div>
+        <div style="text-align: center">
             <p>Żeby w pełni korzystać ze strony należy się zalogować
                 <a href="/login"><button>Zaloguj</button></a></p>
             <p>Jeśli nie masz jeszcze konta

@@ -1,19 +1,19 @@
 {% extends "RunScheduleApp/base.html" %}
 
 {% block content %}
-    <div>
+    <div style="text-align: center">
+    <div class="text_blue">
         {% if workout_plan %}
             <h3>Twój bierzący plan: {{ workout_plan.plan_name }}</h3>
         {% else %}
-            <p>Brak aktywnego planu <a href="/workout_list">
-                <button>Wybierz plan</button>
-            </a></p>
+            <p>Brak aktywnego planu <a href="/workout_list" class="btn btn-primary">
+                Wybierz plan</a></p>
         {% endif %}
     </div>
     <div>
         {% if workout_plan %}
-            <a href="/plan_details/{{ workout_plan.id }}"><button>Szczegóły planu</button></a>
-            <a href="/select_active_plan"><button>Zmień aktualny plan</button></a>
+            <a href="/plan_details/{{ workout_plan.id }}" class="btn btn-primary">Szczegóły planu</a>
+            <a href="/select_active_plan" class="btn btn-primary">Zmień aktualny plan</a>
 
             </div>
 
@@ -23,15 +23,18 @@
             <div>
 
             {% if month_counter != '0' %}
-            <a href="/workout/0"><button>Początek planu</button></a>
-            <a href="/workout/{{ month_counter|add:'-1' }}"><button>Poprzedni miesiąc</button></a>
+            <a href="/workout/0" class="btn btn-primary">
+                <i class="fas fa-arrow-alt-circle-down"></i>
+                Początek planu</a>
+            <a href="/workout/{{ month_counter|add:'-1' }}" class="btn btn-primary">Poprzedni miesiąc</a>
             {% endif %}
-            <a href="/workout/{{ present_mont_counter }}"><button>Obecny miesiąc</button></a>
+            <a href="/workout/{{ present_mont_counter }}" class="btn btn-primary">Obecny miesią</a>
             {% if month_counter != max_month_counter %}
-            <a href="/workout/{{ month_counter|add:1 }}"><button>Następny miesiąc</button></a>
-            <a href="/workout/{{ max_month_counter }}"><button>Koniec planu</button></a>
+            <a href="/workout/{{ month_counter|add:1 }}" class="btn btn-primary">Następny miesiąc</a>
+            <a href="/workout/{{ max_month_counter }}" class="btn btn-primary">Koniec planu</a>
             {% endif %}
         {% endif %}
+    </div>
     </div>
 
 

@@ -1,0 +1,51 @@
+@font-face {
+    font-family: 'Major Mono Display', monospace;
+}
+
+
+body {
+    background-color: aliceblue;
+    font-family: 'Major Mono Display', monospace;
+}
+
+table a {
+    text-decoration: None;
+    color: darkblue;
+}
+
+table th {
+    text-decoration: None;
+    text-align: center;
+    color: aliceblue;
+    background-color: darkblue;
+}
+
+.table tbody td:hover {
+    border: solid 1px darkblue;
+    background-color: mediumvioletred;
+
+}
+
+nav a {
+    color: aliceblue;
+}
+
+.table tbody td {
+    transition: background-color 1s ease-out;
+}
+
+.table a
+{
+    display:block;
+    text-decoration:none;
+}
+
+
+#fixedheight td a {
+    height: 42px;
+    overflow: hidden;
+}
+
+.text_blue {
+    color: darkblue;
+}
