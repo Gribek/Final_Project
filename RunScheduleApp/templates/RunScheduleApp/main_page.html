@@ -3,11 +3,12 @@
 {% block content %}
 
     {% if not request.user.is_authenticated %}
-        <div style="text-align: center">
-            <p>Żeby w pełni korzystać ze strony należy się zalogować
-                <a href="/login"><button>Zaloguj</button></a></p>
-            <p>Jeśli nie masz jeszcze konta
-                <a href="/registration"><button>Zarejestruj się</button></a></p>
+        <div class="text_blue" style="text-align: center">
+        <p></p>
+            <p>
+                <a href="/login" class="btn btn-primary btn-lg btn-block">Żeby w pełni korzystać ze strony należy się zalogować</a></p>
+            <p>
+                <a href="/registration" class="btn btn-primary btn-lg btn-block">Jeśli nie masz jeszcze konta, zarejestruj się</a></p>
         </div>
     {% endif %}
 {% endblock %}

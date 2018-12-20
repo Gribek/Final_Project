@@ -1,33 +1,35 @@
 {% extends "RunScheduleApp/base.html" %}
 
 {% block content %}
-    <h4>Nazwa planu: {{ workout_plan.plan_name }}</h4>
-    {% if workout_plan.description %}
-    <p>Opis: {{ workout_plan.description }}</p>
-    {% endif %}
-    <p>Data rozpoczęcia: {{ workout_plan.date_range.lower|date:"d M Y"  }}</p>
-    <p>Data zakończenia: {{ workout_plan.date_range.upper|date:"d M Y" }}</p>
+    <div class="text_blue">
+        <h4>Nazwa planu: {{ workout_plan.plan_name }}</h4>
+        {% if workout_plan.description %}
+        <p>Opis: {{ workout_plan.description }}</p>
+        {% endif %}
+        <p>Data rozpoczęcia: {{ workout_plan.date_range.lower|date:"d.m.Y"  }}</p>
+        <p>Data zakończenia: {{ workout_plan.date_range.upper|date:"d.m.Y" }}</p>
 
-    <p>
-        <a href="/daily_training_add/{{ workout_plan.id }}"><button>Zaplanuj trening</button></a>
-        <a href="/workout_plan_edit/{{ workout_plan.id }}"><button>Edytuj plan</button></a>
-        <a href="/workout/{{ get_month_counter }}"><button>Powrót do aktualnego planu</button></a>
-        <a href="/workout_list"><button>Powrót do listy planów</button></a>
-    </p>
-
-    <h4>Zaplanowane treningi:</h4>
-    <ul>
-        {% for training in workout_plan.dailytraining_set.all|dictsort:"day" %}
-            <li>
-                {{ training.day|date:"d M Y" }}; {{ training }}
-                <a href="/daily_training_edit/{{ workout_plan.id }}/{{ training.id }}">Edytuj</a>
-                <a href="/daily_training_delete/{{ training.id }}"><button>Usuń</button></a>
-            </li>
-        {% empty %}
-            Brak dodanych treningów
-        {% endfor %}
-    </ul>
-
+        <p>
+            <a class="btn btn-primary" href="/daily_training_add/{{ workout_plan.id }}">Zaplanuj trening</a>
+            <a class="btn btn-primary" href="/workout_plan_edit/{{ workout_plan.id }}">Edytuj plan</a>
+            <a class="btn btn-primary" href="/workout/{{ get_month_counter }}">Powrót do aktualnego planu</a>
+            <a class="btn btn-primary" href="/workout_list">Powrót do listy planów</a>
+        </p>
+    </div>
+    <div class="text_blue">
+        <h4>Zaplanowane treningi:</h4>
+        <ul>
+            {% for training in workout_plan.dailytraining_set.all|dictsort:"day" %}
+                <li>
+                    {{ training.day|date:"d.m.Y" }}; {{ training }}
+                    <a class="btn btn-primary" href="/daily_training_edit/{{ workout_plan.id }}/{{ training.id }}">Edytuj</a>
+                    <a class="btn btn-danger" href="/daily_training_delete/{{ training.id }}">Usuń</a>
+                </li>
+            {% empty %}
+                Brak dodanych treningów
+            {% endfor %}
+        </ul>
+    </div>
 
 
 {% endblock %}

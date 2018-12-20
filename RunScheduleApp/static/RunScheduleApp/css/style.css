@@ -1,11 +1,16 @@
 @font-face {
-    font-family: 'Major Mono Display', monospace;
+    font-family: 'Ubuntu', sans-serif;
 }
 
+.btn-primary{
+    background-color: lightblue;
+    color: darkblue;
+    border-color: lightblue;
+}
 
 body {
-    background-color: aliceblue;
-    font-family: 'Major Mono Display', monospace;
+    background-color: lightcyan;
+    font-family: 'Ubuntu', sans-serif;
 }
 
 table a {
@@ -30,6 +35,10 @@ nav a {
     color: aliceblue;
 }
 
+nav a:hover {
+    color: deepskyblue;
+}
+
 .table tbody td {
     transition: background-color 1s ease-out;
 }
@@ -48,4 +57,8 @@ nav a {
 
 .text_blue {
     color: darkblue;
+}
+
+.center {
+    text-align: center;
 }

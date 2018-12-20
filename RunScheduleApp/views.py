@@ -267,12 +267,12 @@ class WorkoutCalendar(HTMLCalendar):
                 and self.workout_plan_end_date.year == self.year_number:
             if str(day) in self.training_dict:
                 edit_day_link = self.create_day_edit_link(day)
-                return '<td bgcolor= "#ff3333" class="%s"><a href="%s">%d</a><br>%s</td>' % (
+                return '<td bgcolor= "#ff6666" class="%s"><a href="%s">%d</a><br>%s</td>' % (
                     self.cssclasses[weekday], edit_day_link, day, self.training_dict[str(day)])
             else:
                 date = self.create_date_string(day)
                 edit_day_link = f"/daily_training_add/{self.workout_plan.id}/{date}"
-                return '<td bgcolor= "#ff3333" class="%s"><a href="%s">%d</a></td>' % (
+                return '<td bgcolor= "#ff6666" class="%s"><a href="%s">%d</a></td>' % (
                     self.cssclasses[weekday], edit_day_link, day)
         # obsługuje pola w tabeli "poza" miesiącem
         if day == 0:

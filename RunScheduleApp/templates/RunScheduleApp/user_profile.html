@@ -1,14 +1,16 @@
 {% extends "RunScheduleApp/base.html" %}
 
 {% block content %}
-    <p>Nazwa użytkownika: {{ request.user.username }}</p>
-    <p>Imię: {{ request.user.first_name }}</p>
-    <p>Nazwisko: {{ request.user.last_name }}</p>
-    <p>Adres e-mail: {{ request.user.email }}</p>
+    <p>
+    <p class="text_blue">Nazwa użytkownika: {{ request.user.username }}</p>
+    <p class="text_blue">Imię: {{ request.user.first_name }}</p>
+    <p class="text_blue">Nazwisko: {{ request.user.last_name }}</p>
+    <p class="text_blue">Adres e-mail: {{ request.user.email }}</p>
 
-    <div>
-        <a href="/edit_profile"><button>Edytuj dane</button></a>
-        <a href="/password_change"><button>Zmień hasło</button></a>
-    </div>
+
+    <p>
+        <a href="/edit_profile" class="btn btn-primary">Edytuj dane</a>
+        <a href="/password_change" class="btn btn-primary">Zmień hasło</a>
+    </p>
 {% endblock %}
 

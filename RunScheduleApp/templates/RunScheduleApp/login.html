@@ -2,10 +2,10 @@
 
 {% block content %}
 
-<form method="post">
+<p><form method="post" class="center text_blue">
     {{ form.as_p }}
-        <input type="submit" value="Zaloguj">
+        <input class="btn btn-primary" type="submit" value="Zaloguj">
     {% csrf_token %}
-</form>
-<p>Jeśli nie posiadasz jeszcze konta <a href="/registration"><button>Utwórz konto</button></a></p>
+</form></p>
+<p><a href="/registration" class="btn btn-primary btn-lg btn-block">Jeśli nie posiadasz jeszcze konta, zarejestruj się</a></p>
 {% endblock %}

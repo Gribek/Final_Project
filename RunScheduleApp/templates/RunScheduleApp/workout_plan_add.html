@@ -1,11 +1,13 @@
 {% extends "RunScheduleApp/base.html" %}
 
 {% block content %}
-    <form method="post">
+    <p>
+    <form class="text_blue" method="post">
         {{ form.as_p }}
-        <input type="submit" value="Dodaj plan">
-        <button type="reset">Reset</button>
-        <a href="/workout_list"><button type="button">Anuluj</button></a>
+        <input class="btn btn-primary" type="submit" value="Dodaj plan">
+        <button class="btn btn-primary" type="reset">Reset</button>
+        <a class="btn btn-primary" href="/workout_list">Anuluj</a>
         {% csrf_token %}
     </form>
+    </p>
 {% endblock %}

@@ -2,19 +2,19 @@
 
 {% block content %}
 
-    <ul>
+    <p><ul class="text_blue">
         {% for plan in workout_plans %}
             <li>{{ plan.plan_name }} {{ plan.date_range.lower|date:"d.m.Y" }} - {{ plan.date_range.upper|date:"d.m.Y" }}
                 {% if plan.is_active %} <span style="color: red"><i>Twój aktualny plan</i></span> {% endif %}
-            <a href="/plan_details/{{ plan.id }}"><button>Szczegóły planu</button></a></li>
+            <a href="/plan_details/{{ plan.id }} " class="btn btn-primary">Szczegóły planu</a></li>
         {% empty %}
             Brak dodanych planów
         {% endfor %}
-    </ul>
+    </ul></p>
     <div>
-        <a href="/workout_plan_add"><button>Dodaj plan</button></a>
+        <a href="/workout_plan_add" class="btn btn-primary">Dodaj plan</a>
         {% if workout_plans %}
-        <a href="/select_active_plan"><button>Zmień aktualny plan</button></a>
+        <a href="/select_active_plan" class="btn btn-primary">Zmień aktualny plan</a>
         {% endif %}
     </div>
 
