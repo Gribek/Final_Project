@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
@@ -8,7 +8,6 @@ from django.utils.safestring import mark_safe
 from django.views import View
 from datetime import datetime
 from calendar import HTMLCalendar
-
 from RunScheduleApp.forms import *
 
 
@@ -38,7 +37,8 @@ def get_user(request):
     return current_user
 
 
-class WorkoutPlanAdd(View):
+class WorkoutPlanAdd(PermissionRequiredMixin, View):
+    permission_required = 'RunScheduleApp.add_workoutplan'
     def get(self, request):
         form = WorkoutPlanForm()
         return render(request, 'RunScheduleApp/workout_plan_add.html', {'form': form})
@@ -55,7 +55,8 @@ class WorkoutPlanAdd(View):
         return render(request, 'RunScheduleApp/workout_plan_add.html', {'form': form})
 
 
-class WorkoutPlanEdit(View):
+class WorkoutPlanEdit(PermissionRequiredMixin, View):
+    permission_required = 'RunScheduleApp.change_workoutplan'
     def get(self, request, plan_id):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         if workout_plan.owner != get_user(request):
@@ -72,7 +73,8 @@ class WorkoutPlanEdit(View):
         return render(request, 'RunScheduleApp/workout_plan_edit.html', {'form': form, 'plan_id': plan_id})
 
 
-class PlanDetailsView(View):
+class PlanDetailsView(PermissionRequiredMixin, View):
+    permission_required = 'RunScheduleApp.view_workoutplan'
     def get(self, request, id):
         workout_plan = WorkoutPlan.objects.get(pk=id)
         if workout_plan.owner != get_user(request):
@@ -88,7 +90,8 @@ class WorkoutsList(LoginRequiredMixin, View):
         return render(request, "RunScheduleApp/workoutplan_list.html", {'workout_plans': workout_plans})
 
 
-class DailyTrainingAdd(View):
+class DailyTrainingAdd(PermissionRequiredMixin, View):
+    permission_required = 'RunScheduleApp.add_dailytraining'
     def get(self, request, id, date=None):
         if date is not None:
             date_format = datetime.strptime(date, "%Y-%m-%d").date()
@@ -112,7 +115,8 @@ class DailyTrainingAdd(View):
         return render(request, "RunScheduleApp/daily_training_add.html", {'form': form})
 
 
-class DailyTrainingEdit(View):
+class DailyTrainingEdit(PermissionRequiredMixin, View):
+    permission_required = 'RunScheduleApp.change_dailytraining'
     def get(self, request, plan_id, id):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         if workout_plan.owner != get_user(request):
@@ -130,7 +134,8 @@ class DailyTrainingEdit(View):
         return render(request, "RunScheduleApp/daily_training_add.html", {'form': form})
 
 
-class DailyTrainingDelete(View):
+class DailyTrainingDelete(PermissionRequiredMixin, View):
+    permission_required = 'RunScheduleApp.delete_dailytraining'
     def get(self, request, id):
         daily_training = DailyTraining.objects.get(pk=id)
         if daily_training.workout_plan.owner != get_user(request):
@@ -139,7 +144,8 @@ class DailyTrainingDelete(View):
         return redirect(f"/plan_details/{daily_training.workout_plan.id}")
 
 
-class SelectActivePlanView(View):
+class SelectActivePlanView(PermissionRequiredMixin, View):
+    permission_required = 'RunScheduleApp.view_workoutplan'
     def get_user_plans_tuple(self, request):
         all_user_plans = WorkoutPlan.objects.filter(owner=request.user)
         plan_name_array = []
@@ -346,7 +352,7 @@ class UserProfileView(LoginRequiredMixin, View):
         return render(request, "RunScheduleApp/user_profile.html")
 
 
-class PasswordChangeView(View):
+class PasswordChangeView(LoginRequiredMixin, View):
     def get(self, request):
         form = PasswordChangeForm()
         return render(request, "RunScheduleApp/password_change.html", {'form': form})
@@ -364,7 +370,7 @@ class PasswordChangeView(View):
         return render(request, "RunScheduleApp/password_change.html", {'form': form})
 
 
-class EditUserView(View):
+class EditUserView(LoginRequiredMixin, View):
     def get(self, request):
         current_user = request.user
         form = EditUserForm(instance=current_user)
