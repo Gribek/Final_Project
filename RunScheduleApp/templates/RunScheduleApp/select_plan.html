@@ -5,7 +5,7 @@
     <form method="post">
         {{ form.as_p }}
         <input type="submit" value="Wybierz">
-        <a href="/workout_list"><button>Anuluj</button></a>
+        <a href="/workout_list"><button type="button">Anuluj</button></a>
         {% csrf_token %}
     </form>
 

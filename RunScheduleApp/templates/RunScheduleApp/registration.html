@@ -4,9 +4,9 @@
 
     <form method="post">
         {{ form.as_p }}
-        <input type="submit" value="Zarejestruj się">
-        <a href="/"><button>Anuluj</button></a>
         {% csrf_token %}
+        <input type="submit" value="Zarejestruj się">
+        <a href="/"><button type="button">Anuluj</button></a>
     </form>
 
 {% endblock %}

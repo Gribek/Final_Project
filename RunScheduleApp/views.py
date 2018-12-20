@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -323,18 +324,19 @@ class RegistrationView(View):
             email = form.cleaned_data.get('email')
             User.objects.create_user(username=username, password=password, email=email, first_name=name,
                                      last_name=surname)
-            # new_user = User.objects.get(username=username)
-            # permission_list = (
-            #     'RunScheduleApp.add_dailytraining',
-            #     'RunScheduleApp.change_dailytraining',
-            #     'RunScheduleApp.delete_dailytraining',
-            #     'RunScheduleApp.view_dailytraining',
-            #     'RunScheduleApp.add_workoutplan',
-            #     'RunScheduleApp.change_workoutplan',
-            #     'RunScheduleApp.delete_workoutplan',
-            #     'RunScheduleApp.view_workoutplan',
-            # )
-            # new_user.user_permissions.add(permission_list)
+            new_user = User.objects.get(username=username)
+            permission_list = [
+                'add_dailytraining',
+                'change_dailytraining',
+                'delete_dailytraining',
+                'view_dailytraining',
+                'add_workoutplan',
+                'change_workoutplan',
+                'delete_workoutplan',
+                'view_workoutplan',
+            ]
+            permissions = [Permission.objects.get(codename=i) for i in permission_list]  # tworzymy listę objektów typu permission !!!
+            new_user.user_permissions.set(permissions)
             return redirect('/login')
         return render(request, "RunScheduleApp/registration.html", {'form': form})
 

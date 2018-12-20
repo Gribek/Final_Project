@@ -4,9 +4,9 @@
     <form method="post">
         {{ form.as_p }}
         <input type="submit" value="Zapisz trening">
-        <button type="reset">Reset</button>
-        <a href="/plan_details/{{ workout_plan.id }}"><button>Anuluj</button></a>
         {% csrf_token %}
+        <button type="reset">Reset</button>
+        <a href="/plan_details/{{ workout_plan.id }}"><button type="button">Anuluj</button></a>
     </form>
 
 {% endblock %}
