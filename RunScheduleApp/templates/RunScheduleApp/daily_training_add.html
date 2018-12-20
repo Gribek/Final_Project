@@ -6,7 +6,7 @@
         <input type="submit" value="Zapisz trening">
         {% csrf_token %}
         <button type="reset">Reset</button>
-        <a href="/plan_details/{{ workout_plan.id }}"><button type="button">Anuluj</button></a>
+        <a href="/plan_details/{{ plan_id }}"><button type="button">Anuluj</button></a>
     </form>
 
 {% endblock %}

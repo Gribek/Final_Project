@@ -39,6 +39,7 @@ def get_user(request):
 
 class WorkoutPlanAdd(PermissionRequiredMixin, View):
     permission_required = 'RunScheduleApp.add_workoutplan'
+
     def get(self, request):
         form = WorkoutPlanForm()
         return render(request, 'RunScheduleApp/workout_plan_add.html', {'form': form})
@@ -57,12 +58,13 @@ class WorkoutPlanAdd(PermissionRequiredMixin, View):
 
 class WorkoutPlanEdit(PermissionRequiredMixin, View):
     permission_required = 'RunScheduleApp.change_workoutplan'
+
     def get(self, request, plan_id):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         if workout_plan.owner != get_user(request):
             raise PermissionDenied
         form = WorkoutPlanEditForm(instance=workout_plan)
-        return render(request, 'RunScheduleApp/workout_plan_edit.html', {'form': form})
+        return render(request, 'RunScheduleApp/workout_plan_edit.html', {'form': form, 'plan_id': plan_id})
 
     def post(self, request, plan_id):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
@@ -75,6 +77,7 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
 
 class PlanDetailsView(PermissionRequiredMixin, View):
     permission_required = 'RunScheduleApp.view_workoutplan'
+
     def get(self, request, id):
         workout_plan = WorkoutPlan.objects.get(pk=id)
         if workout_plan.owner != get_user(request):
@@ -90,8 +93,15 @@ class WorkoutsList(LoginRequiredMixin, View):
         return render(request, "RunScheduleApp/workoutplan_list.html", {'workout_plans': workout_plans})
 
 
+def get_plan_start_and_end_date(workout_plan):
+    start_date = workout_plan.date_range.lower
+    end_date = workout_plan.date_range.upper
+    return end_date, start_date
+
+
 class DailyTrainingAdd(PermissionRequiredMixin, View):
     permission_required = 'RunScheduleApp.add_dailytraining'
+
     def get(self, request, id, date=None):
         if date is not None:
             date_format = datetime.strptime(date, "%Y-%m-%d").date()
@@ -100,30 +110,34 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
         workout_plan = WorkoutPlan.objects.get(pk=id)
         if workout_plan.owner != get_user(request):
             return HttpResponse('Nie możesz dodać treningu do nie swojego planu!')
-        form = DailyTrainingForm(initial={'day': date_format})
-        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'workout_plan': workout_plan})
+        end_date, start_date = get_plan_start_and_end_date(workout_plan)
+        form = DailyTrainingForm(initial={'day': date_format, 'start_date': start_date, 'end_date': end_date})
+        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'plan_id': workout_plan.id})
 
     def post(self, request, id, date=None):
         new_training = DailyTraining()
         form = DailyTrainingForm(request.POST, instance=new_training)
+        workout_plan = WorkoutPlan.objects.get(pk=id)
         if form.is_valid():
             workout = WorkoutPlan.objects.get(pk=id)
             form.instance.workout_plan = workout
             form.save()
             return redirect(f'/plan_details/{id}')
         # return HttpResponse('Not valid')
-        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form})
+        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'plan_id': workout_plan.id})
 
 
 class DailyTrainingEdit(PermissionRequiredMixin, View):
     permission_required = 'RunScheduleApp.change_dailytraining'
+
     def get(self, request, plan_id, id):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         if workout_plan.owner != get_user(request):
             raise PermissionDenied
         daily_training = DailyTraining.objects.get(pk=id)
-        form = DailyTrainingForm(instance=daily_training)
-        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form})
+        end_date, start_date = get_plan_start_and_end_date(workout_plan)
+        form = DailyTrainingForm(instance=daily_training, initial= {'start_date': start_date, 'end_date': end_date})
+        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'plan_id': plan_id})
 
     def post(self, request, plan_id, id):
         daily_training = DailyTraining.objects.get(pk=id)
@@ -131,11 +145,12 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
         if form.is_valid():
             form.save()
             return redirect(f'/plan_details/{plan_id}')
-        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form})
+        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'plan_id': plan_id})
 
 
 class DailyTrainingDelete(PermissionRequiredMixin, View):
     permission_required = 'RunScheduleApp.delete_dailytraining'
+
     def get(self, request, id):
         daily_training = DailyTraining.objects.get(pk=id)
         if daily_training.workout_plan.owner != get_user(request):
@@ -146,6 +161,7 @@ class DailyTrainingDelete(PermissionRequiredMixin, View):
 
 class SelectActivePlanView(PermissionRequiredMixin, View):
     permission_required = 'RunScheduleApp.view_workoutplan'
+
     def get_user_plans_tuple(self, request):
         all_user_plans = WorkoutPlan.objects.filter(owner=request.user)
         plan_name_array = []
@@ -304,6 +320,7 @@ class LoginView(View):
                 return redirect("/")
             else:
                 return render(request, "RunScheduleApp/login.html", {'form': form})
+        return render(request, "RunScheduleApp/login.html", {'form': form})
 
 
 class LogoutView(View):
@@ -341,7 +358,8 @@ class RegistrationView(View):
                 'delete_workoutplan',
                 'view_workoutplan',
             ]
-            permissions = [Permission.objects.get(codename=i) for i in permission_list]  # tworzymy listę objektów typu permission !!!
+            permissions = [Permission.objects.get(codename=i) for i in
+                           permission_list]  # tworzymy listę objektów typu permission !!!
             new_user.user_permissions.set(permissions)
             return redirect('/login')
         return render(request, "RunScheduleApp/registration.html", {'form': form})

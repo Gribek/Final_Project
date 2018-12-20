@@ -5,8 +5,7 @@
 <form method="post">
     {{ form.as_p }}
         <input type="submit" value="Zaloguj">
-        <a href="/registration"><button>Utwórz konto</button></a>
     {% csrf_token %}
 </form>
-
+<p>Jeśli nie posiadasz jeszcze konta <a href="/registration"><button>Utwórz konto</button></a></p>
 {% endblock %}

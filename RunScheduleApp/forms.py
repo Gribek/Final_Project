@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from django.contrib.postgres.forms import RangeWidget
 from django import forms
 from django.core.exceptions import ValidationError
@@ -28,6 +29,9 @@ class WorkoutPlanEditForm(ModelForm):
 
 
 class DailyTrainingForm(ModelForm):
+    start_date = forms.DateField(widget=forms.HiddenInput)
+    end_date = forms.DateField(widget=forms.HiddenInput)
+
     class Meta:
         TRAINING_TYPES = (  # TODO dopisz rodzaje treningu
             ('', '-----'),
@@ -58,10 +62,32 @@ class DailyTrainingForm(ModelForm):
             'additional_quantity': forms.TextInput(attrs={'placeholder': 'Np. 6x100'})
         }
 
+    def clean(self):
+        cleaned_date = super().clean()
+        start_date = cleaned_date.get('start_date')
+        end_date = cleaned_date.get('end_date')
+        day = cleaned_date.get('day')
+        if day < start_date:
+            self.add_error("day", "Data treningu nie może być wcześniejsza niż data rozpoczęcia planu")
+        if day > end_date:
+            self.add_error("day", "Data treningu nie może być póżniejsza niż data zakończenia planu")
+        distance = cleaned_date.get('training_distance')
+        if int(distance) <= 0:
+            self.add_error("training_distance", "Dystans musi być większy od 0")
+        return cleaned_date
+
 
 class LoginForm(forms.Form):
     user = forms.CharField(label="Użytkownik")
     password = forms.CharField(label="Hasło", widget=forms.PasswordInput)
+
+    def clean(self):
+        username = self.cleaned_data.get('user')
+        password = self.cleaned_data.get('password')
+        user = authenticate(username=username, password=password)
+        if not user or not user.is_active:
+            raise forms.ValidationError("Podane dane są niepoprawne")
+        return self.cleaned_data
 
 
 class RegistrationForm(forms.Form):
