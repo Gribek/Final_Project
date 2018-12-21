@@ -3,36 +3,46 @@
 }
 
 .btn-primary{
-    background-color: lightskyblue;
-    color: darkblue;
-    border-color: lightblue;
+    background-color: #798EF6;
+    color: #0A2299;
+    border-color: #0A2299;
 }
 
 body {
-    background-color: lightcyan;
+    background-color: #DDE3FD;
     font-family: 'Ubuntu', sans-serif;
 }
 
 table a {
     text-decoration: None;
-    color: darkblue;
+    color: #0A2299;
 }
 
 table th {
     text-decoration: None;
     text-align: center;
-    color: aliceblue;
-    background-color: darkblue;
+    color: #DDE3FD;
+    background-color: #0A2299;
 }
 
 .table tbody td:hover {
-    border: solid 1px darkblue;
-    background-color: mediumvioletred;
+    border: solid 1px #0A2299;
+    background-color: #183BF0;
+}
 
+.table tbody td a:hover {
+    color: #DDE3FD;
 }
 
 nav a {
-    color: aliceblue;
+    color: #DDE3FD;
+}
+
+/*#C0C9F6*/
+
+.list-group li{
+    background-color: #798EF6;
+    border-color: #798EF6;
 }
 
 .list-group li:hover{
@@ -61,7 +71,7 @@ nav a:hover {
 }
 
 .text_blue {
-    color: darkblue;
+    color: #0A2299;
 }
 
 .center {
