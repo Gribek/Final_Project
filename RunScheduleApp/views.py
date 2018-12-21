@@ -316,7 +316,7 @@ class WorkoutCalendar(HTMLCalendar):
     def create_day_edit_link(self, day):
         date = self.create_date_string(day)  # buduje pełną datę tego elementu
         date_format = datetime.strptime(date, "%Y-%m-%d").date()  # zamienia ją na typ datetime,date
-        edit_day_id = DailyTraining.objects.get(day=date_format).id  # pobieramy trening obecny pod tą datą
+        edit_day_id = DailyTraining.objects.filter(workout_plan=self.workout_plan).get(day=date_format).id  # pobieramy trening obecny pod tą datą
         edit_day_link = f"/daily_training_edit/{self.workout_plan.id}/{edit_day_id}"  # tworzymy link do edycji
         return edit_day_link
 
