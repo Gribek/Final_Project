@@ -280,7 +280,7 @@ class WorkoutCalendar(HTMLCalendar):
         # dni treningowe
         if str(day) in self.training_dict:
             edit_day_link = self.create_day_edit_link(day)
-            return '<td bgcolor= "lightblue" class="%s"><a href="%s">%d<br>%s</a></td>' % (
+            return '<td bgcolor= "lightskyblue" class="%s"><a href="%s">%d<br>%s</a></td>' % (
                 self.cssclasses[weekday], edit_day_link, day, self.training_dict[str(day)])
         # dni nietreningowe
         else:

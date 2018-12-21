@@ -1,6 +1,7 @@
 {% extends 'RunScheduleApp/base.html' %}
 
 {% block content %}
+    <div class="">
     <p>
     <form class="text_blue" method="post">
         {{ form.as_p }}
@@ -10,5 +11,6 @@
         <a class="btn btn-primary" href="/plan_details/{{ plan_id }}">Anuluj</a>
     </form>
     </p>
+    </div>
 
 {% endblock %}

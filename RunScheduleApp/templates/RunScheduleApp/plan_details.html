@@ -18,12 +18,12 @@
     </div>
     <div class="text_blue">
         <h4>Zaplanowane treningi:</h4>
-        <ul>
+        <ul class="text_blue list-group">
             {% for training in workout_plan.dailytraining_set.all|dictsort:"day" %}
-                <li>
+                <li class="list-group-item list-group-item-primary">
                     {{ training.day|date:"d.m.Y" }}; {{ training }}
-                    <a class="btn btn-primary" href="/daily_training_edit/{{ workout_plan.id }}/{{ training.id }}">Edytuj</a>
-                    <a class="btn btn-danger" href="/daily_training_delete/{{ training.id }}">Usuń</a>
+                    <a class="btn btn-primary btn-sm" href="/daily_training_edit/{{ workout_plan.id }}/{{ training.id }}">Edytuj</a>
+                    <a class="btn btn-danger btn-sm" href="/daily_training_delete/{{ training.id }}">Usuń</a>
                 </li>
             {% empty %}
                 Brak dodanych treningów

@@ -2,11 +2,11 @@
 
 {% block content %}
 
-    <p><ul class="text_blue">
+    <p><ul class="text_blue list-group">
         {% for plan in workout_plans %}
-            <li>{{ plan.plan_name }} {{ plan.date_range.lower|date:"d.m.Y" }} - {{ plan.date_range.upper|date:"d.m.Y" }}
+            <li class="list-group-item list-group-item-primary">{{ plan.plan_name }} {{ plan.date_range.lower|date:"d.m.Y" }} - {{ plan.date_range.upper|date:"d.m.Y" }}
                 {% if plan.is_active %} <span style="color: red"><i>Twój aktualny plan</i></span> {% endif %}
-            <a href="/plan_details/{{ plan.id }} " class="btn btn-primary">Szczegóły planu</a></li>
+            <a href="/plan_details/{{ plan.id }} " class="btn btn-primary btn-sm">Szczegóły planu</a></li>
         {% empty %}
             Brak dodanych planów
         {% endfor %}
