@@ -12,6 +12,8 @@ from RunScheduleApp.forms import *
 
 
 # Create your views here.
+
+
 class MainPageView(View):
     def get(self, request):
         return render(request, "RunScheduleApp/main_page.html")
@@ -202,6 +204,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
         first_year_number = plan_start_date.year
         month_number = first_month_number + int(month_counter)
         year_number = first_year_number
+        # zmienne month_number i year_number używamy jako argumenty funkcji formatmonth
         if month_number > 12:  # mechanizm zmieniający numery miesięcy oraz lat
             year_number = first_year_number + int(month_number / 12)
             month_number = month_number % 12
@@ -295,8 +298,8 @@ class WorkoutCalendar(HTMLCalendar):
         v = []
         a = v.append
         a(
-            '<table id="fixedheight" style="table-layout: fixed" border="0" cellpadding="0" cellspacing="0" class="%s">' % (
-                self.cssclass_month))
+            '<table id="fixedheight" style="table-layout: fixed" border="0" cellpadding="0" cellspacing="0" class="%s">'
+            % self.cssclass_month)
         a('\n')
         a(self.formatmonthname(theyear, themonth, withyear=withyear))
         a('\n')
