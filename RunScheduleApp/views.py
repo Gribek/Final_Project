@@ -11,32 +11,9 @@ from calendar import HTMLCalendar
 from RunScheduleApp.forms import *
 
 
-# Create your views here.
-
-
 class MainPageView(View):
     def get(self, request):
         return render(request, "RunScheduleApp/main_page.html")
-
-
-# oblicza counter dla url-a prowadzącego do current_workout_plan
-def get_month_counter(plan_start_date):
-    day_now = datetime.today().date()
-    month_counter = (day_now.year - plan_start_date.year) * 12 + day_now.month - plan_start_date.month
-    return month_counter
-
-
-# oblicza max_countera dla ostatniego miesiąca aktualnego planu
-def get_max_month_counter(plan_start_date, plan_end_date):
-    day_now = datetime.today().date()
-    month_max_counter = (plan_end_date.year - day_now.year) * 12 + plan_end_date.month - day_now.month
-    month_max_counter += get_month_counter(plan_start_date)
-    return month_max_counter
-
-
-def get_user(request):
-    current_user = request.user
-    return current_user
 
 
 class WorkoutPlanAdd(PermissionRequiredMixin, View):
@@ -95,12 +72,6 @@ class WorkoutsList(LoginRequiredMixin, View):
         return render(request, "RunScheduleApp/workoutplan_list.html", {'workout_plans': workout_plans})
 
 
-def get_plan_start_and_end_date(workout_plan):
-    start_date = workout_plan.date_range.lower
-    end_date = workout_plan.date_range.upper
-    return end_date, start_date
-
-
 class DailyTrainingAdd(PermissionRequiredMixin, View):
     permission_required = 'RunScheduleApp.add_dailytraining'
 
@@ -111,8 +82,8 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
             date_format = None
         workout_plan = WorkoutPlan.objects.get(pk=id)
         if workout_plan.owner != get_user(request):
-            return HttpResponse('Nie możesz dodać treningu do nie swojego planu!')
-        end_date, start_date = get_plan_start_and_end_date(workout_plan)
+            return PermissionDenied
+        start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = DailyTrainingForm(initial={'day': date_format, 'start_date': start_date, 'end_date': end_date})
         return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'plan_id': workout_plan.id})
 
@@ -125,7 +96,6 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
             form.instance.workout_plan = workout
             form.save()
             return redirect(f'/plan_details/{id}')
-        # return HttpResponse('Not valid')
         return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'plan_id': workout_plan.id})
 
 
@@ -137,7 +107,7 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
         if workout_plan.owner != get_user(request):
             raise PermissionDenied
         daily_training = DailyTraining.objects.get(pk=id)
-        end_date, start_date = get_plan_start_and_end_date(workout_plan)
+        start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = DailyTrainingForm(instance=daily_training, initial={'start_date': start_date, 'end_date': end_date})
         return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'plan_id': plan_id})
 
@@ -164,7 +134,8 @@ class DailyTrainingDelete(PermissionRequiredMixin, View):
 class SelectActivePlanView(PermissionRequiredMixin, View):
     permission_required = 'RunScheduleApp.view_workoutplan'
 
-    def get_user_plans_tuple(self, request):
+    @staticmethod
+    def get_user_plans(request):
         all_user_plans = WorkoutPlan.objects.filter(owner=request.user)
         plan_name_array = []
         plan_id_array = []
@@ -174,13 +145,13 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
         return tuple(zip(plan_name_array, plan_id_array))
 
     def get(self, request):
-        PLANS_TUPLE = self.get_user_plans_tuple(request)
-        form = SelectActivePlanFrom(choices=PLANS_TUPLE)
+        plans_tuple = SelectActivePlanView.get_user_plans(request)
+        form = SelectActivePlanFrom(choices=plans_tuple)
         return render(request, "RunScheduleApp/select_plan.html", {'form': form})
 
     def post(self, request):
-        PLANS_TUPLE = self.get_user_plans_tuple(request)
-        form = SelectActivePlanFrom(request.POST, choices=PLANS_TUPLE)
+        plans_tuple = SelectActivePlanView.get_user_plans(request)
+        form = SelectActivePlanFrom(request.POST, choices=plans_tuple)
         if form.is_valid():
             new_active_plan_id = form.cleaned_data.get('active_plan')
             WorkoutPlan.objects.filter(owner=request.user).filter(is_active=True).update(is_active=False)
@@ -197,15 +168,16 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             return render(request, "RunScheduleApp/current_workout_plan.html", {'workout_plan': ''})
         workout_plan = WorkoutPlan.objects.filter(owner=get_user(request)).filter(is_active=True)[0]
 
-        plan_start_date = workout_plan.date_range.lower
-        plan_end_date = workout_plan.date_range.upper
-
+        plan_start_date, plan_end_date = get_plan_start_and_end_date(workout_plan)
         first_month_number = plan_start_date.month
         first_year_number = plan_start_date.year
+
+        # zmienne month_number i year_number używamy jako argumenty funkcji formatmonth
         month_number = first_month_number + int(month_counter)
         year_number = first_year_number
-        # zmienne month_number i year_number używamy jako argumenty funkcji formatmonth
-        if month_number > 12:  # mechanizm zmieniający numery miesięcy oraz lat
+
+        # mechanizm zmieniający numery miesięcy oraz lat
+        if month_number > 12:
             year_number = first_year_number + int(month_number / 12)
             month_number = month_number % 12
             if month_number == 0:  # poprawka na grudzień dla którego reszta z dzielenia przez 12 jest zawsze 0
@@ -218,7 +190,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
         for training in trainings:
             training_dict.update({f'{training.day.day}': training.name()})
 
-        # pobieramy maksymalny month_counter i lucznik dla aktualnego miesiąca
+        # pobieramy maksymalny month_counter i licznik dla aktualnego miesiąca
         max_month_counter = get_max_month_counter(plan_start_date, plan_end_date)
         present_mont_counter = get_month_counter(plan_start_date)
 
@@ -236,6 +208,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
 
 class WorkoutCalendar(HTMLCalendar):
     cssclass_month = "month table"
+
     # day_abbr = ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"]
 
     def __init__(self, workout_plan, training_dict, month_number, year_number):
@@ -319,7 +292,8 @@ class WorkoutCalendar(HTMLCalendar):
     def create_day_edit_link(self, day):
         date = self.create_date_string(day)  # buduje pełną datę tego elementu
         date_format = datetime.strptime(date, "%Y-%m-%d").date()  # zamienia ją na typ datetime,date
-        edit_day_id = DailyTraining.objects.filter(workout_plan=self.workout_plan).get(day=date_format).id  # pobieramy trening obecny pod tą datą
+        edit_day_id = DailyTraining.objects.filter(workout_plan=self.workout_plan).get(
+            day=date_format).id  # pobieramy trening obecny pod tą datą
         edit_day_link = f"/daily_training_edit/{self.workout_plan.id}/{edit_day_id}"  # tworzymy link do edycji
         return edit_day_link
 
@@ -430,3 +404,29 @@ class EditUserView(LoginRequiredMixin, View):
             form.save()
             return redirect("/profile")
         return render(request, "RunScheduleApp/edit_user_profile.html", {'form': form})
+
+
+def get_plan_start_and_end_date(workout_plan):
+    start_date = workout_plan.date_range.lower
+    end_date = workout_plan.date_range.upper
+    return start_date, end_date
+
+
+# oblicza counter dla url-a prowadzącego do current_workout_plan
+def get_month_counter(plan_start_date):
+    day_now = datetime.today().date()
+    month_counter = (day_now.year - plan_start_date.year) * 12 + day_now.month - plan_start_date.month
+    return month_counter
+
+
+# oblicza max_countera dla ostatniego miesiąca aktualnego planu
+def get_max_month_counter(plan_start_date, plan_end_date):
+    day_now = datetime.today().date()
+    month_max_counter = (plan_end_date.year - day_now.year) * 12 + plan_end_date.month - day_now.month
+    month_max_counter += get_month_counter(plan_start_date)
+    return month_max_counter
+
+
+def get_user(request):
+    current_user = request.user
+    return current_user
