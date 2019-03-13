@@ -179,20 +179,12 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             if month_number == 0:  # poprawka na grudzień dla którego reszta z dzielenia przez 12 jest zawsze 0
                 month_number = 12
 
-        # tworzenie słownika z treningami w danym miesiącu danego roku
-        trainings = workout_plan.dailytraining_set.filter(day__year=year_number).filter(
-            day__month=month_number).order_by('day')
-        training_dict = {}
-        for training in trainings:
-            training_dict.update({f'{training.day.day}': training.name()})
-
         # pobieramy maksymalny month_counter i licznik dla aktualnego miesiąca
         max_month_counter = get_max_month_counter(plan_start_date, plan_end_date)
         present_mont_counter = get_month_counter(plan_start_date)
 
-        # Wywołujemy klase WorkoutCalendar, dziedziczącą po HTMLCalendar, którego metody zostały nadpisane
-        cal = WorkoutCalendar(workout_plan, training_dict, month_number, year_number).formatmonth(year_number,
-                                                                                                  month_number)
+        # Tworzymy nowy obiekt klasy WorkoutCalendar, dziedziczącą po HTMLCalendar z nadpisanymi metodami
+        cal = WorkoutCalendar(workout_plan, month_number, year_number).formatmonth(year_number, month_number)
         ctx = {'workout_plan': workout_plan,
                'calendar': mark_safe(cal),
                'month_counter': month_counter,
@@ -207,14 +199,13 @@ class WorkoutCalendar(HTMLCalendar):
 
     # day_abbr = ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"]
 
-    def __init__(self, workout_plan, training_dict, month_number, year_number):
+    def __init__(self, workout_plan, month_number, year_number):
         super(WorkoutCalendar, self).__init__()
-        self.workout_plan = workout_plan
-        self.workout_plan_start_date = self.workout_plan.date_range.lower
-        self.workout_plan_end_date = self.workout_plan.date_range.upper
-        self.training_dict = training_dict
         self.month_number = month_number
         self.year_number = year_number
+        self.workout_plan = workout_plan
+        self.workout_plan_start_date, self.workout_plan_end_date = get_plan_start_and_end_date(self.workout_plan)
+        self.training_dict = self.get_trainings_dict()
 
     def formatday(self, day, weekday):
         """
@@ -283,6 +274,14 @@ class WorkoutCalendar(HTMLCalendar):
             return "#798EF6"
         else:
             return ""
+
+    def get_trainings_dict(self):
+        trainings = self.workout_plan.dailytraining_set.filter(day__year=self.year_number).filter(
+            day__month=self.month_number).order_by('day')
+        training_dict = {}
+        for training in trainings:
+            training_dict.update({f'{training.day.day}': training.name()})
+        return training_dict
 
 
 ####### * * * * * Użytkownicy * * * * * #######
