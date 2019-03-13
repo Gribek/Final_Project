@@ -13,7 +13,7 @@ from RunScheduleApp.forms import *
 
 class MainPageView(View):
     def get(self, request):
-        return render(request, "RunScheduleApp/main_page.html")
+        return render(request, 'RunScheduleApp/main_page.html')
 
 
 class WorkoutPlanAdd(PermissionRequiredMixin, View):
@@ -60,14 +60,14 @@ class PlanDetailsView(PermissionRequiredMixin, View):
         workout_plan = WorkoutPlan.objects.get(pk=id)
         check_workout_plan_owner(workout_plan, get_user(request))
         month_counter = get_month_counter(workout_plan.date_range.lower)
-        return render(request, "RunScheduleApp/plan_details.html",
+        return render(request, 'RunScheduleApp/plan_details.html',
                       {'workout_plan': workout_plan, 'month_counter': month_counter})
 
 
 class WorkoutsList(LoginRequiredMixin, View):
     def get(self, request):
         workout_plans = WorkoutPlan.objects.filter(owner=get_user(request))
-        return render(request, "RunScheduleApp/workoutplan_list.html", {'workout_plans': workout_plans})
+        return render(request, 'RunScheduleApp/workoutplan_list.html', {'workout_plans': workout_plans})
 
 
 class DailyTrainingAdd(PermissionRequiredMixin, View):
@@ -78,7 +78,7 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
         check_workout_plan_owner(workout_plan, get_user(request))
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = DailyTrainingForm(initial={'day': date, 'start_date': start_date, 'end_date': end_date})
-        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'plan_id': workout_plan.id})
+        return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': workout_plan.id})
 
     def post(self, request, id, date=None):
         new_training = DailyTraining()
@@ -89,7 +89,7 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
             form.instance.workout_plan = workout
             form.save()
             return redirect(f'/plan_details/{id}')
-        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'plan_id': workout_plan.id})
+        return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': workout_plan.id})
 
 
 class DailyTrainingEdit(PermissionRequiredMixin, View):
@@ -101,7 +101,7 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
         daily_training = DailyTraining.objects.get(pk=id)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = DailyTrainingForm(instance=daily_training, initial={'start_date': start_date, 'end_date': end_date})
-        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'plan_id': plan_id})
+        return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': plan_id})
 
     def post(self, request, plan_id, id):
         daily_training = DailyTraining.objects.get(pk=id)
@@ -109,7 +109,7 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
         if form.is_valid():
             form.save()
             return redirect(f'/plan_details/{plan_id}')
-        return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'plan_id': plan_id})
+        return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': plan_id})
 
 
 class DailyTrainingDelete(PermissionRequiredMixin, View):
@@ -119,7 +119,7 @@ class DailyTrainingDelete(PermissionRequiredMixin, View):
         daily_training = DailyTraining.objects.get(pk=id)
         check_workout_plan_owner(daily_training.workout_plan, get_user(request))
         daily_training.delete()
-        return redirect(f"/plan_details/{daily_training.workout_plan.id}")
+        return redirect(f'/plan_details/{daily_training.workout_plan.id}')
 
 
 class SelectActivePlanView(PermissionRequiredMixin, View):
@@ -138,7 +138,7 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
     def get(self, request):
         plans_tuple = SelectActivePlanView.get_user_plans(request)
         form = SelectActivePlanFrom(choices=plans_tuple)
-        return render(request, "RunScheduleApp/select_plan.html", {'form': form})
+        return render(request, 'RunScheduleApp/select_plan.html', {'form': form})
 
     def post(self, request):
         plans_tuple = SelectActivePlanView.get_user_plans(request)
@@ -146,14 +146,14 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
         if form.is_valid():
             new_active_plan_id = form.cleaned_data.get('active_plan')
             set_active_workout_plan(new_active_plan_id, request.user)
-            return redirect("/workout_list")
-        return render(request, "RunScheduleApp/select_plan.html", {'form': form})
+            return redirect('/workout_list')
+        return render(request, 'RunScheduleApp/select_plan.html', {'form': form})
 
 
 class CurrentWorkoutPlanView(LoginRequiredMixin, View):
     def get(self, request, month_counter):
         if not WorkoutPlan.objects.filter(owner=get_user(request)).filter(is_active=True).exists():
-            return render(request, "RunScheduleApp/current_workout_plan.html", {'workout_plan': ''})
+            return render(request, 'RunScheduleApp/current_workout_plan.html', {'workout_plan': ''})
         workout_plan = WorkoutPlan.objects.filter(owner=get_user(request)).filter(is_active=True)[0]
 
         # pobieramy maksymalny month_counter i licznik dla aktualnego miesiąca
@@ -171,7 +171,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
                'max_month_counter': str(max_month_counter),
                'present_month_counter': present_month_counter
                }
-        return render(request, "RunScheduleApp/current_workout_plan.html", ctx)
+        return render(request, 'RunScheduleApp/current_workout_plan.html', ctx)
 
     @staticmethod
     def get_month_and_year_number(month_counter, plan_start_date):
@@ -190,7 +190,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
 
 
 class WorkoutCalendar(HTMLCalendar):
-    cssclass_month = "month table"
+    cssclass_month = 'month table'
 
     # day_abbr = ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"]
 
@@ -251,7 +251,7 @@ class WorkoutCalendar(HTMLCalendar):
         date = self.create_date(day)
         edit_day_id = DailyTraining.objects.filter(workout_plan=self.workout_plan).get(
             day=date).id  # pobieramy id treningu obecnego pod tą datą
-        edit_day_link = f"/daily_training_edit/{self.workout_plan.id}/{edit_day_id}"
+        edit_day_link = f'/daily_training_edit/{self.workout_plan.id}/{edit_day_id}'
         return edit_day_link
 
     def create_date(self, day):
@@ -262,13 +262,13 @@ class WorkoutCalendar(HTMLCalendar):
     def set_bg_color(self, day, is_training_day):
         date = self.create_date(day)
         if date == self.workout_plan_start_date:
-            return "greenyellow"
+            return 'greenyellow'
         elif date == self.workout_plan_end_date:
-            return "#ff6666"
+            return '#ff6666'
         if is_training_day:
-            return "#798EF6"
+            return '#798EF6'
         else:
-            return ""
+            return ''
 
     def get_trainings_dict(self):
         trainings = self.workout_plan.dailytraining_set.filter(day__year=self.year_number).filter(
@@ -285,23 +285,23 @@ class LoginView(View):
 
     def get(self, request):
         form = LoginForm()
-        return render(request, "RunScheduleApp/login.html", {'form': form})
+        return render(request, 'RunScheduleApp/login.html', {'form': form})
 
     def post(self, request):
         form = LoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get("user")
-            password = form.cleaned_data.get("password")
+            username = form.cleaned_data.get('user')
+            password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                next = request.GET.get("next")
+                next = request.GET.get('next')
                 if next is not None:
                     return redirect(next)
-                return redirect("/")
+                return redirect('/')
             else:
-                return render(request, "RunScheduleApp/login.html", {'form': form})
-        return render(request, "RunScheduleApp/login.html", {'form': form})
+                return render(request, 'RunScheduleApp/login.html', {'form': form})
+        return render(request, 'RunScheduleApp/login.html', {'form': form})
 
 
 class LogoutView(View):
@@ -310,13 +310,13 @@ class LogoutView(View):
             logout(request)
             return redirect('/')
         else:
-            return HttpResponse("Nie jesteś zalogowany")
+            return HttpResponse('Nie jesteś zalogowany')
 
 
 class RegistrationView(View):
     def get(self, request):
         form = RegistrationForm()
-        return render(request, "RunScheduleApp/registration.html", {'form': form})
+        return render(request, 'RunScheduleApp/registration.html', {'form': form})
 
     def post(self, request):
         form = RegistrationForm(request.POST)
@@ -343,44 +343,44 @@ class RegistrationView(View):
                            permission_list]  # tworzymy listę objektów typu permission
             new_user.user_permissions.set(permissions)
             return redirect('/login')
-        return render(request, "RunScheduleApp/registration.html", {'form': form})
+        return render(request, 'RunScheduleApp/registration.html', {'form': form})
 
 
 class UserProfileView(LoginRequiredMixin, View):
     def get(self, request):
-        return render(request, "RunScheduleApp/user_profile.html")
+        return render(request, 'RunScheduleApp/user_profile.html')
 
 
 class PasswordChangeView(LoginRequiredMixin, View):
     def get(self, request):
         form = PasswordChangeForm()
-        return render(request, "RunScheduleApp/password_change.html", {'form': form})
+        return render(request, 'RunScheduleApp/password_change.html', {'form': form})
 
     def post(self, request):
         form = PasswordChangeForm(request.POST)
         if form.is_valid():
-            new_password = form.cleaned_data.get("new_password")
+            new_password = form.cleaned_data.get('new_password')
             if not request.user.is_authenticated:
-                return redirect("/")
+                return redirect('/')
             current_user = request.user
             current_user.set_password(new_password)
             current_user.save()
-            return redirect("/login")
-        return render(request, "RunScheduleApp/password_change.html", {'form': form})
+            return redirect('/login')
+        return render(request, 'RunScheduleApp/password_change.html', {'form': form})
 
 
 class EditUserView(LoginRequiredMixin, View):
     def get(self, request):
         current_user = request.user
         form = EditUserForm(instance=current_user)
-        return render(request, "RunScheduleApp/edit_user_profile.html", {'form': form})
+        return render(request, 'RunScheduleApp/edit_user_profile.html', {'form': form})
 
     def post(self, request):
         form = EditUserForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            return redirect("/profile")
-        return render(request, "RunScheduleApp/edit_user_profile.html", {'form': form})
+            return redirect('/profile')
+        return render(request, 'RunScheduleApp/edit_user_profile.html', {'form': form})
 
 
 def get_plan_start_and_end_date(workout_plan):

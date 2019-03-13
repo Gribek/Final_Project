@@ -17,15 +17,15 @@ class DailyTraining(models.Model):
     description = models.TextField(null=True, verbose_name='Dodatkowy opis', blank=True)
     training_type = models.CharField(max_length=32, verbose_name='Rodzaj treningu')
     training_distance = models.SmallIntegerField(verbose_name='Dystans (km)')
-    additional = models.CharField(null=True, max_length=32, verbose_name="Dodatkowo", blank=True)
-    additional_quantity = models.CharField(null=True, max_length=32, verbose_name="Ilość", blank=True)
+    additional = models.CharField(null=True, max_length=32, verbose_name='Dodatkowo', blank=True)
+    additional_quantity = models.CharField(null=True, max_length=32, verbose_name='Ilość', blank=True)
     workout_plan = models.ForeignKey(WorkoutPlan, on_delete=models.CASCADE, unique_for_date=day,
-                                     verbose_name="Dodaj trening do planu")
+                                     verbose_name='Dodaj trening do planu')
     accomplished = models.BooleanField(default=False)
 
     def name(self):
-        t_info = f"{self.training_type} {self.training_distance}km"
-        t_info += f" {self.additional} {self.additional_quantity}" if self.additional else ""
+        t_info = f'{self.training_type} {self.training_distance}km'
+        t_info += f' {self.additional} {self.additional_quantity}' if self.additional else ''
         return t_info
 
     def __str__(self):
