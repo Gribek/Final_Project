@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
@@ -40,8 +40,7 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
 
     def get(self, request, plan_id):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
-        if workout_plan.owner != get_user(request):
-            raise PermissionDenied
+        check_workout_plan_owner(workout_plan, get_user(request))
         form = WorkoutPlanEditForm(instance=workout_plan)
         return render(request, 'RunScheduleApp/workout_plan_edit.html', {'form': form, 'plan_id': plan_id})
 
@@ -59,8 +58,7 @@ class PlanDetailsView(PermissionRequiredMixin, View):
 
     def get(self, request, id):
         workout_plan = WorkoutPlan.objects.get(pk=id)
-        if workout_plan.owner != get_user(request):
-            raise PermissionDenied
+        check_workout_plan_owner(workout_plan, get_user(request))
         month_counter = get_month_counter(workout_plan.date_range.lower)
         return render(request, "RunScheduleApp/plan_details.html",
                       {'workout_plan': workout_plan, 'month_counter': month_counter})
@@ -77,8 +75,7 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
 
     def get(self, request, id, date=None):
         workout_plan = WorkoutPlan.objects.get(pk=id)
-        if workout_plan.owner != get_user(request):
-            return PermissionDenied
+        check_workout_plan_owner(workout_plan, get_user(request))
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = DailyTrainingForm(initial={'day': date, 'start_date': start_date, 'end_date': end_date})
         return render(request, "RunScheduleApp/daily_training_add.html", {'form': form, 'plan_id': workout_plan.id})
@@ -100,8 +97,7 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
 
     def get(self, request, plan_id, id):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
-        if workout_plan.owner != get_user(request):
-            raise PermissionDenied
+        check_workout_plan_owner(workout_plan, get_user(request))
         daily_training = DailyTraining.objects.get(pk=id)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = DailyTrainingForm(instance=daily_training, initial={'start_date': start_date, 'end_date': end_date})
@@ -121,8 +117,7 @@ class DailyTrainingDelete(PermissionRequiredMixin, View):
 
     def get(self, request, id):
         daily_training = DailyTraining.objects.get(pk=id)
-        if daily_training.workout_plan.owner != get_user(request):
-            raise PermissionDenied
+        check_workout_plan_owner(daily_training.workout_plan, get_user(request))
         daily_training.delete()
         return redirect(f"/plan_details/{daily_training.workout_plan.id}")
 
@@ -413,5 +408,9 @@ def get_max_month_counter(plan_start_date, plan_end_date):
 
 
 def get_user(request):
-    current_user = request.user
-    return current_user
+    return request.user
+
+
+def check_workout_plan_owner(workout_plan, user):
+    if workout_plan.owner != user:
+        raise PermissionDenied
