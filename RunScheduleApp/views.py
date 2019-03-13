@@ -28,9 +28,9 @@ class WorkoutPlanAdd(PermissionRequiredMixin, View):
         form = WorkoutPlanForm(request.POST, instance=new_workout_plan)
         if form.is_valid():
             form.instance.owner = get_user(request)
-            # if form.instance.is_active == True:
-            #     pass TODO(napisać funkcję deaktywującą inne plany)
-            form.save()
+            new_plan = form.save()
+            if form.instance.is_active:
+                set_active_workout_plan(new_plan.id, get_user(request))
             return redirect('/workout_list')
         return render(request, 'RunScheduleApp/workout_plan_add.html', {'form': form})
 
@@ -145,10 +145,7 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
         form = SelectActivePlanFrom(request.POST, choices=plans_tuple)
         if form.is_valid():
             new_active_plan_id = form.cleaned_data.get('active_plan')
-            WorkoutPlan.objects.filter(owner=request.user).filter(is_active=True).update(is_active=False)
-            new_active_plan = WorkoutPlan.objects.get(pk=new_active_plan_id)
-            new_active_plan.is_active = True
-            new_active_plan.save()
+            set_active_workout_plan(new_active_plan_id, request.user)
             return redirect("/workout_list")
         return render(request, "RunScheduleApp/select_plan.html", {'form': form})
 
@@ -414,3 +411,11 @@ def get_user(request):
 def check_workout_plan_owner(workout_plan, user):
     if workout_plan.owner != user:
         raise PermissionDenied
+
+
+def set_active_workout_plan(new_active_plan_id, user):
+    WorkoutPlan.objects.filter(owner=user).filter(is_active=True).update(is_active=False)
+    new_active_plan = WorkoutPlan.objects.get(pk=new_active_plan_id)
+    new_active_plan.is_active = True
+    new_active_plan.save()
+    return None
