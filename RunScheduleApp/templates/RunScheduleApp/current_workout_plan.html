@@ -22,18 +22,18 @@
             </div>
             <div>
 
-            {% if month_counter != '0' %}
+            {% if month_number_requested != '0' %}
             <a href="/workout/0" class="btn btn-primary">
                 <i class="fas fa-angle-double-left"></i>
                 Pierwszy miesiąc</a>
-            <a href="/workout/{{ month_counter|add:'-1' }}" class="btn btn-primary">
+            <a href="/workout/{{ month_number_requested|add:'-1' }}" class="btn btn-primary">
                 <i class="fas fa-angle-left"></i> Poprzedni miesiąc</a>
             {% endif %}
-            <a href="/workout/{{ present_month_counter }}" class="btn btn-primary">Obecny miesiąc</a>
-            {% if month_counter != max_month_counter %}
-            <a href="/workout/{{ month_counter|add:1 }}" class="btn btn-primary">Następny miesiąc
+            <a href="/workout/{{ present_month_number }}" class="btn btn-primary">Obecny miesiąc</a>
+            {% if month_number_requested != last_month_number %}
+            <a href="/workout/{{ month_number_requested|add:1 }}" class="btn btn-primary">Następny miesiąc
             <i class="fas fa-angle-right"></i></a>
-            <a href="/workout/{{ max_month_counter }}" class="btn btn-primary">Ostatni miesiąc
+            <a href="/workout/{{ last_month_number }}" class="btn btn-primary">Ostatni miesiąc
                 <i class="fas fa-angle-double-right"></i></a>
             {% endif %}
         {% endif %}

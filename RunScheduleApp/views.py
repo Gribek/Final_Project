@@ -59,9 +59,9 @@ class PlanDetailsView(PermissionRequiredMixin, View):
     def get(self, request, id):
         workout_plan = WorkoutPlan.objects.get(pk=id)
         check_workout_plan_owner(workout_plan, get_user(request))
-        month_counter = get_month_counter(workout_plan.date_range.lower)
+        month_number = get_month_number(workout_plan.date_range.lower)
         return render(request, 'RunScheduleApp/plan_details.html',
-                      {'workout_plan': workout_plan, 'month_counter': month_counter})
+                      {'workout_plan': workout_plan, 'month_number': month_number})
 
 
 class WorkoutsList(LoginRequiredMixin, View):
@@ -151,42 +151,44 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
 
 
 class CurrentWorkoutPlanView(LoginRequiredMixin, View):
-    def get(self, request, month_counter):
+    def get(self, request, month_number_requested):
         if not WorkoutPlan.objects.filter(owner=get_user(request)).filter(is_active=True).exists():
             return render(request, 'RunScheduleApp/current_workout_plan.html', {'workout_plan': ''})
         workout_plan = WorkoutPlan.objects.filter(owner=get_user(request)).filter(is_active=True)[0]
 
-        # pobieramy maksymalny month_counter i licznik dla aktualnego miesiąca
+        # Month numbers indicates numbers of the following months in the training plan - 1.
+        # Number of the first month of workout plan is always equal to 0.
+        # present_month_number indicate number for the present month (according to date) in training workout plan.
         plan_start_date, plan_end_date = get_plan_start_and_end_date(workout_plan)
-        max_month_counter = get_max_month_counter(plan_start_date, plan_end_date)
-        present_month_counter = get_month_counter(plan_start_date)
+        last_month_number = get_last_month_number(plan_start_date, plan_end_date)
+        present_month_number = get_month_number(plan_start_date)
 
-        # Tworzymy nowy obiekt klasy WorkoutCalendar, dziedziczącą po HTMLCalendar z nadpisanymi metodami
-        month_number, year_number = CurrentWorkoutPlanView.get_month_and_year_number(month_counter, plan_start_date)
-        cal = WorkoutCalendar(workout_plan, month_number, year_number).formatmonth(year_number, month_number)
+        # Creating a new object of WorkoutCalendar class.
+        month, year = CurrentWorkoutPlanView.get_month_and_year(month_number_requested, plan_start_date)
+        cal = WorkoutCalendar(workout_plan, month, year).formatmonth(year, month)
 
         ctx = {'workout_plan': workout_plan,
                'calendar': mark_safe(cal),
-               'month_counter': month_counter,
-               'max_month_counter': str(max_month_counter),
-               'present_month_counter': present_month_counter
+               'month_number_requested': month_number_requested,
+               'last_month_number': str(last_month_number),
+               'present_month_number': present_month_number
                }
         return render(request, 'RunScheduleApp/current_workout_plan.html', ctx)
 
     @staticmethod
-    def get_month_and_year_number(month_counter, plan_start_date):
-        first_month_number = plan_start_date.month
-        first_year_number = plan_start_date.year
-        # zmienne month_number i year_number używamy jako argumenty funkcji formatmonth
-        month_number = first_month_number + int(month_counter)
-        year_number = first_year_number
-        # mechanizm zmieniający numery miesięcy oraz lat
-        if month_number > 12:
-            year_number = first_year_number + int(month_number / 12)
-            month_number = month_number % 12
-            if month_number == 0:  # poprawka na grudzień dla którego reszta z dzielenia przez 12 jest zawsze 0
-                month_number = 12
-        return month_number, year_number
+    def get_month_and_year(month_number_requested, plan_start_date):
+        plan_first_month = plan_start_date.month
+        plan_first_year = plan_start_date.year
+        # Variables month and year for WorkoutCalendar formatmonth method.
+        month = plan_first_month + int(month_number_requested)
+        year = plan_first_year
+        # Recalculation mechanism for plans exceeding a calendar year.
+        if month > 12:
+            year = plan_first_year + int(month / 12)
+            month = month % 12
+            if month == 0:  # Amendment for december, for which the rest from dividing by 12 is always 0
+                month = 12
+        return month, year
 
 
 class WorkoutCalendar(HTMLCalendar):
@@ -206,17 +208,16 @@ class WorkoutCalendar(HTMLCalendar):
         """
         Return a day as a table cell.
         """
-        # obsługuje pola w tabeli "poza" miesiącem
-        if day == 0:
+        if day == 0:  # Table cells for days 'outside' the month.
             return '<td class="noday">&nbsp;</td>'
-        # dni treningowe
-        if str(day) in self.training_dict:
+
+        if str(day) in self.training_dict:  # Training days.
             bg_color = self.set_bg_color(day, True)
             edit_day_link = self.create_training_day_edit_link(day)
             return '<td bgcolor= "%s" class="%s"><a href="%s">%d<br>%s</a></td>' % (
                 bg_color, self.cssclasses[weekday], edit_day_link, day, self.training_dict[str(day)])
-        # dni nietreningowe
-        else:
+
+        else:  # Non-training days.
             bg_color = self.set_bg_color(day, False)
             edit_day_link = f"/daily_training_add/{self.workout_plan.id}/{self.create_date(day)}"
             return '<td bgcolor= "%s" class="%s"><a href="%s">%d</a></td>' % (
@@ -249,14 +250,14 @@ class WorkoutCalendar(HTMLCalendar):
 
     def create_training_day_edit_link(self, day):
         date = self.create_date(day)
-        edit_day_id = DailyTraining.objects.filter(workout_plan=self.workout_plan).get(
-            day=date).id  # pobieramy id treningu obecnego pod tą datą
-        edit_day_link = f'/daily_training_edit/{self.workout_plan.id}/{edit_day_id}'
+        daily_training_id = DailyTraining.objects.filter(workout_plan=self.workout_plan).get(
+            day=date).id
+        edit_day_link = f'/daily_training_edit/{self.workout_plan.id}/{daily_training_id}'
         return edit_day_link
 
     def create_date(self, day):
-        date = f"{self.year_number}-{self.month_number}-{day}"  # buduje pełną datę tego elementu
-        date_format_datetime = datetime.strptime(date, "%Y-%m-%d").date()  # zamienia ją na typ datetime,date
+        date = f"{self.year_number}-{self.month_number}-{day}"  # Creates a full date for this day.
+        date_format_datetime = datetime.strptime(date, "%Y-%m-%d").date()
         return date_format_datetime
 
     def set_bg_color(self, day, is_training_day):
@@ -278,8 +279,6 @@ class WorkoutCalendar(HTMLCalendar):
             training_dict.update({f'{training.day.day}': training.name()})
         return training_dict
 
-
-####### * * * * * Użytkownicy * * * * * #######
 
 class LoginView(View):
 
@@ -340,7 +339,7 @@ class RegistrationView(View):
                 'view_workoutplan',
             ]
             permissions = [Permission.objects.get(codename=i) for i in
-                           permission_list]  # tworzymy listę objektów typu permission
+                           permission_list]  # Create list of permission type objects.
             new_user.user_permissions.set(permissions)
             return redirect('/login')
         return render(request, 'RunScheduleApp/registration.html', {'form': form})
@@ -389,19 +388,19 @@ def get_plan_start_and_end_date(workout_plan):
     return start_date, end_date
 
 
-# oblicza licznik do url-a prowadzącego do current_workout_plan
-def get_month_counter(plan_start_date):
+# Calculates month number for present month (according to date).
+def get_month_number(plan_start_date):
     day_now = datetime.today().date()
     month_counter = (day_now.year - plan_start_date.year) * 12 + day_now.month - plan_start_date.month
     return month_counter
 
 
-# oblicza wartość licznika dla ostatniego miesiąca aktualnego planu
-def get_max_month_counter(plan_start_date, plan_end_date):
+# Calculates month number for the last month of current workout plan.
+def get_last_month_number(plan_start_date, plan_end_date):
     day_now = datetime.today().date()
     month_max_counter = (plan_end_date.year - day_now.year) * 12 + plan_end_date.month - day_now.month
-    month_max_counter += get_month_counter(plan_start_date)
-    return month_max_counter
+    month_max_counter += get_month_number(plan_start_date)
+    return month_max_counter  # TODO Change function logic, using get_month_number unnecessary.
 
 
 def get_user(request):
