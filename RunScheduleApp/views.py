@@ -397,10 +397,8 @@ def get_month_number(plan_start_date):
 
 # Calculates month number for the last month of current workout plan.
 def get_last_month_number(plan_start_date, plan_end_date):
-    day_now = datetime.today().date()
-    month_max_counter = (plan_end_date.year - day_now.year) * 12 + plan_end_date.month - day_now.month
-    month_max_counter += get_month_number(plan_start_date)
-    return month_max_counter  # TODO Change function logic, using get_month_number unnecessary.
+    month_max_number = (plan_end_date.year - plan_start_date.year) * 12 + plan_end_date.month - plan_start_date.month
+    return month_max_number
 
 
 def get_user(request):
