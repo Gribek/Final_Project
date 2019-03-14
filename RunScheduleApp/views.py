@@ -194,8 +194,6 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
 class WorkoutCalendar(HTMLCalendar):
     cssclass_month = 'month table'
 
-    # day_abbr = ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"]
-
     def __init__(self, workout_plan, month_number, year_number):
         super(WorkoutCalendar, self).__init__()
         self.month_number = month_number
@@ -243,10 +241,6 @@ class WorkoutCalendar(HTMLCalendar):
         a('</table>')
         a('\n')
         return ''.join(v)
-
-    # def formatweekday(self, day):
-    #     # Return a weekday name as a table header.
-    #     return '<th class="%s">%s</th>' % (self.cssclasses[day], self.day_abbr[day])
 
     def create_training_day_edit_link(self, day):
         date = self.create_date(day)
