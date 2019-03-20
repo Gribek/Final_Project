@@ -188,6 +188,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             month = month % 12
             if month == 0:  # Amendment for december, for which the rest from dividing by 12 is always 0
                 month = 12
+                year -= 1
         return month, year
 
 
