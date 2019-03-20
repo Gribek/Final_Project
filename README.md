@@ -5,4 +5,9 @@ It's an application to create and manage training schedule for runners. After cr
 
 Technologies used: Python, Django, PostgreSQL, HTML5, CSS3, Bootstrap
 
-Project under development.
+
+#### Requirements
+
+Python 3.6.7.
+
+All other requirements can be found in the requirements.txt file.
