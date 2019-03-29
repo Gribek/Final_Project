@@ -16,10 +16,11 @@ Including another URLconf
 
 from django.conf.urls import url
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from RunScheduleApp.views import *
 
 urlpatterns = [
+    path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
     url(r'^$', MainPageView.as_view()),
     url(r'^workout/(?P<month_number_requested>\d+)$', CurrentWorkoutPlanView.as_view()),
