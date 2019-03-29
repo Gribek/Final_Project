@@ -152,9 +152,10 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
 
 class CurrentWorkoutPlanView(LoginRequiredMixin, View):
     def get(self, request, month_number_requested):
-        if not WorkoutPlan.objects.filter(owner=get_user(request)).filter(is_active=True).exists():
+        active_workout_plan = WorkoutPlan.objects.filter(owner=request.user).filter(is_active=True)
+        if not active_workout_plan.exists():
             return render(request, 'RunScheduleApp/current_workout_plan.html', {'workout_plan': ''})
-        workout_plan = WorkoutPlan.objects.filter(owner=get_user(request)).filter(is_active=True)[0]
+        workout_plan = active_workout_plan[0]
 
         # Month numbers indicates numbers of the following months in the training plan - 1.
         # Number of the first month of workout plan is always equal to 0.
