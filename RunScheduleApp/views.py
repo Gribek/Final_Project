@@ -27,10 +27,10 @@ class WorkoutPlanAdd(PermissionRequiredMixin, View):
         new_workout_plan = WorkoutPlan()
         form = WorkoutPlanForm(request.POST, instance=new_workout_plan)
         if form.is_valid():
-            form.instance.owner = get_user(request)
+            form.instance.owner = request.user
             new_plan = form.save()
             if form.instance.is_active:
-                set_active_workout_plan(new_plan.id, get_user(request))
+                set_active_workout_plan(new_plan.id, request.user)
             return redirect('/workout_list')
         return render(request, 'RunScheduleApp/workout_plan_add.html', {'form': form})
 
@@ -40,7 +40,7 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
 
     def get(self, request, plan_id):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
-        check_workout_plan_owner(workout_plan, get_user(request))
+        check_workout_plan_owner(workout_plan, request.user)
         form = WorkoutPlanEditForm(instance=workout_plan)
         return render(request, 'RunScheduleApp/workout_plan_edit.html', {'form': form, 'plan_id': plan_id})
 
@@ -58,7 +58,7 @@ class PlanDetailsView(PermissionRequiredMixin, View):
 
     def get(self, request, id):
         workout_plan = WorkoutPlan.objects.get(pk=id)
-        check_workout_plan_owner(workout_plan, get_user(request))
+        check_workout_plan_owner(workout_plan, request.user)
         month_number = get_month_number(workout_plan.date_range.lower)
         return render(request, 'RunScheduleApp/plan_details.html',
                       {'workout_plan': workout_plan, 'month_number': month_number})
@@ -66,7 +66,7 @@ class PlanDetailsView(PermissionRequiredMixin, View):
 
 class WorkoutsList(LoginRequiredMixin, View):
     def get(self, request):
-        workout_plans = WorkoutPlan.objects.filter(owner=get_user(request))
+        workout_plans = WorkoutPlan.objects.filter(owner=request.user)
         return render(request, 'RunScheduleApp/workoutplan_list.html', {'workout_plans': workout_plans})
 
 
@@ -75,7 +75,7 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
 
     def get(self, request, id, date=None):
         workout_plan = WorkoutPlan.objects.get(pk=id)
-        check_workout_plan_owner(workout_plan, get_user(request))
+        check_workout_plan_owner(workout_plan, request.user)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = DailyTrainingForm(initial={'day': date, 'start_date': start_date, 'end_date': end_date})
         return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': workout_plan.id})
@@ -97,7 +97,7 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
 
     def get(self, request, plan_id, id):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
-        check_workout_plan_owner(workout_plan, get_user(request))
+        check_workout_plan_owner(workout_plan, request.user)
         daily_training = DailyTraining.objects.get(pk=id)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = DailyTrainingForm(instance=daily_training, initial={'start_date': start_date, 'end_date': end_date})
@@ -117,7 +117,7 @@ class DailyTrainingDelete(PermissionRequiredMixin, View):
 
     def get(self, request, id):
         daily_training = DailyTraining.objects.get(pk=id)
-        check_workout_plan_owner(daily_training.workout_plan, get_user(request))
+        check_workout_plan_owner(daily_training.workout_plan, request.user)
         daily_training.delete()
         return redirect(f'/plan_details/{daily_training.workout_plan.id}')
 
@@ -395,10 +395,6 @@ def get_month_number(plan_start_date):
 def get_last_month_number(plan_start_date, plan_end_date):
     month_max_number = (plan_end_date.year - plan_start_date.year) * 12 + plan_end_date.month - plan_start_date.month
     return month_max_number
-
-
-def get_user(request):
-    return request.user
 
 
 def check_workout_plan_owner(workout_plan, user):
