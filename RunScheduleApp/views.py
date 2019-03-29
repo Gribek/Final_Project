@@ -271,7 +271,7 @@ class WorkoutCalendar(HTMLCalendar):
             day__month=self.month_number).order_by('day')
         training_dict = {}
         for training in trainings:
-            training_dict.update({f'{training.day.day}': training.name()})
+            training_dict.update({f'{training.day.day}': training.training_info()})
         return training_dict
 
 

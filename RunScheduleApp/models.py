@@ -5,6 +5,9 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class WorkoutPlan(models.Model):
+    """
+    Stores a single workout plan entry.
+    """
     plan_name = models.CharField(max_length=64, verbose_name='Nazwa planu')
     description = models.TextField(null=True, verbose_name='Opis', blank=True)
     date_range = DateRangeField(verbose_name='Termin')
@@ -13,6 +16,9 @@ class WorkoutPlan(models.Model):
 
 
 class DailyTraining(models.Model):
+    """
+    Stores a single training entry.
+    """
     day = models.DateField(verbose_name='Wybierz datę')
     description = models.TextField(null=True, verbose_name='Dodatkowy opis', blank=True)
     training_type = models.CharField(max_length=32, verbose_name='Rodzaj treningu')
@@ -23,12 +29,18 @@ class DailyTraining(models.Model):
                                      verbose_name='Dodaj trening do planu')
     accomplished = models.BooleanField(default=False)
 
-    def name(self):
+    def training_info(self):
+        """
+        Prepares information about training to display on the calendar.
+        :return: String with information about object.
+        :rtype: str
+        """
         t_info = f'{self.training_type} {self.training_distance}km'
         t_info += f' {self.additional} {self.additional_quantity}' if self.additional else ''
         return t_info
 
     def __str__(self):
-        return self.name()
+        return self.training_info()
+
 
 # class TrainingDiary(models.Model): TODO
