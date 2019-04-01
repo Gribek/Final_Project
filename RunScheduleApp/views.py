@@ -12,7 +12,15 @@ from RunScheduleApp.forms import *
 
 
 class MainPageView(View):
+    """Class view for the application home page."""
+
     def get(self, request):
+        """Display application home page.
+
+        :param request: request object
+        :return: application home page
+        :rtype: HttpResponse
+        """
         return render(request, 'RunScheduleApp/main_page.html')
 
 
