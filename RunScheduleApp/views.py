@@ -99,16 +99,16 @@ class PlanDetailsView(PermissionRequiredMixin, View):
 
     permission_required = 'RunScheduleApp.view_workoutplan'
 
-    def get(self, request, id):
+    def get(self, request, plan_id):
         """Display information of a selected workout plan.
 
         :param request: request object
-        :param id: workout plan id
-        :type id: str
+        :param plan_id: workout plan id
+        :type plan_id: str
         :return: view of the workout plan details
         :rtype: HttpResponse
         """
-        workout_plan = WorkoutPlan.objects.get(pk=id)
+        workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
         month_number = get_month_number(workout_plan.date_range.lower)
         return render(request, 'RunScheduleApp/plan_details.html',
