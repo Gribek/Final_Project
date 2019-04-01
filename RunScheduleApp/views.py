@@ -25,13 +25,28 @@ class MainPageView(View):
 
 
 class WorkoutPlanAdd(PermissionRequiredMixin, View):
+    """A class creating a new workout plan."""
+
     permission_required = 'RunScheduleApp.add_workoutplan'
 
     def get(self, request):
+        """Display form for a new workout plan.
+
+        :param request: request object
+        :return: form view
+        :rtype: HttpResponse
+        """
         form = WorkoutPlanForm()
         return render(request, 'RunScheduleApp/workout_plan_add.html', {'form': form})
 
     def post(self, request):
+        """Create a new WorkoutPlan object.
+
+        :param request: request object
+        :return: list view of all created workouts (if form filled out
+            correctly) or form view with error massages
+        :rtype: HttpResponse
+        """
         new_workout_plan = WorkoutPlan()
         form = WorkoutPlanForm(request.POST, instance=new_workout_plan)
         if form.is_valid():
@@ -44,15 +59,33 @@ class WorkoutPlanAdd(PermissionRequiredMixin, View):
 
 
 class WorkoutPlanEdit(PermissionRequiredMixin, View):
+    """A class editing an existing workout plan."""
+
     permission_required = 'RunScheduleApp.change_workoutplan'
 
     def get(self, request, plan_id):
+        """Display edit form for a selected workout plan.
+
+        :param request: request object
+        :param plan_id: workout plan id
+        :type plan_id: str
+        :return: view of the edit form
+        :rtype: HttpResponse
+        """
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
         form = WorkoutPlanEditForm(instance=workout_plan)
         return render(request, 'RunScheduleApp/workout_plan_edit.html', {'form': form, 'plan_id': plan_id})
 
     def post(self, request, plan_id):
+        """Save changes to a selected workout plan.
+
+        :param request: request object
+        :param plan_id: workout plan id
+        :return: plan details view (if form filled out correctly) or
+            form view with error massages
+        :rtype: HttpResponse
+        """
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         form = WorkoutPlanEditForm(request.POST, instance=workout_plan)
         if form.is_valid():
@@ -62,9 +95,19 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
 
 
 class PlanDetailsView(PermissionRequiredMixin, View):
+    """A class that shows the information of a workout plan."""
+
     permission_required = 'RunScheduleApp.view_workoutplan'
 
     def get(self, request, id):
+        """Display information of a selected workout plan.
+
+        :param request: request object
+        :param id: workout plan id
+        :type id: str
+        :return: view of the workout plan details
+        :rtype: HttpResponse
+        """
         workout_plan = WorkoutPlan.objects.get(pk=id)
         check_workout_plan_owner(workout_plan, request.user)
         month_number = get_month_number(workout_plan.date_range.lower)
@@ -73,7 +116,15 @@ class PlanDetailsView(PermissionRequiredMixin, View):
 
 
 class WorkoutsList(LoginRequiredMixin, View):
+    """A class that shows list of all created workout plans."""
+
     def get(self, request):
+        """Display all user workout plans.
+
+        :param request: request object
+        :return: view of all user plans
+        :rtype: HttpResponse
+        """
         workout_plans = WorkoutPlan.objects.filter(owner=request.user)
         return render(request, 'RunScheduleApp/workoutplan_list.html', {'workout_plans': workout_plans})
 
