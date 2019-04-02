@@ -22,10 +22,9 @@
             </div>
             <div>
 
-            {% if month_number_requested != '0' %}
-            <a href="/workout/0" class="btn btn-primary">
-                <i class="fas fa-angle-double-left"></i>
-                Pierwszy miesiąc</a>
+            {% if month_number_requested != '1' %}
+            <a href="/workout/1" class="btn btn-primary">
+                <i class="fas fa-angle-double-left"></i>Pierwszy miesiąc</a>
             <a href="/workout/{{ month_number_requested|add:'-1' }}" class="btn btn-primary">
                 <i class="fas fa-angle-left"></i> Poprzedni miesiąc</a>
             {% endif %}

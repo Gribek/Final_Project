@@ -293,25 +293,37 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
 
 
 class CurrentWorkoutPlanView(LoginRequiredMixin, View):
+    """Class view that displays calendar for current workout plan.
+
+    All variables containing in their names phrase 'month_number'
+    indicate numbers of the following months in a workout plan.
+    Number of the first month in a workout plan is always equal to 1.
+    Number of the second month is 2, third is 3, etc.
+    """
+
     def get(self, request, month_number_requested):
+        """Display a calendar for a given month.
+
+        :param request: request object
+        :param month_number_requested: month number in a workout plan
+        :type month_number_requested: str
+        :return: calendar view for the selected month with all
+            trainings of active workout plan marked on it
+        :rtype: HttpResponse
+        """
         active_workout_plan = WorkoutPlan.objects.filter(owner=request.user).filter(is_active=True)
         if not active_workout_plan.exists():
             return render(request, 'RunScheduleApp/current_workout_plan.html', {'workout_plan': ''})
         workout_plan = active_workout_plan[0]
-
-        # Month numbers indicates numbers of the following months in the training plan - 1.
-        # Number of the first month of workout plan is always equal to 0.
-        # present_month_number indicate number for the present month (according to date) in training workout plan.
         plan_start_date, plan_end_date = get_plan_start_and_end_date(workout_plan)
-        last_month_number = get_last_month_number(plan_start_date, plan_end_date)
         present_month_number = get_month_number(plan_start_date)
+        last_month_number = get_last_month_number(plan_start_date, plan_end_date)
 
-        # Creating a new object of WorkoutCalendar class.
         month, year = CurrentWorkoutPlanView.get_month_and_year(month_number_requested, plan_start_date)
-        cal = WorkoutCalendar(workout_plan, month, year).formatmonth(year, month)
+        calendar = WorkoutCalendar(workout_plan, month, year).formatmonth(year, month)
 
         ctx = {'workout_plan': workout_plan,
-               'calendar': mark_safe(cal),
+               'calendar': mark_safe(calendar),
                'month_number_requested': month_number_requested,
                'last_month_number': str(last_month_number),
                'present_month_number': present_month_number
@@ -320,13 +332,21 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
 
     @staticmethod
     def get_month_and_year(month_number_requested, plan_start_date):
+        """Calculate month and year for formatmonth method.
+
+        :param month_number_requested: month number in a workout plan
+        :type month_number_requested: str
+        :param plan_start_date: workout plan start date
+        :type plan_start_date: datetime
+        :return: number of month and year
+        :rtype: tuple[int, int]
+        """
         plan_first_month = plan_start_date.month
         plan_first_year = plan_start_date.year
-        # Variables month and year for WorkoutCalendar formatmonth method.
-        month = plan_first_month + int(month_number_requested)
+        month = plan_first_month + int(month_number_requested) - 1
         year = plan_first_year
-        # Recalculation mechanism for plans exceeding a calendar year.
-        if month > 12:
+
+        if month > 12:  # Recalculation mechanism for plans exceeding a calendar year.
             year = plan_first_year + int(month / 12)
             month = month % 12
             if month == 0:  # Amendment for december, for which the rest from dividing by 12 is always 0
@@ -529,14 +549,14 @@ def get_plan_start_and_end_date(workout_plan):
 # Calculates month number for present month (according to date).
 def get_month_number(plan_start_date):
     day_now = datetime.today().date()
-    month_counter = (day_now.year - plan_start_date.year) * 12 + day_now.month - plan_start_date.month
-    return month_counter
+    month_number = (day_now.year - plan_start_date.year) * 12 + day_now.month - plan_start_date.month + 1
+    return month_number
 
 
 # Calculates month number for the last month of current workout plan.
 def get_last_month_number(plan_start_date, plan_end_date):
-    month_max_number = (plan_end_date.year - plan_start_date.year) * 12 + plan_end_date.month - plan_start_date.month
-    return month_max_number
+    month_number = (plan_end_date.year - plan_start_date.year) * 12 + plan_end_date.month - plan_start_date.month + 1
+    return month_number
 
 
 def check_workout_plan_owner(workout_plan, user):
