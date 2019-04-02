@@ -30,7 +30,7 @@ class WorkoutPlanAdd(PermissionRequiredMixin, View):
     permission_required = 'RunScheduleApp.add_workoutplan'
 
     def get(self, request):
-        """Display form for a new workout plan.
+        """Display the form for creating a new workout plan.
 
         :param request: request object
         :return: form view
@@ -40,7 +40,7 @@ class WorkoutPlanAdd(PermissionRequiredMixin, View):
         return render(request, 'RunScheduleApp/workout_plan_add.html', {'form': form})
 
     def post(self, request):
-        """Create a new WorkoutPlan object.
+        """Create a new workout plan.
 
         :param request: request object
         :return: list view of all created workouts (if form filled out
@@ -95,7 +95,7 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
 
 
 class PlanDetailsView(PermissionRequiredMixin, View):
-    """A class that shows the information of a workout plan."""
+    """A class view that shows the information of a workout plan."""
 
     permission_required = 'RunScheduleApp.view_workoutplan'
 
@@ -116,13 +116,13 @@ class PlanDetailsView(PermissionRequiredMixin, View):
 
 
 class WorkoutsList(LoginRequiredMixin, View):
-    """A class that shows list of all created workout plans."""
+    """A class view that shows list of all created workout plans."""
 
     def get(self, request):
         """Display all user workout plans.
 
         :param request: request object
-        :return: view of all user plans
+        :return: list view of all user plans
         :rtype: HttpResponse
         """
         workout_plans = WorkoutPlan.objects.filter(owner=request.user)
@@ -130,9 +130,21 @@ class WorkoutsList(LoginRequiredMixin, View):
 
 
 class DailyTrainingAdd(PermissionRequiredMixin, View):
+    """A class creating a new training."""
+
     permission_required = 'RunScheduleApp.add_dailytraining'
 
     def get(self, request, id, date=None):
+        """Display the form for creating a new training.
+
+        :param request: request object
+        :param id: id of a workout plan to which a new training is to
+            be added
+        :param date: date of training, optional (default = None)
+        :type date: str
+        :return: form view
+        :rtype: HttpResponse
+        """
         workout_plan = WorkoutPlan.objects.get(pk=id)
         check_workout_plan_owner(workout_plan, request.user)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
@@ -140,6 +152,16 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
         return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': workout_plan.id})
 
     def post(self, request, id, date=None):
+        """Create a new training.
+
+        :param request: request object
+        :param id: id of a workout plan to which a new training is to
+            be added
+        :type id: str
+        :return: list view of all trainings in a given training plan or
+            form view with error massages
+        :rtype: HttpResponse
+        """
         new_training = DailyTraining()
         form = DailyTrainingForm(request.POST, instance=new_training)
         workout_plan = WorkoutPlan.objects.get(pk=id)
@@ -152,9 +174,22 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
 
 
 class DailyTrainingEdit(PermissionRequiredMixin, View):
+    """A class editing an existing training."""
+
     permission_required = 'RunScheduleApp.change_dailytraining'
 
     def get(self, request, plan_id, id):
+        """Display edit form for a selected training.
+
+        :param request: request object
+        :param plan_id: id of a workout plan to which a training
+            belongs
+        :type plan_id: str
+        :param id: training id
+        :type id: str
+        :return: view of the edit form
+        :rtype: HttpResponse
+        """
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
         daily_training = DailyTraining.objects.get(pk=id)
@@ -163,6 +198,19 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
         return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': plan_id})
 
     def post(self, request, plan_id, id):
+        """Save changes to a selected training.
+
+        :param request: request object
+        :param plan_id: id of a workout plan to which a training
+            belongs
+        :type plan_id: str
+        :param id: training id
+        :type id: str
+        :return: list view of all trainings in a given training plan
+            (if form filled out correctly) or form view with error
+            massages
+        :rtype: HttpResponse
+        """
         daily_training = DailyTraining.objects.get(pk=id)
         form = DailyTrainingForm(request.POST, instance=daily_training)
         if form.is_valid():
@@ -172,9 +220,20 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
 
 
 class DailyTrainingDelete(PermissionRequiredMixin, View):
+    """A class deleting an existing training."""
+
     permission_required = 'RunScheduleApp.delete_dailytraining'
 
     def get(self, request, id):
+        """Delete a selected training.
+
+        :param request: request object
+        :param id: training id
+        :type id: str
+        :return: list view of all remaining trainings in a training
+            plan to which the deleted training belonged
+        :rtype: HttpResponse
+        """
         daily_training = DailyTraining.objects.get(pk=id)
         check_workout_plan_owner(daily_training.workout_plan, request.user)
         daily_training.delete()
@@ -182,10 +241,19 @@ class DailyTrainingDelete(PermissionRequiredMixin, View):
 
 
 class SelectActivePlanView(PermissionRequiredMixin, View):
+    """A class view for selecting an active workout plan"""
+
     permission_required = 'RunScheduleApp.view_workoutplan'
 
     @staticmethod
     def get_user_plans(request):
+        """Get all training plans belonging to the current user.
+
+        :param request: request object
+        :return: a tuple of paired workout plan ids with workout plan
+            names
+        :rtype: tuple[tuple[int, str]]
+        """
         all_user_plans = WorkoutPlan.objects.filter(owner=request.user)
         plan_name_array = []
         plan_id_array = []
@@ -195,11 +263,23 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
         return tuple(zip(plan_name_array, plan_id_array))
 
     def get(self, request):
+        """Display the form for selecting an active workout plan.
+
+        :param request: request object
+        :return: form view
+        :rtype: HttpResponse
+        """
         plans_tuple = SelectActivePlanView.get_user_plans(request)
         form = SelectActivePlanFrom(choices=plans_tuple)
         return render(request, 'RunScheduleApp/select_plan.html', {'form': form})
 
     def post(self, request):
+        """Change the user's active workout plan.
+
+        :param request: request object
+        :return: list view of all user plans
+        :rtype: HttpResponse
+        """
         plans_tuple = SelectActivePlanView.get_user_plans(request)
         form = SelectActivePlanFrom(request.POST, choices=plans_tuple)
         if form.is_valid():
