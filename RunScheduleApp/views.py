@@ -67,7 +67,7 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
         """Display edit form for a selected workout plan.
 
         :param request: request object
-        :param plan_id: workout plan id
+        :param plan_id: id of a workout plan to edit
         :type plan_id: str
         :return: view of the edit form
         :rtype: HttpResponse
@@ -81,7 +81,8 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
         """Save changes to a selected workout plan.
 
         :param request: request object
-        :param plan_id: workout plan id
+        :param plan_id: id of a workout plan to edit
+        :type plan_id: str
         :return: plan details view (if form filled out correctly) or
             form view with error massages
         :rtype: HttpResponse
@@ -180,40 +181,40 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
 
     permission_required = 'RunScheduleApp.change_dailytraining'
 
-    def get(self, request, plan_id, id):
+    def get(self, request, plan_id, training_id):
         """Display edit form for a selected training.
 
         :param request: request object
         :param plan_id: id of a workout plan to which a training
             belongs
         :type plan_id: str
-        :param id: training id
-        :type id: str
+        :param training_id: id of a training to edit
+        :type training_id: str
         :return: view of the edit form
         :rtype: HttpResponse
         """
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
-        daily_training = DailyTraining.objects.get(pk=id)
+        daily_training = DailyTraining.objects.get(pk=training_id)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = DailyTrainingForm(instance=daily_training, initial={'start_date': start_date, 'end_date': end_date})
         return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': plan_id})
 
-    def post(self, request, plan_id, id):
+    def post(self, request, plan_id, training_id):
         """Save changes to a selected training.
 
         :param request: request object
         :param plan_id: id of a workout plan to which a training
             belongs
         :type plan_id: str
-        :param id: training id
-        :type id: str
+        :param training_id: id of a training to edit
+        :type training_id: str
         :return: list view of all trainings in a given training plan
             (if form filled out correctly) or form view with error
             massages
         :rtype: HttpResponse
         """
-        daily_training = DailyTraining.objects.get(pk=id)
+        daily_training = DailyTraining.objects.get(pk=training_id)
         form = DailyTrainingForm(request.POST, instance=daily_training)
         if form.is_valid():
             form.save()
@@ -226,17 +227,17 @@ class DailyTrainingDelete(PermissionRequiredMixin, View):
 
     permission_required = 'RunScheduleApp.delete_dailytraining'
 
-    def get(self, request, id):
+    def get(self, request, training_id):
         """Delete a selected training.
 
         :param request: request object
-        :param id: training id
-        :type id: str
+        :param training_id: id of a training to delete
+        :type training_id: str
         :return: list view of all remaining trainings in a training
             plan to which the deleted training belonged
         :rtype: HttpResponse
         """
-        daily_training = DailyTraining.objects.get(pk=id)
+        daily_training = DailyTraining.objects.get(pk=training_id)
         check_workout_plan_owner(daily_training.workout_plan, request.user)
         daily_training.delete()
         return redirect(f'/plan_details/{daily_training.workout_plan.id}')
