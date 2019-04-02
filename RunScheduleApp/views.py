@@ -134,42 +134,44 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
 
     permission_required = 'RunScheduleApp.add_dailytraining'
 
-    def get(self, request, id, date=None):
+    def get(self, request, plan_id, date=None):
         """Display the form for creating a new training.
 
         :param request: request object
-        :param id: id of a workout plan to which a new training is to
+        :param plan_id: id of a workout plan to which a new training is to
             be added
+        :type plan_id: str
         :param date: date of training, optional (default = None)
         :type date: str
         :return: form view
         :rtype: HttpResponse
         """
-        workout_plan = WorkoutPlan.objects.get(pk=id)
+        workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = DailyTrainingForm(initial={'day': date, 'start_date': start_date, 'end_date': end_date})
-        return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': workout_plan.id})
+        return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': workout_plan.id,
+                                                                          'date': date})
 
-    def post(self, request, id, date=None):
+    def post(self, request, plan_id):
         """Create a new training.
 
         :param request: request object
-        :param id: id of a workout plan to which a new training is to
+        :param plan_id: id of a workout plan to which a new training is to
             be added
-        :type id: str
+        :type plan_id: str
         :return: list view of all trainings in a given training plan or
             form view with error massages
         :rtype: HttpResponse
         """
         new_training = DailyTraining()
         form = DailyTrainingForm(request.POST, instance=new_training)
-        workout_plan = WorkoutPlan.objects.get(pk=id)
+        workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         if form.is_valid():
-            workout = WorkoutPlan.objects.get(pk=id)
+            workout = WorkoutPlan.objects.get(pk=plan_id)
             form.instance.workout_plan = workout
             form.save()
-            return redirect(f'/plan_details/{id}')
+            return redirect(f'/plan_details/{plan_id}')
         return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': workout_plan.id})
 
 
