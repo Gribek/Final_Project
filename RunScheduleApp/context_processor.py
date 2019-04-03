@@ -1,4 +1,4 @@
-from RunScheduleApp.views import get_month_number
+from RunScheduleApp.views import CurrentWorkoutPlanView
 from RunScheduleApp.models import WorkoutPlan
 
 
@@ -11,6 +11,6 @@ def pass_month_counter_to_base_html(request):
         return ctx
     plan_start_date = WorkoutPlan.objects.filter(owner=request.user).filter(is_active=True)[0].date_range.lower
     ctx = {
-        'get_month_counter': get_month_number(plan_start_date)
+        'get_month_counter': CurrentWorkoutPlanView.get_month_number(plan_start_date)
     }
     return ctx

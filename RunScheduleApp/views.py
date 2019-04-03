@@ -111,7 +111,7 @@ class PlanDetailsView(PermissionRequiredMixin, View):
         """
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
-        month_number = get_month_number(workout_plan.date_range.lower)
+        month_number = CurrentWorkoutPlanView.get_month_number(workout_plan.date_range.lower)
         return render(request, 'RunScheduleApp/plan_details.html',
                       {'workout_plan': workout_plan, 'month_number': month_number})
 
@@ -316,8 +316,8 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             return render(request, 'RunScheduleApp/current_workout_plan.html', {'workout_plan': ''})
         workout_plan = active_workout_plan[0]
         plan_start_date, plan_end_date = get_plan_start_and_end_date(workout_plan)
-        present_month_number = get_month_number(plan_start_date)
-        last_month_number = get_last_month_number(plan_start_date, plan_end_date)
+        present_month_number = CurrentWorkoutPlanView.get_month_number(plan_start_date)
+        last_month_number = CurrentWorkoutPlanView.get_last_month_number(plan_start_date, plan_end_date)
 
         month, year = CurrentWorkoutPlanView.get_month_and_year(month_number_requested, plan_start_date)
         calendar = WorkoutCalendar(workout_plan, month, year).formatmonth(year, month)
@@ -353,6 +353,34 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
                 month = 12
                 year -= 1
         return month, year
+
+    @staticmethod
+    def get_last_month_number(plan_start_date, plan_end_date):
+        """Calculate month number for the last month in workout plan.
+
+        :param plan_start_date: first day of a plan
+        :type plan_start_date: datetime
+        :param plan_end_date: last date of a plan
+        :type plan_end_date: datetime
+        :return: month number for the last month of a plan
+        :rtype: int
+        """
+        last_month_number = (plan_end_date.year - plan_start_date.year) * 12 \
+                            + plan_end_date.month - plan_start_date.month + 1
+        return last_month_number
+
+    @staticmethod
+    def get_month_number(plan_start_date):
+        """Calculate month number for present month (according to date).
+
+        :param plan_start_date:  first day of a plan
+        :type plan_start_date: datetime
+        :return: month number of the present month in workout plan
+        :rtype: int
+        """
+        day_now = datetime.today().date()
+        month_number = (day_now.year - plan_start_date.year) * 12 + day_now.month - plan_start_date.month + 1
+        return month_number
 
 
 class WorkoutCalendar(HTMLCalendar):
@@ -544,19 +572,6 @@ def get_plan_start_and_end_date(workout_plan):
     start_date = workout_plan.date_range.lower
     end_date = workout_plan.date_range.upper
     return start_date, end_date
-
-
-# Calculates month number for present month (according to date).
-def get_month_number(plan_start_date):
-    day_now = datetime.today().date()
-    month_number = (day_now.year - plan_start_date.year) * 12 + day_now.month - plan_start_date.month + 1
-    return month_number
-
-
-# Calculates month number for the last month of current workout plan.
-def get_last_month_number(plan_start_date, plan_end_date):
-    month_number = (plan_end_date.year - plan_start_date.year) * 12 + plan_end_date.month - plan_start_date.month + 1
-    return month_number
 
 
 def check_workout_plan_owner(workout_plan, user):
