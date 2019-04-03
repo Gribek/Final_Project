@@ -360,7 +360,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
 
         :param plan_start_date: first day of a plan
         :type plan_start_date: datetime
-        :param plan_end_date: last date of a plan
+        :param plan_end_date: last day of a plan
         :type plan_end_date: datetime
         :return: month number for the last month of a plan
         :rtype: int
@@ -384,9 +384,19 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
 
 
 class WorkoutCalendar(HTMLCalendar):
-    cssclass_month = 'month table'
+    """A class used to create monthly workout calendar in HTML"""
+
+    css_class_month = 'month table'
 
     def __init__(self, workout_plan, month_number, year_number):
+        """
+        :param workout_plan: workout plan
+        :type workout_plan: WorkoutPlan object
+        :param month_number: month number
+        :type month_number: int
+        :param year_number: year number
+        :type year_number: int
+        """
         super(WorkoutCalendar, self).__init__()
         self.month_number = month_number
         self.year_number = year_number
@@ -395,8 +405,15 @@ class WorkoutCalendar(HTMLCalendar):
         self.training_dict = self.get_trainings_dict()
 
     def formatday(self, day, weekday):
-        """
-        Return a day as a table cell.
+        """Return a day as a table cell.
+
+        :param day: day number
+        :type day: int
+        :param weekday: day of the week (numbers from 0 to 6, 0 means
+            monday, 6 means sunday)
+        :type weekday: int
+        :return: HTML code for one day
+        :rtype: str
         """
         if day == 0:  # Table cells for days 'outside' the month.
             return '<td class="noday">&nbsp;</td>'
@@ -414,14 +431,23 @@ class WorkoutCalendar(HTMLCalendar):
                 bg_color, self.cssclasses[weekday], edit_day_link, day)
 
     def formatmonth(self, theyear, themonth, withyear=True):
-        """
-        Return a formatted month as a table.
+        """Return a formatted month as a table.
+
+        :param theyear: year number
+        :type theyear: int
+        :param themonth: month number
+        :type themonth: int
+        :param withyear: if True year number will be included in table
+            header, optional (default = True)
+        :type withyear: bool
+        :return: HTML code for whole month
+        :rtype: str
         """
         v = []
         a = v.append
         a(
             '<table id="fixedheight" style="table-layout: fixed" border="0" cellpadding="0" cellspacing="0" class="%s">'
-            % self.cssclass_month)
+            % self.css_class_month)
         a('\n')
         a(self.formatmonthname(theyear, themonth, withyear=withyear))
         a('\n')
@@ -435,6 +461,13 @@ class WorkoutCalendar(HTMLCalendar):
         return ''.join(v)
 
     def create_training_day_edit_link(self, day):
+        """Create a link to edit a training.
+
+        :param day: day number
+        :type day: int
+        :return: url to edit training on a given day
+        :rtype: str
+        """
         date = self.create_date(day)
         daily_training_id = DailyTraining.objects.filter(workout_plan=self.workout_plan).get(
             day=date).id
@@ -442,11 +475,27 @@ class WorkoutCalendar(HTMLCalendar):
         return edit_day_link
 
     def create_date(self, day):
-        date = f"{self.year_number}-{self.month_number}-{day}"  # Creates a full date for this day.
+        """Create full date in datatime format.
+
+        :param day: day number
+        :return: date
+        :rtype: datetime
+        """
+        date = f"{self.year_number}-{self.month_number}-{day}"
         date_format_datetime = datetime.strptime(date, "%Y-%m-%d").date()
         return date_format_datetime
 
     def set_bg_color(self, day, is_training_day):
+        """Choose background color for table cell.
+
+        :param day: day number
+        :type day: int
+        :param is_training_day: indicates if there is a training in
+            that day
+        :type is_training_day: bool
+        :return: background color
+        :rtype: str
+        """
         date = self.create_date(day)
         if date == self.workout_plan_start_date:
             return 'greenyellow'
@@ -458,6 +507,13 @@ class WorkoutCalendar(HTMLCalendar):
             return ''
 
     def get_trainings_dict(self):
+        """Create dictionary with trainings.
+
+        :return: information about trainings in formatted month,
+            day number as key and information about training in that
+            day as value
+        :rtype: dict[str, str]
+        """
         trainings = self.workout_plan.dailytraining_set.filter(day__year=self.year_number).filter(
             day__month=self.month_number).order_by('day')
         training_dict = {}
