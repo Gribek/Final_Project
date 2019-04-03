@@ -1,6 +1,6 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Permission, User
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -9,6 +9,7 @@ from django.views import View
 from datetime import datetime
 from calendar import HTMLCalendar
 from RunScheduleApp.forms import *
+from RunScheduleApp.models import WorkoutPlan
 
 
 class MainPageView(View):
@@ -18,7 +19,7 @@ class MainPageView(View):
         """Display application home page.
 
         :param request: request object
-        :return: application home page
+        :return: home page view
         :rtype: HttpResponse
         """
         return render(request, 'RunScheduleApp/main_page.html')
@@ -355,25 +356,24 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
         return month, year
 
     @staticmethod
-    def get_last_month_number(plan_start_date, plan_end_date):
+    def get_last_month_number(start_date, end_date):
         """Calculate month number for the last month in workout plan.
 
-        :param plan_start_date: first day of a plan
-        :type plan_start_date: datetime
-        :param plan_end_date: last day of a plan
-        :type plan_end_date: datetime
+        :param start_date: first day of a plan
+        :type start_date: datetime
+        :param end_date: last day of a plan
+        :type end_date: datetime
         :return: month number for the last month of a plan
         :rtype: int
         """
-        last_month_number = (plan_end_date.year - plan_start_date.year) * 12 \
-                            + plan_end_date.month - plan_start_date.month + 1
+        last_month_number = (end_date.year - start_date.year) * 12 + end_date.month - start_date.month + 1
         return last_month_number
 
     @staticmethod
     def get_month_number(plan_start_date):
         """Calculate month number for present month (according to date).
 
-        :param plan_start_date:  first day of a plan
+        :param plan_start_date: first day of a plan
         :type plan_start_date: datetime
         :return: month number of the present month in workout plan
         :rtype: int
@@ -391,7 +391,7 @@ class WorkoutCalendar(HTMLCalendar):
     def __init__(self, workout_plan, month_number, year_number):
         """
         :param workout_plan: workout plan
-        :type workout_plan: WorkoutPlan object
+        :type workout_plan: WorkoutPlan
         :param month_number: month number
         :type month_number: int
         :param year_number: year number
@@ -523,12 +523,26 @@ class WorkoutCalendar(HTMLCalendar):
 
 
 class LoginView(View):
+    """A class view to log users in."""
 
     def get(self, request):
+        """Display login form.
+
+        :param request: request object
+        :return: login page view
+        :rtype: HttpResponse
+        """
         form = LoginForm()
         return render(request, 'RunScheduleApp/login.html', {'form': form})
 
     def post(self, request):
+        """Log a user in.
+
+        :param request: request object
+        :return: home page view (if user authenticated correctly) or login
+            page view with error massage
+        :rtype: HttpResponse
+        """
         form = LoginForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('user')
@@ -546,20 +560,41 @@ class LoginView(View):
 
 
 class LogoutView(View):
+    """A class view to log users out."""
+
     def get(self, request):
+        """Log a user out.
+
+        :param request: request object
+        :return: home page view
+        :rtype: HttpResponse
+        """
         if request.user.is_authenticated:
             logout(request)
-            return redirect('/')
-        else:
-            return HttpResponse('Nie jesteś zalogowany')
+        return redirect('/')
 
 
 class RegistrationView(View):
+    """A class view to register new users."""
+
     def get(self, request):
+        """Display registration form.
+
+        :param request: request object
+        :return: registration form view
+        :rtype: HttpResponse
+        """
         form = RegistrationForm()
         return render(request, 'RunScheduleApp/registration.html', {'form': form})
 
     def post(self, request):
+        """Register a new user.
+
+        :param request: request object
+        :return: login page view (if form filled out correctly) or
+            registration form view with error massages
+        :rtype: HttpResponse
+        """
         form = RegistrationForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
@@ -588,16 +623,38 @@ class RegistrationView(View):
 
 
 class UserProfileView(LoginRequiredMixin, View):
+    """A class view that shows information about user"""
+
     def get(self, request):
+        """Display user profile.
+
+        :param request: request object
+        :return: user profile page view
+        :rtype: HttpResponse
+        """
         return render(request, 'RunScheduleApp/user_profile.html')
 
 
 class PasswordChangeView(LoginRequiredMixin, View):
+    """A class view for changing user password"""
+
     def get(self, request):
+        """Display a password change form.
+
+        :param request: request object
+        :return: password change form view
+        :rtype: HttpResponse
+        """
         form = PasswordChangeForm()
         return render(request, 'RunScheduleApp/password_change.html', {'form': form})
 
     def post(self, request):
+        """Change user password.
+
+        :param request: request object
+        :return: login page view (if form filled out correctly) or
+            password change form view with error massage
+        """
         form = PasswordChangeForm(request.POST)
         if form.is_valid():
             new_password = form.cleaned_data.get('new_password')
@@ -611,12 +668,27 @@ class PasswordChangeView(LoginRequiredMixin, View):
 
 
 class EditUserView(LoginRequiredMixin, View):
+    """A class view for changing user data"""
+
     def get(self, request):
+        """Display user data edit form.
+
+        :param request: request object
+        :return: user data edit form view
+        :rtype: HttpResponse
+        """
         current_user = request.user
         form = EditUserForm(instance=current_user)
         return render(request, 'RunScheduleApp/edit_user_profile.html', {'form': form})
 
     def post(self, request):
+        """Save changes to user data.
+
+        :param request: request object
+        :return: user profile page view (if form filled out correctly)
+            or user data edit form view with error massages
+        :rtype: HttpResponse
+        """
         form = EditUserForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
@@ -625,17 +697,41 @@ class EditUserView(LoginRequiredMixin, View):
 
 
 def get_plan_start_and_end_date(workout_plan):
+    """Get workout plan start and end date.
+
+    :param workout_plan: workout plan
+    :type workout_plan: WorkoutPlan
+    :return: workout plan start date and end date
+    :rtype: tuple[datetime, datetime]
+    """
     start_date = workout_plan.date_range.lower
     end_date = workout_plan.date_range.upper
     return start_date, end_date
 
 
 def check_workout_plan_owner(workout_plan, user):
+    """Check if user is owner of given workout plan.
+
+    :param workout_plan: workout plan
+    :type workout_plan: WorkoutPlan
+    :param user: user
+    :type user: User
+    :return: confirmation of ownership
+    :rtype: bool
+    """
     if workout_plan.owner != user:
         raise PermissionDenied
 
 
 def set_active_workout_plan(new_active_plan_id, user):
+    """Set workout plan as active.
+
+    :param new_active_plan_id: id of a workout plan to be set as active
+    :type new_active_plan_id: str or int
+    :param user: user for whom new active plan is to be set
+    :type user: User
+    :return: None
+    """
     WorkoutPlan.objects.filter(owner=user).filter(is_active=True).update(is_active=False)
     new_active_plan = WorkoutPlan.objects.get(pk=new_active_plan_id)
     new_active_plan.is_active = True
