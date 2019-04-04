@@ -112,7 +112,7 @@ class PlanDetailsView(PermissionRequiredMixin, View):
         """
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
-        month_number = CurrentWorkoutPlanView.get_month_number(workout_plan.date_range.lower)
+        month_number = WorkoutPlanView.get_month_number(workout_plan.date_range.lower)
         return render(request, 'RunScheduleApp/plan_details.html',
                       {'workout_plan': workout_plan, 'month_number': month_number})
 
@@ -293,7 +293,7 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
         return render(request, 'RunScheduleApp/select_plan.html', {'form': form})
 
 
-class CurrentWorkoutPlanView(LoginRequiredMixin, View):
+class WorkoutPlanView(LoginRequiredMixin, View):
     """Class view that displays calendar for current workout plan.
 
     All variables containing in their names phrase 'month_number'
@@ -317,10 +317,10 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             return render(request, 'RunScheduleApp/current_workout_plan.html', {'workout_plan': ''})
         workout_plan = active_workout_plan[0]
         plan_start_date, plan_end_date = get_plan_start_and_end_date(workout_plan)
-        present_month_number = CurrentWorkoutPlanView.get_month_number(plan_start_date)
-        last_month_number = CurrentWorkoutPlanView.get_last_month_number(plan_start_date, plan_end_date)
+        present_month_number = WorkoutPlanView.get_month_number(plan_start_date)
+        last_month_number = WorkoutPlanView.get_last_month_number(plan_start_date, plan_end_date)
 
-        month, year = CurrentWorkoutPlanView.get_month_and_year(month_number_requested, plan_start_date)
+        month, year = WorkoutPlanView.get_month_and_year(month_number_requested, plan_start_date)
         calendar = WorkoutCalendar(workout_plan, month, year).formatmonth(year, month)
 
         ctx = {'workout_plan': workout_plan,
