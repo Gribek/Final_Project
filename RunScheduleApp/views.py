@@ -296,10 +296,10 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
 class WorkoutPlanView(LoginRequiredMixin, View):
     """Class view that displays calendar for current workout plan.
 
-    All variables containing in their names phrase 'month_number'
-    indicate numbers of the following months in a workout plan.
-    Number of the first month in a workout plan is always equal to 1.
-    Number of the second month is 2, third is 3, etc.
+    Within that class, all variables and methods names containing
+    phrase 'month_number' refers to the numbers of the following months
+    in a workout plan. Number of the first month in the workout plan is
+    equal to 1. Number of the second month is 2, third is 3, etc.
     """
 
     def get(self, request, month_number_requested):
