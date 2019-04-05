@@ -112,9 +112,7 @@ class PlanDetailsView(PermissionRequiredMixin, View):
         """
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
-        month_number = WorkoutPlanView.get_month_number(workout_plan.date_range.lower)
-        return render(request, 'RunScheduleApp/plan_details.html',
-                      {'workout_plan': workout_plan, 'month_number': month_number})
+        return render(request, 'RunScheduleApp/plan_details.html', {'workout_plan': workout_plan})
 
 
 class WorkoutsList(LoginRequiredMixin, View):
