@@ -69,13 +69,13 @@ class PlanDetailsViewTest(TestCase):
 class WorkoutsList(TestCase):
     @classmethod
     def setUpTestData(cls):
-        user = User.objects.create_user(username='test_user', password='test')
-        user_2 = User.objects.create_user(username='test_user_2', password='test')
-        WorkoutPlan.objects.create(plan_name='plan name1', date_range=["2011-01-01", "2018-01-31"], owner=user)
-        WorkoutPlan.objects.create(plan_name='plan name2', date_range=["2011-01-01", "2018-01-31"], owner=user_2)
-        WorkoutPlan.objects.create(plan_name='plan name3', date_range=["2011-01-01", "2018-01-31"], owner=user)
-        WorkoutPlan.objects.create(plan_name='plan name4', date_range=["2011-01-01", "2018-01-31"], owner=user_2)
-        WorkoutPlan.objects.create(plan_name='plan name5', date_range=["2011-01-01", "2018-01-31"], owner=user)
+        test_user = User.objects.create_user(username='test_user', password='test')
+        test_user_2 = User.objects.create_user(username='test_user_2', password='test')
+        WorkoutPlan.objects.create(plan_name='plan name1', date_range=["2011-01-01", "2018-01-31"], owner=test_user)
+        WorkoutPlan.objects.create(plan_name='plan name2', date_range=["2011-01-01", "2018-01-31"], owner=test_user_2)
+        WorkoutPlan.objects.create(plan_name='plan name3', date_range=["2011-01-01", "2018-01-31"], owner=test_user)
+        WorkoutPlan.objects.create(plan_name='plan name4', date_range=["2011-01-01", "2018-01-31"], owner=test_user_2)
+        WorkoutPlan.objects.create(plan_name='plan name5', date_range=["2011-01-01", "2018-01-31"], owner=test_user)
 
     def test_view_url_exist_at_desired_location(self):
         response = self.client.get('/workout_list')
