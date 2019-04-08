@@ -56,8 +56,12 @@ class WorkoutsListTest(TestCase):
 class PermissionRequiredViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        User.objects.create_user(username='user_with_permission', password='test')
-        User.objects.create_user(username='non_permission_user', password='test')
+        user_1 = User.objects.create_user(username='user_with_permission', password='test')
+        user_2 = User.objects.create_user(username='non_permission_user', password='test')
+        WorkoutPlan.objects.create(plan_name='setUp plan 1', date_range=["2011-01-01", "2018-01-31"], owner=user_1,
+                                   is_active=True)
+        WorkoutPlan.objects.create(plan_name='setUp plan 2', date_range=["2011-01-01", "2018-01-31"], owner=user_2,
+                                   is_active=False)
 
     def log_user_with_permission(self):
         self.client.login(username='user_with_permission', password='test')
@@ -72,13 +76,9 @@ class PlanDetailsViewTest(PermissionRequiredViewTest):
         super(PlanDetailsViewTest, cls).setUpTestData()
         user = User.objects.get(username='user_with_permission')
         user.user_permissions.add(Permission.objects.get(codename='view_workoutplan'))
-        WorkoutPlan.objects.create(plan_name='name', date_range=["2011-01-01", "2018-01-31"],
-                                   owner=User.objects.get(username='user_with_permission'))
-        WorkoutPlan.objects.create(plan_name='name', date_range=['2011-01-01', '2018-01-31'],
-                                   owner=User.objects.get(username='non_permission_user'))
 
     def setUp(self):
-        self.workout_plan = WorkoutPlan.objects.get(owner__username='user_with_permission')
+        self.workout_plan = WorkoutPlan.objects.filter(owner__username='user_with_permission')[0]
 
     def test_view_url_exist_at_desired_location(self):
         self.log_user_with_permission()
@@ -143,3 +143,20 @@ class WorkoutPlanAddTest(PermissionRequiredViewTest):
         self.log_user_with_permission()
         response = self.client.get(reverse('workout_plan_add'))
         self.assertTrue('form' in response.context, 'Key not found in context dictionary')
+
+    def test_view_checks_if_object_is_created_in_post(self):
+        self.log_user_with_permission()
+        number_of_workout_plans = WorkoutPlan.objects.count()
+        data = {'plan_name': 'new plan', 'date_range_0': '2011-01-01', 'date_range_1': '2018-01-01'}
+        response = self.client.post(reverse('workout_plan_add'), data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/workout_list')
+        self.assertEqual(WorkoutPlan.objects.count(), number_of_workout_plans + 1)
+
+    def test_view_checks_if_workout_plan_is_set_as_active(self):
+        self.log_user_with_permission()
+        data = {'plan_name': 'new plan', 'date_range_0': '2011-01-01',
+                'date_range_1': '2018-01-01', 'is_active': True}
+        self.client.post(reverse('workout_plan_add'), data)
+        self.assertTrue(WorkoutPlan.objects.get(plan_name='new plan').is_active)
+        self.assertFalse(WorkoutPlan.objects.get(plan_name='setUp plan 1').is_active)
