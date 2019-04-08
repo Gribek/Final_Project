@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib.auth.models import User, Permission
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -73,7 +75,7 @@ class PlanDetailsViewTest(PermissionRequiredViewTest):
         user.user_permissions.add(Permission.objects.get(codename='view_workoutplan'))
 
     def setUp(self):
-        self.workout_plan = WorkoutPlan.objects.filter(owner__username='user_with_permission')[0]
+        self.workout_plan = WorkoutPlan.objects.get(plan_name='setUp plan 1')
 
     def test_view_url_exist_at_desired_location(self):
         self.log_user_with_permission()
@@ -91,9 +93,8 @@ class PlanDetailsViewTest(PermissionRequiredViewTest):
 
     def test_view_checks_if_user_is_owner_of_the_workout_plan(self):
         self.log_user_with_permission()
-        other_user_workout_plan = WorkoutPlan.objects.filter(owner__username='non_permission_user')[0]
-        response = self.client.get(
-            f'/plan_details/{other_user_workout_plan.id}')
+        other_user_workout_plan = WorkoutPlan.objects.get(plan_name='setUp plan 2')
+        response = self.client.get(f'/plan_details/{other_user_workout_plan.id}')
         self.assertEqual(response.status_code, 403)
 
     def test_view_uses_correct_template(self):
@@ -109,7 +110,6 @@ class PlanDetailsViewTest(PermissionRequiredViewTest):
 
 
 class WorkoutPlanAddTest(PermissionRequiredViewTest):
-
     @classmethod
     def setUpTestData(cls):
         super(WorkoutPlanAddTest, cls).setUpTestData()
@@ -140,7 +140,7 @@ class WorkoutPlanAddTest(PermissionRequiredViewTest):
         response = self.client.get(reverse('workout_plan_add'))
         self.assertTrue('form' in response.context, 'Key not found in context dictionary')
 
-    def test_view_checks_if_object_is_created_in_post(self):
+    def test_view_checks_if_workout_plan_is_created_in_post(self):
         self.log_user_with_permission()
         number_of_workout_plans = WorkoutPlan.objects.count()
         data = {'plan_name': 'new plan', 'date_range_0': '2011-01-01', 'date_range_1': '2018-01-01'}
@@ -149,6 +149,13 @@ class WorkoutPlanAddTest(PermissionRequiredViewTest):
         self.assertRedirects(response, '/workout_list')
         self.assertEqual(WorkoutPlan.objects.count(), number_of_workout_plans + 1)
 
+    def test_view_returns_the_form_if_data_not_valid(self):
+        self.log_user_with_permission()
+        data = {'plan_name': 'new plan', 'date_range_0': '2020-01-01', 'date_range_1': '2018-01-01'}
+        response = self.client.post(reverse('workout_plan_add'), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'RunScheduleApp/workout_plan_add.html')
+
     def test_view_checks_if_workout_plan_is_set_as_active(self):
         self.log_user_with_permission()
         data = {'plan_name': 'new plan', 'date_range_0': '2011-01-01',
@@ -156,3 +163,70 @@ class WorkoutPlanAddTest(PermissionRequiredViewTest):
         self.client.post(reverse('workout_plan_add'), data)
         self.assertTrue(WorkoutPlan.objects.get(plan_name='new plan').is_active)
         self.assertFalse(WorkoutPlan.objects.get(plan_name='setUp plan 1').is_active)
+
+
+class WorkoutPlanEditTest(PermissionRequiredViewTest):
+    @classmethod
+    def setUpTestData(cls):
+        super(WorkoutPlanEditTest, cls).setUpTestData()
+        user = User.objects.get(username='user_with_permission')
+        user.user_permissions.set([Permission.objects.get(codename='change_workoutplan'),
+                                   Permission.objects.get(codename='view_workoutplan')])
+
+    def setUp(self):
+        self.workout_plan = WorkoutPlan.objects.create(plan_name='plan to edit',
+                                                       date_range=["2011-01-01", "2018-01-31"],
+                                                       owner=User.objects.get(username='user_with_permission'))
+
+    def test_view_url_exist_at_desired_location(self):
+        self.log_user_with_permission()
+        response = self.client.get(reverse('workout_plan_edit', kwargs={'plan_id': self.workout_plan.id}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_redirects_if_user_not_logged_in(self):
+        response = self.client.get(reverse('workout_plan_edit', kwargs={'plan_id': self.workout_plan.id}))
+        self.assertTrue(response.url.startswith('/login'))
+
+    def test_view_checks_if_user_has_proper_permission(self):
+        self.log_non_permission_user()
+        response = self.client.get(reverse('workout_plan_edit', kwargs={'plan_id': self.workout_plan.id}))
+        self.assertEqual(response.status_code, 403)
+
+    def test_view_uses_correct_template(self):
+        self.log_user_with_permission()
+        response = self.client.get(reverse('workout_plan_edit', kwargs={'plan_id': self.workout_plan.id}))
+        self.assertTemplateUsed(response, 'RunScheduleApp/workout_plan_edit.html')
+
+    def test_view_returns_form_with_data_and_plan_id_in_context(self):
+        self.log_user_with_permission()
+        response = self.client.get(reverse('workout_plan_edit', kwargs={'plan_id': self.workout_plan.id}))
+        self.assertTrue('form' in response.context, 'Key "form" not found in context dictionary')
+        self.assertEqual(response.context['form'].initial['plan_name'], self.workout_plan.plan_name, 'No initial data')
+        self.assertTrue('plan_id' in response.context, 'Key "plan_id" not found in context dictionary')
+        self.assertEqual(response.context['plan_id'], str(self.workout_plan.id), 'Wrong plan id value')
+
+    def test_view_checks_if_user_is_owner_of_the_workout_plan(self):
+        self.log_user_with_permission()
+        other_user_workout_plan = WorkoutPlan.objects.get(plan_name='setUp plan 2')
+        response = self.client.get(f'/plan_details/{other_user_workout_plan.id}')
+        self.assertEqual(response.status_code, 403)
+
+    def test_view_checks_if_workout_plan_is_edited_in_post(self):
+        self.log_user_with_permission()
+        data = {'plan_name': 'changed plan name', 'date_range_0': '2010-01-01',
+                'date_range_1': '2020-01-31'}
+        response = self.client.post(reverse('workout_plan_edit', kwargs={'plan_id': self.workout_plan.id}), data)
+        changed_workout_plan = WorkoutPlan.objects.get(id=self.workout_plan.id)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f'/plan_details/{self.workout_plan.id}')
+        self.assertEqual(changed_workout_plan.plan_name, 'changed plan name')
+        self.assertEqual(changed_workout_plan.date_range.lower, date(2010, 1, 1))
+        self.assertEqual(changed_workout_plan.date_range.upper, date(2020, 1, 31))
+
+    def test_view_returns_the_form_if_data_not_valid(self):
+        self.log_user_with_permission()
+        data = {'plan_name': 'changed plan name', 'date_range_0': '2020-01-01',
+                'date_range_1': '2010-01-31'}
+        response = self.client.post(reverse('workout_plan_edit', kwargs={'plan_id': self.workout_plan.id}), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'RunScheduleApp/workout_plan_edit.html')
