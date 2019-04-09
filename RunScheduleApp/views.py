@@ -1,3 +1,6 @@
+from datetime import datetime
+from calendar import HTMLCalendar
+
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Permission, User
@@ -6,17 +9,16 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils.safestring import mark_safe
 from django.views import View
-from datetime import datetime
-from calendar import HTMLCalendar
+
 from RunScheduleApp.forms import *
 from RunScheduleApp.models import WorkoutPlan
 
 
 class MainPageView(View):
-    """Class view for the application home page."""
+    """Class view for the application's home page."""
 
     def get(self, request):
-        """Display application home page.
+        """Display application's home page.
 
         :param request: request object
         :return: home page view
@@ -26,7 +28,7 @@ class MainPageView(View):
 
 
 class WorkoutPlanAdd(PermissionRequiredMixin, View):
-    """A class creating a new workout plan."""
+    """The class that creates a new workout plan."""
 
     permission_required = 'RunScheduleApp.add_workoutplan'
 
@@ -60,7 +62,7 @@ class WorkoutPlanAdd(PermissionRequiredMixin, View):
 
 
 class WorkoutPlanEdit(PermissionRequiredMixin, View):
-    """A class editing an existing workout plan."""
+    """The class that edits an existing workout plan."""
 
     permission_required = 'RunScheduleApp.change_workoutplan'
 
@@ -97,12 +99,12 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
 
 
 class PlanDetailsView(PermissionRequiredMixin, View):
-    """A class view that shows the information of a workout plan."""
+    """The class view that shows information about a workout plan."""
 
     permission_required = 'RunScheduleApp.view_workoutplan'
 
     def get(self, request, plan_id):
-        """Display information of a selected workout plan.
+        """Display information about a selected workout plan.
 
         :param request: request object
         :param plan_id: workout plan id
@@ -116,13 +118,13 @@ class PlanDetailsView(PermissionRequiredMixin, View):
 
 
 class WorkoutsList(LoginRequiredMixin, View):
-    """A class view that shows list of all created workout plans."""
+    """The class view that shows list of all created workout plans."""
 
     def get(self, request):
-        """Display all user workout plans.
+        """Display all user's workout plans.
 
         :param request: request object
-        :return: list view of all user plans
+        :return: list view of all workout plans
         :rtype: HttpResponse
         """
         workout_plans = WorkoutPlan.objects.filter(owner=request.user)
@@ -130,7 +132,7 @@ class WorkoutsList(LoginRequiredMixin, View):
 
 
 class DailyTrainingAdd(PermissionRequiredMixin, View):
-    """A class creating a new training."""
+    """The class that creates a new training."""
 
     permission_required = 'RunScheduleApp.add_dailytraining'
 
@@ -176,7 +178,7 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
 
 
 class DailyTrainingEdit(PermissionRequiredMixin, View):
-    """A class editing an existing training."""
+    """The class that edits an existing training."""
 
     permission_required = 'RunScheduleApp.change_dailytraining'
 
@@ -222,7 +224,7 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
 
 
 class DailyTrainingDelete(PermissionRequiredMixin, View):
-    """A class deleting an existing training."""
+    """The class that deletes an existing training."""
 
     permission_required = 'RunScheduleApp.delete_dailytraining'
 
@@ -243,7 +245,7 @@ class DailyTrainingDelete(PermissionRequiredMixin, View):
 
 
 class SelectActivePlanView(PermissionRequiredMixin, View):
-    """A class view for selecting an active workout plan"""
+    """The class view for selecting an active workout plan"""
 
     permission_required = 'RunScheduleApp.view_workoutplan'
 
@@ -292,12 +294,12 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
 
 
 class WorkoutPlanView(LoginRequiredMixin, View):
-    """Class view that displays calendar for current workout plan.
+    """The class view displaying a calendar with training marked.
 
-    Within that class, all variables and methods names containing
+    Within that class, all variables and methods names containing the
     phrase 'month_number' refers to the numbers of the following months
-    in a workout plan. Number of the first month in the workout plan is
-    equal to 1. Number of the second month is 2, third is 3, etc.
+    in a workout plan. Number of the first month in a workout plan is
+    equal to 1. Number of the second month is 2, the third is 3, etc.
     """
 
     def get(self, request, month_number_requested):
@@ -521,7 +523,7 @@ class WorkoutCalendar(HTMLCalendar):
 
 
 class LoginView(View):
-    """A class view to log users in."""
+    """The class view to log users in."""
 
     def get(self, request):
         """Display login form.
@@ -537,8 +539,8 @@ class LoginView(View):
         """Log a user in.
 
         :param request: request object
-        :return: home page view (if user authenticated correctly) or login
-            page view with error massage
+        :return: home page view (if user authenticated correctly) or
+            login page view with error massage
         :rtype: HttpResponse
         """
         form = LoginForm(request.POST)
@@ -558,7 +560,7 @@ class LoginView(View):
 
 
 class LogoutView(View):
-    """A class view to log users out."""
+    """The class view to log users out."""
 
     def get(self, request):
         """Log a user out.
@@ -573,7 +575,7 @@ class LogoutView(View):
 
 
 class RegistrationView(View):
-    """A class view to register new users."""
+    """The class view to register new users."""
 
     def get(self, request):
         """Display registration form.
@@ -621,7 +623,7 @@ class RegistrationView(View):
 
 
 class UserProfileView(LoginRequiredMixin, View):
-    """A class view that shows information about user"""
+    """The class view that shows information about user"""
 
     def get(self, request):
         """Display user profile.
@@ -634,7 +636,7 @@ class UserProfileView(LoginRequiredMixin, View):
 
 
 class PasswordChangeView(LoginRequiredMixin, View):
-    """A class view for changing user password"""
+    """The class view for changing user password"""
 
     def get(self, request):
         """Display a password change form.
@@ -666,7 +668,7 @@ class PasswordChangeView(LoginRequiredMixin, View):
 
 
 class EditUserView(LoginRequiredMixin, View):
-    """A class view for changing user data"""
+    """The class view for changing user data"""
 
     def get(self, request):
         """Display user data edit form.

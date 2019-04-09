@@ -3,7 +3,6 @@ from django.contrib.postgres.fields.ranges import DateRangeField
 from django.contrib.auth.models import User
 
 
-# Create your models here.
 class WorkoutPlan(models.Model):
     """Stores a single workout plan entry."""
 
@@ -40,6 +39,5 @@ class DailyTraining(models.Model):
     def __str__(self):
         """Return training information"""
         return self.training_info()
-
 
 # class TrainingDiary(models.Model): TODO

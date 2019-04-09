@@ -1,9 +1,10 @@
 from django.contrib.auth import authenticate
 from django.contrib.postgres.forms import RangeWidget
 from django import forms
-from django.core.exceptions import ValidationError
-from RunScheduleApp.models import *
 from django.forms import ModelForm, DateInput
+from django.core.exceptions import ValidationError
+
+from RunScheduleApp.models import *
 
 
 class DatePicker(DateInput):
