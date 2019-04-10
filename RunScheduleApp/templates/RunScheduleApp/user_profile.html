@@ -2,12 +2,18 @@
 
 {% block content %}
     <p>
-    <p class="text_blue">Nazwa użytkownika: {{ request.user.username }}</p>
-    <p class="text_blue">Imię: {{ request.user.first_name }}</p>
-    <p class="text_blue">Nazwisko: {{ request.user.last_name }}</p>
-    <p class="text_blue">Adres e-mail: {{ request.user.email }}</p>
-
-
+    <p class="text_blue">
+        Nazwa użytkownika: {{ request.user.username }}
+    </p>
+    <p class="text_blue">
+        Imię: {{ request.user.first_name }}
+    </p>
+    <p class="text_blue">
+        Nazwisko: {{ request.user.last_name }}
+    </p>
+    <p class="text_blue">
+        Adres e-mail: {{ request.user.email }}
+    </p>
     <p>
         <a href="/edit_profile" class="btn btn-primary">Edytuj dane</a>
         <a href="/password_change" class="btn btn-primary">Zmień hasło</a>

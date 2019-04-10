@@ -17,22 +17,21 @@
     <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
 <body>
 {% block header %}
-
     <nav class="navbar navbar-expand-lg" style="color: aliceblue; font-size: 20px; background-color: #0A2299">
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
-              <li class="nav-item active">
-                <a class="nav-link" href="/">Strona główna <span class="sr-only">(current)</span></a>
-              </li>
                 <li class="nav-item active">
-                <a class="nav-link" href="/workout/{{ get_month_counter }}">Mój aktualny plan <span class="sr-only">(current)</span></a>
-              </li>
+                    <a class="nav-link" href="/">Strona główna <span class="sr-only">(current)</span></a>
+                </li>
                 <li class="nav-item active">
-                <a class="nav-link" href="/workout_list">Moje plany <span class="sr-only">(current)</span></a>
-              </li>
+                    <a class="nav-link" href="/workout/{{ get_month_counter }}">Mój aktualny plan <span class="sr-only">(current)</span></a>
+                </li>
                 <li class="nav-item active">
-                <a class="nav-link" href="/profile">Mój profil <span class="sr-only">(current)</span></a>
-              </li>
+                    <a class="nav-link" href="/workout_list">Moje plany <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/profile">Mój profil <span class="sr-only">(current)</span></a>
+                </li>
             </ul>
         </div>
         <div style="text-align: right">
@@ -43,11 +42,9 @@
             {% endif %}
         </div>
     </nav>
-{#    <h2 style="color: darkblue; text-align: center; "><b><i>RunWorkoutApp</i></b></h2>#}
-{#    <img height="" width="100%" src="{% static "RunScheduleApp/css/app_logo.png" %}">#}
-   {% endblock %}
-{% block content %}
+{% endblock %}
 
+{% block content %}
 {% endblock %}
 
 {% block footer %}

@@ -4,11 +4,15 @@
     <img height="500" width="100%" src="{% static "RunScheduleApp/css/app_logo.png" %}">
     {% if not request.user.is_authenticated %}
         <div class="text_blue" style="text-align: center">
-        <p></p>
             <p>
-                <a href="/login" class="btn btn-primary btn-lg btn-block">Żeby w pełni korzystać ze strony należy się zalogować</a></p>
             <p>
-                <a href="/registration" class="btn btn-primary btn-lg btn-block">Jeśli nie masz jeszcze konta, zarejestruj się</a></p>
+                <a href="/login" class="btn btn-primary btn-lg btn-block">Żeby w pełni korzystać ze strony należy się
+                    zalogować</a>
+            </p>
+            <p>
+                <a href="/registration" class="btn btn-primary btn-lg btn-block">Jeśli nie masz jeszcze konta,
+                    zarejestruj się</a>
+            </p>
         </div>
     {% endif %}
 {% endblock %}

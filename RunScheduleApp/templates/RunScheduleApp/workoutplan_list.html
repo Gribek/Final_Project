@@ -1,22 +1,24 @@
 {% extends "RunScheduleApp/base.html" %}
 
 {% block content %}
-
-    <p><ul class="text_blue list-group">
+    <p>
+    <ul class="text_blue list-group">
         {% for plan in workout_plans %}
             <a style="margin-bottom: 10px; font-size: 20px" href="/plan_details/{{ plan.id }} " class="btn btn-primary">
-            <li class="list-group-item">{{ plan.plan_name }} {{ plan.date_range.lower|date:"d.m.Y" }} - {{ plan.date_range.upper|date:"d.m.Y" }}
-                {% if plan.is_active %} <span style="color: red"><i>Twój aktualny plan</i></span> {% endif %}
-            </li></a>
+                <li class="list-group-item">{{ plan.plan_name }} {{ plan.date_range.lower|date:"d.m.Y" }}
+                    - {{ plan.date_range.upper|date:"d.m.Y" }}
+                    {% if plan.is_active %} <span style="color: red"><i>Twój aktualny plan</i></span> {% endif %}
+                </li>
+            </a>
         {% empty %}
             Brak dodanych planów
         {% endfor %}
-    </ul></p>
+    </ul>
+    </p>
     <div>
         <a href="/workout_plan_add" class="btn btn-primary">Dodaj plan</a>
         {% if workout_plans %}
-        <a href="/select_active_plan" class="btn btn-primary">Zmień aktualny plan</a>
+            <a href="/select_active_plan" class="btn btn-primary">Zmień aktualny plan</a>
         {% endif %}
     </div>
-
 {% endblock %}

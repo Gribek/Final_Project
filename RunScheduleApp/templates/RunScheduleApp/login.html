@@ -1,11 +1,15 @@
 {% extends "RunScheduleApp/base.html" %}
 
 {% block content %}
-
-<p><form method="post" class="center text_blue">
-    {{ form.as_p }}
+    <p>
+    <form method="post" class="center text_blue">
+        {{ form.as_p }}
         <input class="btn btn-primary" type="submit" value="Zaloguj">
-    {% csrf_token %}
-</form></p>
-<p><a href="/registration" class="btn btn-primary btn-lg btn-block">Jeśli nie posiadasz jeszcze konta, zarejestruj się</a></p>
+        {% csrf_token %}
+    </form>
+    </p>
+    <p>
+        <a href="/registration" class="btn btn-primary btn-lg btn-block">Jeśli nie posiadasz jeszcze konta, zarejestruj
+            się</a>
+    </p>
 {% endblock %}
