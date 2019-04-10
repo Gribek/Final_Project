@@ -3,8 +3,7 @@
 {% block content %}
     <img height="500" width="100%" src="{% static "RunScheduleApp/css/app_logo.png" %}">
     {% if not request.user.is_authenticated %}
-        <div class="text_blue" style="text-align: center">
-            <p>
+        <div class="text_blue">
             <p>
                 <a href="/login" class="btn btn-primary btn-lg btn-block">Żeby w pełni korzystać ze strony należy się
                     zalogować</a>

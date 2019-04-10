@@ -1,13 +1,13 @@
 {% extends "RunScheduleApp/base.html" %}
 
 {% block content %}
-    <p>
-    <form class="text_blue center" method="post">
-        {{ form.as_p }}
-        <input class="btn btn-primary" type="submit" value="Zapisz zmiany">
-        <button class="btn btn-primary" type="reset">Reset</button>
-        <a class="btn btn-primary" href="/plan_details/{{ plan_id }}">Anuluj</a>
-        {% csrf_token %}
-    </form>
-    </p>
+    <div class="form">
+        <form class="text_blue" method="post">
+            {{ form.as_p }}
+            <input class="btn btn-primary" type="submit" value="Zapisz zmiany">
+            <button class="btn btn-primary" type="reset">Reset</button>
+            <a class="btn btn-primary" href="/plan_details/{{ plan_id }}">Anuluj</a>
+            {% csrf_token %}
+        </form>
+    </div>
 {% endblock %}

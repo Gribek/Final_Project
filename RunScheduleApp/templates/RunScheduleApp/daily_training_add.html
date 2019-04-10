@@ -1,9 +1,8 @@
 {% extends 'RunScheduleApp/base.html' %}
 
 {% block content %}
-    <div class="">
-        <p>
-        <form class="text_blue center" method="post" {% if date %}
+    <div class="form">
+        <form class="text_blue" method="post" {% if date %}
               action="/daily_training_add/{{ plan_id }}" {% endif %}>
             {{ form.as_p }}
             <input class="btn btn-primary" type="submit" value="Zapisz trening">
@@ -11,6 +10,5 @@
             <button class="btn btn-primary" type="reset">Reset</button>
             <a class="btn btn-primary" href="/plan_details/{{ plan_id }}">Anuluj</a>
         </form>
-        </p>
     </div>
 {% endblock %}
