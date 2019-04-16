@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'RunSchedules.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'runschedules',
+        'NAME': 'run_schedule_app',
         'USER': 'postgres',
         'PASSWORD': 'coderslab',
         'HOST': '127.0.0.1',

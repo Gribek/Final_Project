@@ -4,7 +4,7 @@
     <div class="text_blue list-group">
         {% for plan in workout_plans %}
             <a href="/plan_details/{{ plan.id }} " class="btn btn-primary">
-                <div class="list-group-item">{{ plan.plan_name }} {{ plan.date_range.lower|date:"d.m.Y" }}
+                <div class="list-group-item">{{ plan.name }} {{ plan.date_range.lower|date:"d.m.Y" }}
                     - {{ plan.date_range.upper|date:"d.m.Y" }}
                     {% if plan.is_active %} <span class="active_plan">Twój aktualny plan</span> {% endif %}
                 </div>

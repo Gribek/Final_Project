@@ -151,7 +151,7 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
-        form = DailyTrainingForm(initial={'day': date, 'start_date': start_date, 'end_date': end_date})
+        form = TrainingForm(initial={'day': date, 'start_date': start_date, 'end_date': end_date})
         return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': workout_plan.id,
                                                                           'date': date})
 
@@ -166,8 +166,8 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
             form view with error massages
         :rtype: HttpResponse
         """
-        new_training = DailyTraining()
-        form = DailyTrainingForm(request.POST, instance=new_training)
+        new_training = Training()
+        form = TrainingForm(request.POST, instance=new_training)
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         if form.is_valid():
             workout = WorkoutPlan.objects.get(pk=plan_id)
@@ -196,9 +196,9 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
         """
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
-        daily_training = DailyTraining.objects.get(pk=training_id)
+        daily_training = Training.objects.get(pk=training_id)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
-        form = DailyTrainingForm(instance=daily_training, initial={'start_date': start_date, 'end_date': end_date})
+        form = TrainingForm(instance=daily_training, initial={'start_date': start_date, 'end_date': end_date})
         return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': plan_id})
 
     def post(self, request, plan_id, training_id):
@@ -215,8 +215,8 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
             massages
         :rtype: HttpResponse
         """
-        daily_training = DailyTraining.objects.get(pk=training_id)
-        form = DailyTrainingForm(request.POST, instance=daily_training)
+        daily_training = Training.objects.get(pk=training_id)
+        form = TrainingForm(request.POST, instance=daily_training)
         if form.is_valid():
             form.save()
             return redirect(f'/plan_details/{plan_id}')
@@ -238,7 +238,7 @@ class DailyTrainingDelete(PermissionRequiredMixin, View):
             plan to which the deleted training belonged
         :rtype: HttpResponse
         """
-        daily_training = DailyTraining.objects.get(pk=training_id)
+        daily_training = Training.objects.get(pk=training_id)
         check_workout_plan_owner(daily_training.workout_plan, request.user)
         daily_training.delete()
         return redirect(f'/plan_details/{daily_training.workout_plan.id}')
@@ -469,7 +469,7 @@ class WorkoutCalendar(HTMLCalendar):
         :rtype: str
         """
         date = self.create_date(day)
-        daily_training_id = DailyTraining.objects.filter(workout_plan=self.workout_plan).get(
+        daily_training_id = Training.objects.filter(workout_plan=self.workout_plan).get(
             day=date).id
         edit_day_link = f'/daily_training_edit/{self.workout_plan.id}/{daily_training_id}'
         return edit_day_link
@@ -514,7 +514,7 @@ class WorkoutCalendar(HTMLCalendar):
             day as value
         :rtype: dict[str, str]
         """
-        trainings = self.workout_plan.dailytraining_set.filter(day__year=self.year_number).filter(
+        trainings = self.workout_plan.training_set.filter(day__year=self.year_number).filter(
             day__month=self.month_number).order_by('day')
         training_dict = {}
         for training in trainings:

@@ -6,24 +6,26 @@ from django.contrib.auth.models import User
 class WorkoutPlan(models.Model):
     """Stores a single workout plan entry."""
 
-    plan_name = models.CharField(max_length=64, verbose_name='Nazwa planu')
-    description = models.TextField(null=True, verbose_name='Opis', blank=True)
-    date_range = DateRangeField(verbose_name='Termin')
-    is_active = models.BooleanField(default=False, verbose_name='Ustaw jako bieżący')
+    name = models.CharField(max_length=64, verbose_name='Name of the plan')
+    description = models.TextField(null=True, verbose_name='Description', blank=True)
+    date_range = DateRangeField(verbose_name='Time range')
+    is_active = models.BooleanField(default=False, verbose_name='Set as active')
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
-class DailyTraining(models.Model):
+class Training(models.Model):
     """Stores a single training entry."""
 
-    day = models.DateField(verbose_name='Wybierz datę')
-    description = models.TextField(null=True, verbose_name='Dodatkowy opis', blank=True)
-    training_type = models.CharField(max_length=32, verbose_name='Rodzaj treningu')
-    training_distance = models.SmallIntegerField(verbose_name='Dystans (km)')
-    additional = models.CharField(null=True, max_length=32, verbose_name='Dodatkowo', blank=True)
-    additional_quantity = models.CharField(null=True, max_length=32, verbose_name='Ilość', blank=True)
+    day = models.DateField(verbose_name='Date of training')
+    training_main = models.CharField(max_length=32, verbose_name='Main training')
+    distance_main = models.DecimalField(max_digits=3, decimal_places=1, verbose_name='Distance [km]')
+    time_main = models.SmallIntegerField(verbose_name='Time [min]')
+    training_additional = models.CharField(null=True, max_length=32, blank=True,
+                                           verbose_name='Additional training (optional)')
+    distance_additional = models.DecimalField(max_digits=3, decimal_places=1, verbose_name='Distance [km]')
+    time_additional = models.SmallIntegerField(verbose_name='Time [min]')
     workout_plan = models.ForeignKey(WorkoutPlan, on_delete=models.CASCADE, unique_for_date=day,
-                                     verbose_name='Dodaj trening do planu')
+                                     verbose_name='Add training to workout plan')
     accomplished = models.BooleanField(default=False)
 
     def training_info(self):
@@ -32,8 +34,8 @@ class DailyTraining(models.Model):
         :return: information about object
         :rtype: str
         """
-        t_info = f'{self.training_type} {self.training_distance}km'
-        t_info += f' {self.additional} {self.additional_quantity}' if self.additional else ''
+        t_info = f'{self.training_main} {self.distance_main}km {self.time_main}min'
+        t_info += f' {self.training_additional}' if self.training_additional else ''
         return t_info
 
     def __str__(self):

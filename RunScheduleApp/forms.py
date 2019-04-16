@@ -29,38 +29,15 @@ class WorkoutPlanEditForm(ModelForm):
         }
 
 
-class DailyTrainingForm(ModelForm):
+class TrainingForm(ModelForm):
     start_date = forms.DateField(widget=forms.HiddenInput)
     end_date = forms.DateField(widget=forms.HiddenInput)
 
     class Meta:
-        TRAINING_TYPES = (  # TODO dopisz rodzaje treningu
-            ('', '-----'),
-            ('TR', 'TR'),
-            ('OWB', 'OWB'),
-            ('WB', 'WB'),
-            ('WB2', 'WB2'),
-            ('WB3', 'WB3'),
-            ('KROS pas', 'KROS pas'),
-            ('KROS akt', 'KROS akt'),
-            ('BNP', 'BNP'),
-            ('WT', 'WT'),
-        )
-        ADDITIONAL_TRAINING = (  # TODO dopisz dodatkowe
-            ('', '-----'),
-            ('P', 'P'),
-            ('M3', 'M3'),
-            ('SB', 'SB'),
-            # ('GR', 'GR'),
-            # ('GS', 'GS'),
-        )
-        model = DailyTraining
+        model = Training
         exclude = ['accomplished', 'workout_plan']
         widgets = {
             'day': DatePicker(),
-            'training_type': forms.Select(choices=TRAINING_TYPES),
-            'additional': forms.Select(choices=ADDITIONAL_TRAINING),
-            'additional_quantity': forms.TextInput(attrs={'placeholder': 'Np. 6x100'})
         }
 
     def clean(self):
@@ -74,7 +51,7 @@ class DailyTrainingForm(ModelForm):
             self.add_error('day', 'Data treningu nie może być póżniejsza niż data zakończenia planu')
         distance = cleaned_date.get('training_distance')
         if int(distance) <= 0:
-            self.add_error('training_distance', 'Dystans musi być większy od 0')
+            self.add_error('distance_main', 'Dystans musi być większy od 0')
         return cleaned_date
 
 
