@@ -21,24 +21,28 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="/">Strona główna <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="/"><i class="fas fa-home"></i> Home page<span class="sr-only">
+                        (current)</span></a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="/workout/{{ get_month_counter }}">Mój aktualny plan <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="/workout/{{ get_month_counter }}"><i class="far fa-calendar-alt"></i>
+                        Current workout plan<span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="/workout_list">Moje plany <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="/workout_list"><i class="fas fa-running"></i>
+                        My plans<span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="/profile">Mój profil <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="/profile"><i class="fas fa-user"></i> Profile<span class="sr-only">
+                        (current)</span></a>
                 </li>
             </ul>
         </div>
         <div class="right">
             {% if request.user.is_authenticated %}
-                Witaj, {{ request.user.username }} <a href="/logout" class="btn btn-danger">Wyloguj</a>
+                Hello, {{ request.user.username }} <a href="/logout" class="btn btn-danger">Sign out</a>
             {% else %}
-                Nie jesteś zalogowany <a href="/login" class="btn btn-success">Zaloguj</a>
+                You're not sign in <a href="/login" class="btn btn-success">Sign in</a>
             {% endif %}
         </div>
     </nav>
@@ -59,7 +63,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
             integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
             crossorigin="anonymous"></script>
-    <h6 class="text_blue">Wersja 1.0</h6>
+    <h6 class="text_blue">Version 1.0</h6>
 {% endblock %}
 </body>
 </html>

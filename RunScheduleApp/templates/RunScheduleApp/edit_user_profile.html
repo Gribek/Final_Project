@@ -4,9 +4,9 @@
     <div class="form">
         <form class="text_blue" method="post">
             {{ form.as_p }}
-            <input class="btn btn-primary" type="submit" value="Zapisz zmiany">
+            <input class="btn btn-primary" type="submit" value="Save changes">
             <button class="btn btn-primary" type="reset">Reset</button>
-            <a href="/profile" class="btn btn-primary">Anuluj</a>
+            <a href="/profile" class="btn btn-primary">Cancel</a>
             {% csrf_token %}
         </form>
     </div>

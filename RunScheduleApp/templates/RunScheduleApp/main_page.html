@@ -5,12 +5,11 @@
     {% if not request.user.is_authenticated %}
         <div class="text_blue">
             <p>
-                <a href="/login" class="btn btn-primary btn-lg btn-block">Żeby w pełni korzystać ze strony należy się
-                    zalogować</a>
+                <a href="/login" class="btn btn-primary btn-lg btn-block">To fully use the site you must sign in</a>
             </p>
             <p>
-                <a href="/registration" class="btn btn-primary btn-lg btn-block">Jeśli nie masz jeszcze konta,
-                    zarejestruj się</a>
+                <a href="/registration" class="btn btn-primary btn-lg btn-block">
+                    If you do not have an account yet, sign up</a>
             </p>
         </div>
     {% endif %}

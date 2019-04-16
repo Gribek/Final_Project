@@ -5,10 +5,10 @@
         <form class="text_blue" method="post" {% if date %}
               action="/training_add/{{ plan_id }}" {% endif %}>
             {{ form.as_p }}
-            <input class="btn btn-primary" type="submit" value="Zapisz trening">
+            <input class="btn btn-primary" type="submit" value="Save training">
             {% csrf_token %}
             <button class="btn btn-primary" type="reset">Reset</button>
-            <a class="btn btn-primary" href="/plan_details/{{ plan_id }}">Anuluj</a>
+            <a class="btn btn-primary" href="/plan_details/{{ plan_id }}">Cancel</a>
         </form>
     </div>
 {% endblock %}

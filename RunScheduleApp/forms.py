@@ -49,7 +49,7 @@ class TrainingForm(ModelForm):
             self.add_error('day', 'The training date cannot be earlier than the workout plan start date')
         if day > end_date:
             self.add_error('day', 'The training date cannot be later than the workout plan end date')
-        distance = cleaned_data.get('training_distance')
+        distance = cleaned_data.get('distance_main')
         if int(distance) <= 0:
             self.add_error('distance_main', 'Distance must be greater than 0')
         return cleaned_data

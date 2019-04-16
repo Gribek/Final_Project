@@ -262,7 +262,7 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
         plan_name_array = []
         plan_id_array = []
         for plan in all_user_plans:
-            plan_id_array.append(plan.plan_name)
+            plan_id_array.append(plan.name)
             plan_name_array.append(plan.id)
         return tuple(zip(plan_name_array, plan_id_array))
 

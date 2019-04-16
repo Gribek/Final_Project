@@ -7,20 +7,20 @@
                 <a href="/plan_details/{{ plan.id }} " class="btn btn-primary">
                     <div class="list-group-item">{{ plan.name }} {{ plan.date_range.lower|date:"d.m.Y" }}
                         - {{ plan.date_range.upper|date:"d.m.Y" }}
-                        {% if plan.is_active %} <span class="active_plan">Twój aktualny plan</span> {% endif %}
+                        {% if plan.is_active %} <span class="active_plan">Your current workout plan</span> {% endif %}
                     </div>
                 </a>
             </div>
         {% empty %}
             <p class="form">
-                Brak dodanych planów <a href="/workout_plan_add" class="btn btn-primary">Dodaj plan</a>
+                <a href="/workout_plan_add" class="btn btn-primary">No workout plans added, create new one</a>
             </p>
         {% endfor %}
     </div>
     <div class="form">
         {% if workout_plans %}
-            <a href="/workout_plan_add" class="btn btn-primary">Dodaj plan</a>
-            <a href="/select_active_plan" class="btn btn-primary">Zmień aktualny plan</a>
+            <a href="/workout_plan_add" class="btn btn-primary">Create new plan</a>
+            <a href="/select_active_plan" class="btn btn-primary">Change current workout plan</a>
         {% endif %}
     </div>
 {% endblock %}

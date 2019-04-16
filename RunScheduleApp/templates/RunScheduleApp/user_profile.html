@@ -3,20 +3,20 @@
 {% block content %}
     <div class="profile">
         <p>
-            Nazwa użytkownika: {{ request.user.username }}
+           Username: {{ request.user.username }}
         </p>
         <p>
-            Imię: {{ request.user.first_name }}
+            First name: {{ request.user.first_name }}
         </p>
         <p>
-            Nazwisko: {{ request.user.last_name }}
+            Last name: {{ request.user.last_name }}
         </p>
         <p>
-            Adres e-mail: {{ request.user.email }}
+            E-mail address: {{ request.user.email }}
         </p>
         <p>
-            <a href="/edit_profile" class="btn btn-primary">Edytuj dane</a>
-            <a href="/password_change" class="btn btn-primary">Zmień hasło</a>
+            <a href="/edit_profile" class="btn btn-primary">Edit profile</a>
+            <a href="/password_change" class="btn btn-primary">Change your password</a>
         </p>
     </div>
 {% endblock %}

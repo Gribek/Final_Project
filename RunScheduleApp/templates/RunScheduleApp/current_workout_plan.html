@@ -4,18 +4,17 @@
     <div class="center">
         <div class="text_blue">
             {% if workout_plan %}
-                <h3>Twój bierzący plan: {{ workout_plan.name }}</h3>
+                <h3>Your current workout plan: {{ workout_plan.name }}</h3>
             {% else %}
                 <p class="form">
-                    Brak aktywnego planu <a href="/workout_list" class="btn btn-primary">
-                    Wybierz plan</a>
+                    <a href="/workout_list" class="btn btn-primary">No workout plan selected, choose one of yours</a>
                 </p>
             {% endif %}
         </div>
         <div>
             {% if workout_plan %}
-                <a href="/plan_details/{{ workout_plan.id }}" class="btn btn-primary">Szczegóły planu</a>
-                <a href="/select_active_plan" class="btn btn-primary">Zmień aktualny plan</a>
+                <a href="/plan_details/{{ workout_plan.id }}" class="btn btn-primary">Plan details</a>
+                <a href="/select_active_plan" class="btn btn-primary">Change plan</a>
                 </div>
                 <div>
                     {{ calendar }}
@@ -23,15 +22,15 @@
                 <div>
                 {% if month_number_requested != '1' %}
                     <a href="/workout/1" class="btn btn-primary">
-                        <i class="fas fa-angle-double-left"></i>Pierwszy miesiąc</a>
+                        <i class="fas fa-angle-double-left"></i> First month</a>
                     <a href="/workout/{{ month_number_requested|add:'-1' }}" class="btn btn-primary">
-                        <i class="fas fa-angle-left"></i> Poprzedni miesiąc</a>
+                        <i class="fas fa-angle-left"></i> Previous month</a>
                 {% endif %}
-                <a href="/workout/{{ present_month_number }}" class="btn btn-primary">Obecny miesiąc</a>
+                <a href="/workout/{{ present_month_number }}" class="btn btn-primary">Current month</a>
                 {% if month_number_requested != last_month_number %}
-                    <a href="/workout/{{ month_number_requested|add:1 }}" class="btn btn-primary">Następny miesiąc
+                    <a href="/workout/{{ month_number_requested|add:1 }}" class="btn btn-primary">Next month
                         <i class="fas fa-angle-right"></i></a>
-                    <a href="/workout/{{ last_month_number }}" class="btn btn-primary">Ostatni miesiąc
+                    <a href="/workout/{{ last_month_number }}" class="btn btn-primary">Last month
                         <i class="fas fa-angle-double-right"></i></a>
                 {% endif %}
             {% endif %}

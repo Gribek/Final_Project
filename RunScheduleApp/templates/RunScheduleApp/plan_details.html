@@ -2,27 +2,27 @@
 
 {% block content %}
     <div class="text_blue">
-        <h4>Nazwa planu: {{ workout_plan.name }}</h4>
+        <h4>Plan's name: {{ workout_plan.name }}</h4>
         {% if workout_plan.description %}
             <p>
-                Opis: {{ workout_plan.description }}
+                Description: {{ workout_plan.description }}
             </p>
         {% endif %}
         <p>
-            Data rozpoczęcia: {{ workout_plan.date_range.lower|date:"d.m.Y" }}
+            Plan start date: {{ workout_plan.date_range.lower|date:"d.m.Y" }}
         </p>
         <p>
-            Data zakończenia: {{ workout_plan.date_range.upper|date:"d.m.Y" }}
+            Plan end date: {{ workout_plan.date_range.upper|date:"d.m.Y" }}
         </p>
         <p>
-            <a class="btn btn-primary" href="/training_add/{{ workout_plan.id }}">Zaplanuj trening</a>
-            <a class="btn btn-primary" href="/workout_plan_edit/{{ workout_plan.id }}">Edytuj plan</a>
-            <a class="btn btn-primary" href="/workout/{{ get_month_counter }}">Powrót do aktualnego planu</a>
-            <a class="btn btn-primary" href="/workout_list">Powrót do listy planów</a>
+            <a class="btn btn-primary" href="/training_add/{{ workout_plan.id }}">Add new training</a>
+            <a class="btn btn-primary" href="/workout_plan_edit/{{ workout_plan.id }}">Edit plan</a>
+            <a class="btn btn-primary" href="/workout/{{ get_month_counter }}">Return to current workout</a>
+            <a class="btn btn-primary" href="/workout_list">Return to plan list</a>
         </p>
     </div>
     <div class="text_blue">
-        <h4>Zaplanowane treningi:</h4>
+        <h4>Scheduled trainings:</h4>
         <div class="text_blue list-group">
             {% for training in workout_plan.training_set.all|dictsort:"day" %}
                 <a class="btn btn-primary btn-sm"
@@ -31,13 +31,13 @@
                         {{ training.day|date:"d.m.Y" }}; {{ training }}
                         <form class="inline">
                             <button formmethod="get" formaction="/training_delete/{{ training.id }}"
-                                    class="btn btn-danger btn-sm">Usuń
+                                    class="btn btn-danger btn-sm">Delete
                             </button>
                         </form>
                     </div>
                 </a>
             {% empty %}
-                Brak dodanych treningów
+                No trainings added
             {% endfor %}
         </div>
     </div>
