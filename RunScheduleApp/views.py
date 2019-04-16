@@ -131,10 +131,10 @@ class WorkoutsList(LoginRequiredMixin, View):
         return render(request, 'RunScheduleApp/workoutplan_list.html', {'workout_plans': workout_plans})
 
 
-class DailyTrainingAdd(PermissionRequiredMixin, View):
+class TrainingAdd(PermissionRequiredMixin, View):
     """The class that creates a new training."""
 
-    permission_required = 'RunScheduleApp.add_dailytraining'
+    permission_required = 'RunScheduleApp.add_training'
 
     def get(self, request, plan_id, date=None):
         """Display the form for creating a new training.
@@ -152,8 +152,8 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
         check_workout_plan_owner(workout_plan, request.user)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = TrainingForm(initial={'day': date, 'start_date': start_date, 'end_date': end_date})
-        return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': workout_plan.id,
-                                                                          'date': date})
+        return render(request, 'RunScheduleApp/training_add.html', {'form': form, 'plan_id': workout_plan.id,
+                                                                    'date': date})
 
     def post(self, request, plan_id):
         """Create a new training.
@@ -174,13 +174,13 @@ class DailyTrainingAdd(PermissionRequiredMixin, View):
             form.instance.workout_plan = workout
             form.save()
             return redirect(f'/plan_details/{plan_id}')
-        return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': workout_plan.id})
+        return render(request, 'RunScheduleApp/training_add.html', {'form': form, 'plan_id': workout_plan.id})
 
 
-class DailyTrainingEdit(PermissionRequiredMixin, View):
+class TrainingEdit(PermissionRequiredMixin, View):
     """The class that edits an existing training."""
 
-    permission_required = 'RunScheduleApp.change_dailytraining'
+    permission_required = 'RunScheduleApp.change_training'
 
     def get(self, request, plan_id, training_id):
         """Display edit form for a selected training.
@@ -196,10 +196,10 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
         """
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
-        daily_training = Training.objects.get(pk=training_id)
+        training_to_edit = Training.objects.get(pk=training_id)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
-        form = TrainingForm(instance=daily_training, initial={'start_date': start_date, 'end_date': end_date})
-        return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': plan_id})
+        form = TrainingForm(instance=training_to_edit, initial={'start_date': start_date, 'end_date': end_date})
+        return render(request, 'RunScheduleApp/training_add.html', {'form': form, 'plan_id': plan_id})
 
     def post(self, request, plan_id, training_id):
         """Save changes to a selected training.
@@ -215,18 +215,18 @@ class DailyTrainingEdit(PermissionRequiredMixin, View):
             massages
         :rtype: HttpResponse
         """
-        daily_training = Training.objects.get(pk=training_id)
-        form = TrainingForm(request.POST, instance=daily_training)
+        training_to_edit = Training.objects.get(pk=training_id)
+        form = TrainingForm(request.POST, instance=training_to_edit)
         if form.is_valid():
             form.save()
             return redirect(f'/plan_details/{plan_id}')
-        return render(request, 'RunScheduleApp/daily_training_add.html', {'form': form, 'plan_id': plan_id})
+        return render(request, 'RunScheduleApp/training_add.html', {'form': form, 'plan_id': plan_id})
 
 
-class DailyTrainingDelete(PermissionRequiredMixin, View):
+class TrainingDelete(PermissionRequiredMixin, View):
     """The class that deletes an existing training."""
 
-    permission_required = 'RunScheduleApp.delete_dailytraining'
+    permission_required = 'RunScheduleApp.delete_training'
 
     def get(self, request, training_id):
         """Delete a selected training.
@@ -238,10 +238,10 @@ class DailyTrainingDelete(PermissionRequiredMixin, View):
             plan to which the deleted training belonged
         :rtype: HttpResponse
         """
-        daily_training = Training.objects.get(pk=training_id)
-        check_workout_plan_owner(daily_training.workout_plan, request.user)
-        daily_training.delete()
-        return redirect(f'/plan_details/{daily_training.workout_plan.id}')
+        training_to_delete = Training.objects.get(pk=training_id)
+        check_workout_plan_owner(training_to_delete.workout_plan, request.user)
+        training_to_delete.delete()
+        return redirect(f'/plan_details/{training_to_delete.workout_plan.id}')
 
 
 class SelectActivePlanView(PermissionRequiredMixin, View):
@@ -426,7 +426,7 @@ class WorkoutCalendar(HTMLCalendar):
 
         else:  # Non-training days.
             bg_color = self.set_bg_color(day, False)
-            edit_day_link = f"/daily_training_add/{self.workout_plan.id}/{self.create_date(day)}"
+            edit_day_link = f"/training_add/{self.workout_plan.id}/{self.create_date(day)}"
             return '<td bgcolor= "%s" class="%s"><a href="%s">%d</a></td>' % (
                 bg_color, self.cssclasses[weekday], edit_day_link, day)
 
@@ -469,9 +469,9 @@ class WorkoutCalendar(HTMLCalendar):
         :rtype: str
         """
         date = self.create_date(day)
-        daily_training_id = Training.objects.filter(workout_plan=self.workout_plan).get(
+        training_id = Training.objects.filter(workout_plan=self.workout_plan).get(
             day=date).id
-        edit_day_link = f'/daily_training_edit/{self.workout_plan.id}/{daily_training_id}'
+        edit_day_link = f'/training_edit/{self.workout_plan.id}/{training_id}'
         return edit_day_link
 
     def create_date(self, day):
@@ -606,10 +606,10 @@ class RegistrationView(View):
                                      last_name=surname)
             new_user = User.objects.get(username=username)
             permission_list = [
-                'add_dailytraining',
-                'change_dailytraining',
-                'delete_dailytraining',
-                'view_dailytraining',
+                'add_training',
+                'change_training',
+                'delete_training',
+                'view_training',
                 'add_workoutplan',
                 'change_workoutplan',
                 'delete_workoutplan',

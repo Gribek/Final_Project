@@ -3,7 +3,7 @@
 {% block content %}
     <div class="form">
         <form class="text_blue" method="post" {% if date %}
-              action="/daily_training_add/{{ plan_id }}" {% endif %}>
+              action="/training_add/{{ plan_id }}" {% endif %}>
             {{ form.as_p }}
             <input class="btn btn-primary" type="submit" value="Zapisz trening">
             {% csrf_token %}

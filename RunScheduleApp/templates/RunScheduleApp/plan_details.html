@@ -15,7 +15,7 @@
             Data zakończenia: {{ workout_plan.date_range.upper|date:"d.m.Y" }}
         </p>
         <p>
-            <a class="btn btn-primary" href="/daily_training_add/{{ workout_plan.id }}">Zaplanuj trening</a>
+            <a class="btn btn-primary" href="/training_add/{{ workout_plan.id }}">Zaplanuj trening</a>
             <a class="btn btn-primary" href="/workout_plan_edit/{{ workout_plan.id }}">Edytuj plan</a>
             <a class="btn btn-primary" href="/workout/{{ get_month_counter }}">Powrót do aktualnego planu</a>
             <a class="btn btn-primary" href="/workout_list">Powrót do listy planów</a>
@@ -24,13 +24,13 @@
     <div class="text_blue">
         <h4>Zaplanowane treningi:</h4>
         <div class="text_blue list-group">
-            {% for training in workout_plan.dailytraining_set.all|dictsort:"day" %}
+            {% for training in workout_plan.training_set.all|dictsort:"day" %}
                 <a class="btn btn-primary btn-sm"
-                   href="/daily_training_edit/{{ workout_plan.id }}/{{ training.id }}">
+                   href="/training_edit/{{ workout_plan.id }}/{{ training.id }}">
                     <div class="list-group-item list-group-item-primary">
                         {{ training.day|date:"d.m.Y" }}; {{ training }}
                         <form class="inline">
-                            <button formmethod="get" formaction="/daily_training_delete/{{ training.id }}"
+                            <button formmethod="get" formaction="/training_delete/{{ training.id }}"
                                     class="btn btn-danger btn-sm">Usuń
                             </button>
                         </form>
