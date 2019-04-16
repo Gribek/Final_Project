@@ -9,7 +9,7 @@ class WorkoutPlan(models.Model):
     name = models.CharField(max_length=64, verbose_name='Name of the plan')
     description = models.TextField(null=True, verbose_name='Description', blank=True)
     date_range = DateRangeField(verbose_name='Time range')
-    is_active = models.BooleanField(default=False, verbose_name='Set as active')
+    is_active = models.BooleanField(default=False, verbose_name='Set as current')
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
@@ -22,8 +22,9 @@ class Training(models.Model):
     time_main = models.SmallIntegerField(verbose_name='Time [min]')
     training_additional = models.CharField(null=True, max_length=32, blank=True,
                                            verbose_name='Additional training (optional)')
-    distance_additional = models.DecimalField(max_digits=3, decimal_places=1, verbose_name='Distance [km]')
-    time_additional = models.SmallIntegerField(verbose_name='Time [min]')
+    distance_additional = models.DecimalField(max_digits=3, decimal_places=1, verbose_name='Distance [km]', null=True,
+                                              blank=True)
+    time_additional = models.SmallIntegerField(verbose_name='Time [min]', null=True, blank=True)
     workout_plan = models.ForeignKey(WorkoutPlan, on_delete=models.CASCADE, unique_for_date=day,
                                      verbose_name='Add training to workout plan')
     accomplished = models.BooleanField(default=False)
