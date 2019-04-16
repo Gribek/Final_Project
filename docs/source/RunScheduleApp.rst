@@ -1,9 +1,6 @@
 Run Schedule App
 ================
 
-.. toctree::
-   :maxdepth: 2
-
 Models
 ^^^^^^
 
