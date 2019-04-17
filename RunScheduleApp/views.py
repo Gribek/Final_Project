@@ -486,10 +486,13 @@ class WorkoutCalendar(HTMLCalendar):
         return date_format_datetime
 
     def set_css_class(self, day, weekday, is_training_day):
-        """Choose background color for table cell.
+        """Set css classes for table cell.
 
         :param day: day number
         :type day: int
+        :param weekday: weekday: day of the week (numbers from 0 to 6, 0 means
+            monday, 6 means sunday)
+        :type weekday: int
         :param is_training_day: indicates if there is a training in
             that day
         :type is_training_day: bool
