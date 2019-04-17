@@ -4,7 +4,30 @@
     <div class="form">
         <form class="text_blue" method="post" {% if date %}
               action="/training_add/{{ plan_id }}" {% endif %}>
-            {{ form.as_p }}
+            <p>
+                {{ form.day.errors }}
+                {{ form.day.label_tag }} {{ form.day }}
+            </p>
+            <p>
+                {{ form.training_main.errors }}
+                {{ form.training_main.label_tag }}{{ form.training_main }}
+            </p>
+            <p>
+                {{ form.distance_main.errors }} {{ form.time_main.errors }}
+                {{ form.distance_main.label_tag }}{{ form.distance_main }} and/or
+                {{ form.time_main.label_tag }}{{ form.time_main }}
+            </p>
+            <p>
+                {{ form.training_additional.errors }}
+                {{ form.training_additional.label_tag }}{{ form.training_additional }}
+            </p>
+            <p>
+                {{ form.distance_additional.errors }} {{ form.time_additional.errors }}
+                {{ form.distance_additional.label_tag }}{{ form.distance_additional }} and/or
+                {{ form.time_additional.label_tag }}{{ form.time_additional }}
+            </p>
+            {{ form.start_date }}{{ form.end_date }}
+
             <input class="btn btn-primary" type="submit" value="Save training">
             {% csrf_token %}
             <button class="btn btn-primary" type="reset">Reset</button>

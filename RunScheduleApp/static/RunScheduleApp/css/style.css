@@ -73,7 +73,7 @@ nav a:hover {
 }
 
 #fixedheight td a {
-    height: 42px;
+    height: 60px;
     overflow: hidden;
 }
 
@@ -123,4 +123,8 @@ nav a:hover {
 
 .today {
     background-color: #d24dff;
+}
+
+.training_info {
+    font-size: 13px;
 }
