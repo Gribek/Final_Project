@@ -40,7 +40,7 @@ class TrainingForm(ModelForm):
             'day': DatePicker(),
         }
 
-    def clean(self):  # TODO: correct the clean method, expand accordingly to new model
+    def clean(self):
         cleaned_data = super().clean()
         start_date = cleaned_data.get('start_date')
         end_date = cleaned_data.get('end_date')
@@ -49,9 +49,15 @@ class TrainingForm(ModelForm):
             self.add_error('day', 'The training date cannot be earlier than the workout plan start date')
         if day > end_date:
             self.add_error('day', 'The training date cannot be later than the workout plan end date')
-        distance = cleaned_data.get('distance_main')
-        if int(distance) <= 0:
+        distance_main = cleaned_data.get('distance_main')
+        if distance_main is not None and distance_main <= 0:
             self.add_error('distance_main', 'Distance must be greater than 0')
+        distance_additional = cleaned_data.get('distance_additional')
+        if distance_additional is not None and distance_additional <= 0:
+            self.add_error('distance_additional', 'Distance must be greater than 0')
+        time_additional = cleaned_data.get('time_additional')
+        if time_additional is not None and time_additional <= 0:
+            self.add_error('time_additional', 'Time must be greater than 0')
         return cleaned_data
 
 

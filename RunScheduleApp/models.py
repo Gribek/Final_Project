@@ -18,8 +18,9 @@ class Training(models.Model):
 
     day = models.DateField(verbose_name='Date of training')
     training_main = models.CharField(max_length=32, verbose_name='Main training')
-    distance_main = models.DecimalField(max_digits=3, decimal_places=1, verbose_name='Distance [km]')
-    time_main = models.SmallIntegerField(verbose_name='Time [min]')
+    distance_main = models.DecimalField(max_digits=3, decimal_places=1, verbose_name='Distance [km]',null=True,
+                                        blank=True)
+    time_main = models.SmallIntegerField(verbose_name='Time [min]', null=True, blank=True)
     training_additional = models.CharField(null=True, max_length=32, blank=True,
                                            verbose_name='Additional training (optional)')
     distance_additional = models.DecimalField(max_digits=3, decimal_places=1, verbose_name='Distance [km]', null=True,
