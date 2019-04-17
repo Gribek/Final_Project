@@ -419,16 +419,16 @@ class WorkoutCalendar(HTMLCalendar):
             return '<td class="noday">&nbsp;</td>'
 
         if str(day) in self.training_dict:  # Training days.
-            bg_color = self.set_bg_color(day, True)
-            edit_day_link = self.create_training_day_edit_link(day)
-            return '<td bgcolor= "%s" class="%s"><a href="%s">%d<br>%s</a></td>' % (
-                bg_color, self.cssclasses[weekday], edit_day_link, day, self.training_dict[str(day)])
+            css_class = self.set_css_class(day, weekday, is_training_day=True)
+            edit_training_link = self.create_training_edit_link(day)
+            return '<td class="%s"><a href="%s">%d<br>%s</a></td>' % (
+                css_class, edit_training_link, day, self.training_dict[str(day)])
 
         else:  # Non-training days.
-            bg_color = self.set_bg_color(day, False)
-            edit_day_link = f"/training_add/{self.workout_plan.id}/{self.create_date(day)}"
-            return '<td bgcolor= "%s" class="%s"><a href="%s">%d</a></td>' % (
-                bg_color, self.cssclasses[weekday], edit_day_link, day)
+            css_class = self.set_css_class(day, weekday, is_training_day=False)
+            add_training_link = f"/training_add/{self.workout_plan.id}/{self.create_date(day)}"
+            return '<td class="%s"><a href="%s">%d</a></td>' % (
+                css_class, add_training_link, day)
 
     def formatmonth(self, theyear, themonth, withyear=True):
         """Return a formatted month as a table.
@@ -460,7 +460,7 @@ class WorkoutCalendar(HTMLCalendar):
         a('\n')
         return ''.join(v)
 
-    def create_training_day_edit_link(self, day):
+    def create_training_edit_link(self, day):
         """Create a link to edit a training.
 
         :param day: day number
@@ -485,7 +485,7 @@ class WorkoutCalendar(HTMLCalendar):
         date_format_datetime = datetime.strptime(date, "%Y-%m-%d").date()
         return date_format_datetime
 
-    def set_bg_color(self, day, is_training_day):
+    def set_css_class(self, day, weekday, is_training_day):
         """Choose background color for table cell.
 
         :param day: day number
@@ -497,14 +497,17 @@ class WorkoutCalendar(HTMLCalendar):
         :rtype: str
         """
         date = self.create_date(day)
+        css_class = self.cssclasses[weekday]
+        if date == datetime.today().date():
+            return css_class + ' today'
         if date == self.workout_plan_start_date:
-            return 'greenyellow'
+            return css_class + ' plan_start_day'
         elif date == self.workout_plan_end_date:
-            return '#ff6666'
+            return css_class + ' plan_end_day'
         if is_training_day:
-            return '#798EF6'
+            return css_class + ' training_day'
         else:
-            return ''
+            return css_class
 
     def get_trainings_dict(self):
         """Create dictionary with trainings.

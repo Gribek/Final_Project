@@ -108,3 +108,19 @@ nav a:hover {
     color: #0A2299;
     margin-top: 2em;
 }
+
+.training_day {
+    background-color: #798EF6;
+}
+
+.plan_start_day {
+    background-color: greenyellow;
+}
+
+.plan_end_day {
+    background-color: #ff6666;
+}
+
+.today {
+    background-color: #d24dff;
+}
