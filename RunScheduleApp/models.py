@@ -18,7 +18,7 @@ class Training(models.Model):
 
     day = models.DateField(verbose_name='Date of training')
     training_main = models.CharField(max_length=32, verbose_name='Main training')
-    distance_main = models.DecimalField(max_digits=3, decimal_places=1, verbose_name='Distance [km]',null=True,
+    distance_main = models.DecimalField(max_digits=3, decimal_places=1, verbose_name='Distance [km]', null=True,
                                         blank=True)
     time_main = models.SmallIntegerField(verbose_name='Time [min]', null=True, blank=True)
     training_additional = models.CharField(null=True, max_length=32, blank=True,
@@ -36,8 +36,12 @@ class Training(models.Model):
         :return: information about object
         :rtype: str
         """
-        t_info = f'{self.training_main} {self.distance_main}km {self.time_main}min'
+        t_info = f'{self.training_main}'
+        t_info += f' {self.distance_main}km' if self.distance_main else ''
+        t_info += f' {self.time_main}min' if self.time_main else ''
         t_info += f' {self.training_additional}' if self.training_additional else ''
+        t_info += f' {self.distance_additional}km' if self.distance_additional else ''
+        t_info += f' {self.time_additional}min' if self.time_additional else ''
         return t_info
 
     def __str__(self):
