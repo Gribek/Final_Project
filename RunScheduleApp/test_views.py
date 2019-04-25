@@ -58,12 +58,12 @@ class WorkoutsListTest(PermissionRequiredViewTest):
     def test_view_returns_correct_workout_plans_list_in_context(self):
         self.log_user_with_permission()
         response = self.client.get('/workout_list')
-        self.assertTrue('workout_plans' in response.context, 'Key not found in context dictionary')
+        self.assertIn('workout_plans', response.context, 'Key not found in context dictionary')
         number_of_user_plans = len(WorkoutPlan.objects.filter(owner__username='user_with_permission'))
         self.assertEqual(len(response.context['workout_plans']), number_of_user_plans,
                          'Context does not contain all user plans')
         other_user_workout_plan = WorkoutPlan.objects.get(name='setUp plan 2')
-        self.assertFalse(other_user_workout_plan in response.context['workout_plans'],
+        self.assertNotIn(other_user_workout_plan, response.context['workout_plans'],
                          'Context contain workout plan belonging to another user')
 
 
@@ -138,7 +138,7 @@ class WorkoutPlanAddTest(PermissionRequiredViewTest):
     def test_view_returns_form_in_context(self):
         self.log_user_with_permission()
         response = self.client.get(reverse('workout_plan_add'))
-        self.assertTrue('form' in response.context, 'Key not found in context dictionary')
+        self.assertIn('form', response.context, 'Key not found in context dictionary')
 
     def test_view_checks_if_workout_plan_is_created_in_post(self):
         self.log_user_with_permission()
@@ -200,9 +200,9 @@ class WorkoutPlanEditTest(PermissionRequiredViewTest):
     def test_view_returns_form_with_data_and_plan_id_in_context(self):
         self.log_user_with_permission()
         response = self.client.get(reverse('workout_plan_edit', kwargs={'plan_id': self.workout_plan.id}))
-        self.assertTrue('form' in response.context, 'Key "form" not found in context dictionary')
+        self.assertIn('form', response.context, 'Key "form" not found in context dictionary')
         self.assertEqual(response.context['form'].initial['name'], self.workout_plan.name, 'No initial data')
-        self.assertTrue('plan_id' in response.context, 'Key "plan_id" not found in context dictionary')
+        self.assertIn('plan_id', response.context, 'Key "plan_id" not found in context dictionary')
         self.assertEqual(response.context['plan_id'], str(self.workout_plan.id), 'Wrong plan id value')
 
     def test_view_checks_if_user_is_owner_of_the_workout_plan(self):
