@@ -59,12 +59,12 @@ class WorkoutsListTest(PermissionRequiredViewTest):
         self.log_user_with_permission()
         response = self.client.get('/workout_list')
         self.assertIn('workout_plans', response.context, 'Key not found in context dictionary')
-        number_of_user_plans = len(WorkoutPlan.objects.filter(owner__username='user_with_permission'))
+        number_of_user_plans = WorkoutPlan.objects.filter(owner__username='user_with_permission').count()
         self.assertEqual(len(response.context['workout_plans']), number_of_user_plans,
                          'Context does not contain all user plans')
-        other_user_workout_plan = WorkoutPlan.objects.get(name='setUp plan 2')
-        self.assertNotIn(other_user_workout_plan, response.context['workout_plans'],
-                         'Context contain workout plan belonging to another user')
+        other_users_workout_plans = WorkoutPlan.objects.exclude(owner__username='user_with_permission')
+        self.assertTrue(all([plan not in response.context['workout_plans'] for plan in other_users_workout_plans]),
+                        'Context contain workout plan belonging to another user')
 
 
 class PlanDetailsViewTest(PermissionRequiredViewTest):
@@ -156,13 +156,13 @@ class WorkoutPlanAddTest(PermissionRequiredViewTest):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'RunScheduleApp/workout_plan_add.html')
 
-    def test_view_checks_if_workout_plan_is_set_as_active(self):
+    def test_view_checks_if_workout_plan_is_correctly_set_as_active(self):
         self.log_user_with_permission()
         data = {'name': 'new plan', 'date_range_0': '2011-01-01',
                 'date_range_1': '2018-01-01', 'is_active': True}
         self.client.post(reverse('workout_plan_add'), data)
-        self.assertTrue(WorkoutPlan.objects.get(name='new plan').is_active)
-        self.assertFalse(WorkoutPlan.objects.get(name='setUp plan 1').is_active)
+        self.assertTrue(WorkoutPlan.objects.get(name='new plan').is_active, 'Workout plan not set as active')
+        self.assertEqual(WorkoutPlan.objects.filter(is_active=True).count(), 1, 'More than one active workout plan')
 
 
 class WorkoutPlanEditTest(PermissionRequiredViewTest):
@@ -180,7 +180,7 @@ class WorkoutPlanEditTest(PermissionRequiredViewTest):
 
     def test_view_url_exist_at_desired_location(self):
         self.log_user_with_permission()
-        response = self.client.get(reverse('workout_plan_edit', kwargs={'plan_id': self.workout_plan.id}))
+        response = self.client.get(f'/workout_plan_edit/{self.workout_plan.id}')
         self.assertEqual(response.status_code, 200)
 
     def test_view_redirects_if_user_not_logged_in(self):
