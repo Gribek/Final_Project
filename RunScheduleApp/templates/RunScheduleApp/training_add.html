@@ -31,7 +31,11 @@
             <input class="btn btn-primary" type="submit" value="Save training">
             {% csrf_token %}
             <button class="btn btn-primary" type="reset">Reset</button>
-            <a class="btn btn-primary" href="/workout/{{ month_number }}">Cancel</a>
+            {% if month_number %}
+                <a class="btn btn-primary" href="/workout/{{ month_number }}">Cancel</a>
+            {% else %}
+                <a class="btn btn-primary" href="/plan_details/{{ plan_id }}">Cancel</a>
+            {% endif %}
         </form>
     </div>
 {% endblock %}

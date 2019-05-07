@@ -136,7 +136,7 @@ class TrainingAdd(PermissionRequiredMixin, View):
 
     permission_required = 'RunScheduleApp.add_training'
 
-    def get(self, request, plan_id, month_number, date=None):
+    def get(self, request, plan_id, month_number=None, date=None):
         """Display the form for creating a new training.
 
         :param request: request object
@@ -158,7 +158,7 @@ class TrainingAdd(PermissionRequiredMixin, View):
         return render(request, 'RunScheduleApp/training_add.html', {'form': form, 'plan_id': workout_plan.id,
                                                                     'date': date, 'month_number': month_number})
 
-    def post(self, request, month_number, plan_id):
+    def post(self, request, plan_id, month_number=None):
         """Create a new training.
 
         :param request: request object
@@ -179,6 +179,8 @@ class TrainingAdd(PermissionRequiredMixin, View):
             workout = WorkoutPlan.objects.get(pk=plan_id)
             form.instance.workout_plan = workout
             form.save()
+            if month_number is None:
+                return redirect(f'/plan_details/{plan_id}')
             return redirect(f'/workout/{month_number}')
         return render(request, 'RunScheduleApp/training_add.html', {'form': form, 'plan_id': workout_plan.id,
                                                                     'month_number': month_number})
@@ -189,18 +191,18 @@ class TrainingEdit(PermissionRequiredMixin, View):
 
     permission_required = 'RunScheduleApp.change_training'
 
-    def get(self, request, plan_id, month_number, training_id):
+    def get(self, request, plan_id, training_id, month_number=None):
         """Display edit form for a selected training.
 
         :param request: request object
         :param plan_id: id of a workout plan to which a training
             belongs
         :type plan_id: str
+        :param training_id: id of a training to edit
+        :type training_id: str
         :param month_number: month number according to workout plan
             numbering
         :type month_number: str
-        :param training_id: id of a training to edit
-        :type training_id: str
         :return: view of the edit form
         :rtype: HttpResponse
         """
@@ -212,18 +214,18 @@ class TrainingEdit(PermissionRequiredMixin, View):
         return render(request, 'RunScheduleApp/training_add.html', {'form': form, 'plan_id': plan_id,
                                                                     'month_number': month_number})
 
-    def post(self, request, plan_id, month_number, training_id):
+    def post(self, request, plan_id, training_id, month_number=None):
         """Save changes to a selected training.
 
         :param request: request object
         :param plan_id: id of a workout plan to which a training
             belongs
         :type plan_id: str
+        :param training_id: id of a training to edit
+        :type training_id: str
         :param month_number: month number according to workout plan
             numbering
         :type month_number: str
-        :param training_id: id of a training to edit
-        :type training_id: str
         :return: list view of all trainings in a given training plan
             (if form filled out correctly) or form view with error
             massages
@@ -233,6 +235,8 @@ class TrainingEdit(PermissionRequiredMixin, View):
         form = TrainingForm(request.POST, instance=training_to_edit)
         if form.is_valid():
             form.save()
+            if month_number is None:
+                return redirect(f'/plan_details/{plan_id}')
             return redirect(f'/workout/{month_number}')
         return render(request, 'RunScheduleApp/training_add.html', {'form': form, 'plan_id': plan_id,
                                                                     'month_number': month_number})
@@ -490,7 +494,7 @@ class WorkoutCalendar(HTMLCalendar):
         date = self.create_date(day)
         training_id = Training.objects.filter(workout_plan=self.workout_plan).get(
             day=date).id
-        edit_day_link = f'/training_edit/{self.workout_plan.id}/{self.month_number_requested}/{training_id}'
+        edit_day_link = f'/training_edit/{self.workout_plan.id}/{training_id}/{self.month_number_requested}'
         return edit_day_link
 
     def create_date(self, day):
