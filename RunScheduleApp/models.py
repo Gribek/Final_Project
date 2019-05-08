@@ -48,4 +48,13 @@ class Training(models.Model):
         """Return training information"""
         return self.training_info()
 
-# class TrainingDiary(models.Model): TODO
+
+class TrainingDiary(models.Model):
+    """Stores a single entry in a training diary."""
+
+    training_info = models.CharField(max_length=128, verbose_name='Training')
+    training_distance = models.DecimalField(max_digits=3, decimal_places=1,
+                                            verbose_name='Total distance')
+    training_time = models.SmallIntegerField(verbose_name='Total time')
+    comments = models.CharField(max_length=256, verbose_name='Comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
