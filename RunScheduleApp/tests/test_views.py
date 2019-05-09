@@ -233,10 +233,10 @@ class WorkoutPlanEditTest(PermissionRequiredViewTest):
         self.assertTemplateUsed(response, 'RunScheduleApp/workout_plan_edit.html')
 
 
-class TrainingDiaryEntryAddView(PermissionRequiredViewTest):
+class TrainingDiaryEntryAddTest(PermissionRequiredViewTest):
     @classmethod
     def setUpTestData(cls):
-        super(TrainingDiaryEntryAddView, cls).setUpTestData()
+        super(TrainingDiaryEntryAddTest, cls).setUpTestData()
         user = User.objects.get(username='user_with_permission')
         user.user_permissions.add(Permission.objects.get(codename='add_trainingdiary'))
         workout_plan = WorkoutPlan.objects.get(name='setUp plan 1')

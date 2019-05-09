@@ -130,5 +130,13 @@ class SelectActivePlanFrom(forms.Form):
     active_plan = forms.ChoiceField(choices=[], label='Select active workout plan')
 
 
-class DiaryEntryForm(forms.Form):
-   pass
+class DiaryEntryForm(ModelForm):
+    class Meta:
+        model = TrainingDiary
+        exclude = ['user']
+        labels = {
+            'date': 'Date of training',
+        }
+        widgets = {
+            'date': RangeWidget(DatePicker())
+        }
