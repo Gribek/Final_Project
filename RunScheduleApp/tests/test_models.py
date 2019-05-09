@@ -31,11 +31,17 @@ class TrainingDiaryModelTest(TestCase):
         user = User.objects.create_user(username='test user', password='test')
         TrainingDiary.objects.create(
             training_info='Test diary training entry', training_distance=10.5,
-            training_time=80, user=user, comments='comment test')
+            training_time=80, user=user, comments='comment test',
+            date='2018-01-01')
 
     def test_creating_new_training_diary_object(self):
         test_diary = TrainingDiary.objects.get(id=1)
         self.assertTrue(isinstance(test_diary, TrainingDiary))
+
+    def test_date_field(self):
+        diary_entry = TrainingDiary.objects.get(id=1)
+        field_label = diary_entry._meta.get_field('date').verbose_name
+        self.assertEqual(field_label, 'Date')
 
     def test_training_info_field(self):
         diary_entry = TrainingDiary.objects.get(id=1)

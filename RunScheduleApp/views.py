@@ -449,7 +449,8 @@ class WorkoutCalendar(HTMLCalendar):
 
         else:  # Non-training days.
             css_class = self.set_css_class(day, weekday, is_training_day=False)
-            add_training_link = f"/training_add/{self.workout_plan.id}/{self.month_number_requested}/{self.create_date(day)}"
+            date = self.create_date(day)
+            add_training_link = f"/training_add/{self.workout_plan.id}/{self.month_number_requested}/{date}"
             return '<td class="%s"><a href="%s">%d</a></td>' % (
                 css_class, add_training_link, day)
 
@@ -766,3 +767,12 @@ def set_active_workout_plan(new_active_plan_id, user):
     new_active_plan.is_active = True
     new_active_plan.save()
     return None
+
+
+class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
+
+    permission_required = 'RunScheduleApp.add_trainingdiary'
+
+    def get(self, request, training_id):
+        form = DiaryEntryForm()
+        return render(request, 'RunScheduleApp/diary_entry_add.html', {'form': form})

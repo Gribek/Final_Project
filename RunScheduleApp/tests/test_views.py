@@ -4,7 +4,8 @@ from django.contrib.auth.models import User, Permission
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from RunScheduleApp.models import WorkoutPlan
+from RunScheduleApp.models import WorkoutPlan, Training
+from RunScheduleApp.forms import DiaryEntryForm
 
 
 class MainPageViewTest(TestCase):
@@ -230,3 +231,46 @@ class WorkoutPlanEditTest(PermissionRequiredViewTest):
         response = self.client.post(reverse('workout_plan_edit', kwargs={'plan_id': self.workout_plan.id}), data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'RunScheduleApp/workout_plan_edit.html')
+
+
+class TrainingDiaryEntryAddView(PermissionRequiredViewTest):
+    @classmethod
+    def setUpTestData(cls):
+        super(TrainingDiaryEntryAddView, cls).setUpTestData()
+        user = User.objects.get(username='user_with_permission')
+        user.user_permissions.add(Permission.objects.get(codename='add_trainingdiary'))
+        workout_plan = WorkoutPlan.objects.get(name='setUp plan 1')
+        Training.objects.create(
+            day='2018-01-01', training_main='test training 1', distance_main=10,
+            time_main=60, training_additional='8x100m', workout_plan=workout_plan)
+
+    def setUp(self):
+        self.training = Training.objects.get(training_main='test training 1')
+
+    def test_view_url_exist_at_desired_location(self):
+        response = self.client.get(f'/training_diary_entry_add/{self.training.id}')
+        self.assertNotEqual(response.status_code, 404)
+
+    def test_view_redirects_if_user_not_logged_in(self):
+        response = self.client.get(f'/training_diary_entry_add/{self.training.id}')
+        self.assertTrue(response.url.startswith('/login'))
+
+    def test_view_url_has_name_attribute(self):
+        response = self.client.get(reverse('diary_entry_add', kwargs={'training_id': self.training.id}))
+        self.assertTrue(response.status_code)
+
+    def test_view_checks_if_user_has_proper_permission(self):
+        self.log_non_permission_user()
+        response = self.client.get(reverse('diary_entry_add', kwargs={'training_id': self.training.id}))
+        self.assertEqual(response.status_code, 403)
+
+    def test_view_uses_correct_template(self):
+        self.log_user_with_permission()
+        response = self.client.get(reverse('diary_entry_add', kwargs={'training_id': self.training.id}))
+        self.assertTemplateUsed(response, 'RunScheduleApp/diary_entry_add.html')
+
+    def test_view_returns_correct_form_in_context(self):
+        self.log_user_with_permission()
+        response = self.client.get(reverse('diary_entry_add', kwargs={'training_id': self.training.id}))
+        self.assertIn('form', response.context, 'Form not found in context dictionary')
+        self.assertTrue(isinstance(response.context['form'], DiaryEntryForm), 'Wrong form returned in context')

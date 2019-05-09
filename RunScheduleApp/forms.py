@@ -128,3 +128,7 @@ class SelectActivePlanFrom(forms.Form):
         self.fields['active_plan'].choices = self.choices
 
     active_plan = forms.ChoiceField(choices=[], label='Select active workout plan')
+
+
+class DiaryEntryForm(forms.Form):
+   pass

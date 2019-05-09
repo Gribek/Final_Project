@@ -52,6 +52,7 @@ class Training(models.Model):
 class TrainingDiary(models.Model):
     """Stores a single entry in a training diary."""
 
+    date = models.DateField(verbose_name="Date")
     training_info = models.CharField(max_length=128, verbose_name='Training')
     training_distance = models.DecimalField(max_digits=3, decimal_places=1,
                                             verbose_name='Total distance')
