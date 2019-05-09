@@ -34,26 +34,26 @@ class TrainingDiaryModelTest(TestCase):
             training_time=80, user=user, comments='comment test',
             date='2018-01-01')
 
+    def setUp(self):
+        self.diary_entry = TrainingDiary.objects.get(
+            training_info='Test diary training entry')
+
     def test_creating_new_training_diary_object(self):
-        test_diary = TrainingDiary.objects.get(id=1)
-        self.assertTrue(isinstance(test_diary, TrainingDiary))
+        self.assertTrue(isinstance(self.diary_entry, TrainingDiary))
 
     def test_date_field(self):
-        diary_entry = TrainingDiary.objects.get(id=1)
-        field_label = diary_entry._meta.get_field('date').verbose_name
+        field_label = self.diary_entry._meta.get_field('date').verbose_name
         self.assertEqual(field_label, 'Date')
 
     def test_training_info_field(self):
-        diary_entry = TrainingDiary.objects.get(id=1)
-        model_field = diary_entry._meta.get_field('training_info')
+        model_field = self.diary_entry._meta.get_field('training_info')
         field_label = model_field.verbose_name
         max_length = model_field.max_length
         self.assertEqual(field_label, 'Training')
         self.assertEqual(max_length, 128)
 
     def test_training_distance_field(self):
-        diary_entry = TrainingDiary.objects.get(id=1)
-        model_field = diary_entry._meta.get_field('training_distance')
+        model_field = self.diary_entry._meta.get_field('training_distance')
         field_label = model_field.verbose_name
         max_digits = model_field.max_digits
         decimal_places = model_field.decimal_places
@@ -62,13 +62,11 @@ class TrainingDiaryModelTest(TestCase):
         self.assertEqual(decimal_places, 1)
 
     def test_training_time_field(self):
-        diary_entry = TrainingDiary.objects.get(id=1)
-        label = diary_entry._meta.get_field('training_time').verbose_name
+        label = self.diary_entry._meta.get_field('training_time').verbose_name
         self.assertEqual(label, 'Total time')
 
     def test_comments_field(self):
-        diary_entry = TrainingDiary.objects.get(id=1)
-        model_field = diary_entry._meta.get_field('comments')
+        model_field = self.diary_entry._meta.get_field('comments')
         field_label = model_field.verbose_name
         max_length = model_field.max_length
         self.assertEqual(field_label, 'Comments')
