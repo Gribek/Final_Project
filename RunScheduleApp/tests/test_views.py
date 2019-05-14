@@ -274,3 +274,13 @@ class TrainingDiaryEntryAddTest(PermissionRequiredViewTest):
         response = self.client.get(reverse('diary_entry_add', kwargs={'training_id': self.training.id}))
         self.assertIn('form', response.context, 'Form not found in context dictionary')
         self.assertTrue(isinstance(response.context['form'], DiaryEntryForm), 'Wrong form returned in context')
+
+    def test_view_form_filed_with_initial_data(self):
+        self.log_user_with_permission()
+        response = self.client.get(reverse('diary_entry_add', kwargs={'training_id': self.training.id}))
+        form = response.context['form']
+        self.assertEqual(form.initial['date'], self.training.day)
+        self.assertEqual(form.initial['training_info'], self.training.training_info())
+        # distance = self.training.distance_main + self.training.distance_additional
+        # distance += self.training.distance_additional if self.training.distance_additional else 0
+        # self.assertEqual(form.initial['training_distance'], distance)

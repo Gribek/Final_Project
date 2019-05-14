@@ -71,3 +71,5 @@ class TrainingDiaryModelTest(TestCase):
         max_length = model_field.max_length
         self.assertEqual(field_label, 'Comments')
         self.assertEqual(max_length, 256)
+        self.assertTrue(model_field.null)
+        self.assertTrue(model_field.blank)

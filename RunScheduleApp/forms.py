@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib.auth import authenticate
 from django.contrib.postgres.forms import RangeWidget
 from django import forms
@@ -138,5 +140,13 @@ class DiaryEntryForm(ModelForm):
             'date': 'Date of training',
         }
         widgets = {
-            'date': RangeWidget(DatePicker())
+            'date': DatePicker()
         }
+
+    def clean_date(self):
+        training_date = self.cleaned_data['date']
+        date_today = date.today()
+        if training_date > date_today:
+            self.add_error('date', 'You can not add an entry for training'
+                                   ' that has not yet taken place')
+        return training_date

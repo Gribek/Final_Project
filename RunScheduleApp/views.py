@@ -774,5 +774,7 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
     permission_required = 'RunScheduleApp.add_trainingdiary'
 
     def get(self, request, training_id):
-        form = DiaryEntryForm()
+        training = Training.objects.get(id=training_id)
+        form = DiaryEntryForm(initial={'date': training.day, 'training_info': training.training_info()})
+        print(training)
         return render(request, 'RunScheduleApp/diary_entry_add.html', {'form': form})

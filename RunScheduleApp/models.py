@@ -57,5 +57,6 @@ class TrainingDiary(models.Model):
     training_distance = models.DecimalField(max_digits=3, decimal_places=1,
                                             verbose_name='Total distance')
     training_time = models.SmallIntegerField(verbose_name='Total time')
-    comments = models.CharField(max_length=256, verbose_name='Comments')
+    comments = models.CharField(max_length=256, verbose_name='Comments',
+                                null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

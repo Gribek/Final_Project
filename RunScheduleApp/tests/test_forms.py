@@ -1,7 +1,8 @@
-from django.test import TestCase
-from django.contrib.postgres.forms import RangeWidget
+from datetime import timedelta, date
 
-from RunScheduleApp.forms import DiaryEntryForm
+from django.test import TestCase
+
+from RunScheduleApp.forms import DiaryEntryForm, DatePicker
 from RunScheduleApp.models import TrainingDiary
 
 
@@ -18,7 +19,7 @@ class DiaryEntryFormTest(TestCase):
         self.assertEqual('Date of training', self.form.fields['date'].label,
                          'Wrong field label')
         self.assertTrue(isinstance(self.form.fields['date'].widget,
-                                   RangeWidget))
+                                   DatePicker))
 
     def test_form_training_info_field(self):
         self.assertIn('training_info', self.form.fields,
@@ -48,3 +49,20 @@ class DiaryEntryFormTest(TestCase):
     def test_form_user_field(self):
         self.assertNotIn('user', self.form.fields,
                          'Unnecessary field in the form')
+
+    def test_form_validation_date_incorrect(self):
+        date_in_future = date.today() + timedelta(days=1)
+        form = DiaryEntryForm(data={
+            'date': date_in_future, 'training_info': 'test',
+            'training_distance': 10, 'training_time': 60, 'comments': 'test'})
+        self.assertFalse(form.is_valid())
+
+    def test_form_validation_date_correct(self):
+        date_today = date.today()
+        date_in_past = date.today() - timedelta(days=1)
+        form = DiaryEntryForm(data={
+            'date': date_today, 'training_info': 'test',
+            'training_distance': 10, 'training_time': 60, 'comments': 'test'})
+        self.assertTrue(form.is_valid())
+        form.data['date'] = date_in_past
+        self.assertTrue(form.is_valid())
