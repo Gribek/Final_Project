@@ -6,6 +6,7 @@ from django.urls import reverse
 
 from RunScheduleApp.models import WorkoutPlan, Training
 from RunScheduleApp.forms import DiaryEntryForm
+from RunScheduleApp.views import TrainingDiaryEntryAdd
 
 
 class MainPageViewTest(TestCase):
@@ -243,6 +244,16 @@ class TrainingDiaryEntryAddTest(PermissionRequiredViewTest):
         Training.objects.create(
             day='2018-01-01', training_main='test training 1', distance_main=10,
             time_main=60, training_additional='8x100m', workout_plan=workout_plan)
+        Training.objects.create(
+            day='2018-01-01', training_main='test training 2', distance_additional=20,
+            time_additional=50, training_additional='8x100m', workout_plan=workout_plan)
+        Training.objects.create(
+            day='2018-01-01', training_main='test training 3',
+            training_additional='8x100m', workout_plan=workout_plan)
+        Training.objects.create(
+            day='2018-01-01', training_main='test training 4', distance_main=10,
+            time_main=60, training_additional='8x100m', distance_additional=5,
+            time_additional=20, workout_plan=workout_plan)
 
     def setUp(self):
         self.training = Training.objects.get(training_main='test training 1')
@@ -279,8 +290,32 @@ class TrainingDiaryEntryAddTest(PermissionRequiredViewTest):
         self.log_user_with_permission()
         response = self.client.get(reverse('diary_entry_add', kwargs={'training_id': self.training.id}))
         form = response.context['form']
-        self.assertEqual(form.initial['date'], self.training.day)
-        self.assertEqual(form.initial['training_info'], self.training.training_info())
-        # distance = self.training.distance_main + self.training.distance_additional
-        # distance += self.training.distance_additional if self.training.distance_additional else 0
-        # self.assertEqual(form.initial['training_distance'], distance)
+        self.assertEqual(form.initial['date'], self.training.day, 'No date in initial data')
+        self.assertEqual(form.initial['training_info'], self.training.training_info(),
+                         'No training_info in initial data')
+        distance = TrainingDiaryEntryAdd.calculate_distance(self.training)
+        self.assertEqual(form.initial['training_distance'], distance, 'No training_distance in initial data')
+        time = TrainingDiaryEntryAdd.calculate_time(self.training)
+        self.assertEqual(form.initial['training_time'], time, 'No training_time in initial data')
+
+    def test_calculate_distance_and_calculate_time_methods(self):
+        training_1 = Training.objects.get(training_main='test training 1')
+        training_2 = Training.objects.get(training_main='test training 2')
+        training_3 = Training.objects.get(training_main='test training 3')
+        training_4 = Training.objects.get(training_main='test training 4')
+        distance_1 = TrainingDiaryEntryAdd.calculate_distance(training_1)
+        distance_2 = TrainingDiaryEntryAdd.calculate_distance(training_2)
+        distance_3 = TrainingDiaryEntryAdd.calculate_distance(training_3)
+        distance_4 = TrainingDiaryEntryAdd.calculate_distance(training_4)
+        time_1 = TrainingDiaryEntryAdd.calculate_time(training_1)
+        time_2 = TrainingDiaryEntryAdd.calculate_time(training_2)
+        time_3 = TrainingDiaryEntryAdd.calculate_time(training_3)
+        time_4 = TrainingDiaryEntryAdd.calculate_time(training_4)
+        self.assertEqual(distance_1, 10, 'Wrong distance')
+        self.assertEqual(distance_2, 20, 'Wrong distance')
+        self.assertEqual(distance_3, None, 'Wrong distance')
+        self.assertEqual(distance_4, 15, 'Wrong distance')
+        self.assertEqual(time_1, 60, 'Wrong time')
+        self.assertEqual(time_2, 50, 'Wrong time')
+        self.assertEqual(time_3, None, 'Wrong time')
+        self.assertEqual(time_4, 80, 'Wrong time')

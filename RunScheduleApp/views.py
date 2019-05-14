@@ -770,11 +770,37 @@ def set_active_workout_plan(new_active_plan_id, user):
 
 
 class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
-
     permission_required = 'RunScheduleApp.add_trainingdiary'
 
     def get(self, request, training_id):
         training = Training.objects.get(id=training_id)
-        form = DiaryEntryForm(initial={'date': training.day, 'training_info': training.training_info()})
-        print(training)
+        distance = TrainingDiaryEntryAdd.calculate_distance(training)
+        time = TrainingDiaryEntryAdd.calculate_time(training)
+        form = DiaryEntryForm(initial={
+            'date': training.day, 'training_info': training.training_info(),
+            'training_distance': distance, 'training_time': time})
         return render(request, 'RunScheduleApp/diary_entry_add.html', {'form': form})
+
+    @staticmethod
+    def calculate_distance(training):
+        if training.distance_main and training.distance_additional:
+            distance = training.distance_main + training.distance_additional
+        elif training.distance_main:
+            distance = training.distance_main
+        elif training.distance_additional:
+            distance = training.distance_additional
+        else:
+            distance = None
+        return distance
+
+    @staticmethod
+    def calculate_time(training):
+        if training.time_main and training.time_additional:
+            time = training.time_main + training.time_additional
+        elif training.time_main:
+            time = training.time_main
+        elif training.time_additional:
+            time = training.time_additional
+        else:
+            time = None
+        return time
