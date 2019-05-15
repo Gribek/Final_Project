@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from django.views import View
 
 from RunScheduleApp.forms import *
-from RunScheduleApp.models import WorkoutPlan
+from RunScheduleApp.models import WorkoutPlan, Training
 
 
 class MainPageView(View):
@@ -770,9 +770,20 @@ def set_active_workout_plan(new_active_plan_id, user):
 
 
 class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
+    """The class that creates a new entry to training diary."""
+
     permission_required = 'RunScheduleApp.add_trainingdiary'
 
     def get(self, request, training_id):
+        """Display the form for creating a new diary entry.
+
+        :param request: request object
+        :param training_id: id of a training for which a new entry is
+            to be created
+        :type training_id: str
+        :return: form view
+        :rtype: HttpResponse
+        """
         training = Training.objects.get(id=training_id)
         distance = TrainingDiaryEntryAdd.calculate_distance(training)
         time = TrainingDiaryEntryAdd.calculate_time(training)
@@ -781,8 +792,36 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
             'training_distance': distance, 'training_time': time})
         return render(request, 'RunScheduleApp/diary_entry_add.html', {'form': form})
 
+    def post(self, request, training_id):
+        """Create a new diary entry.
+
+        :param request: request object
+        :param training_id: id of a training for which a new entry is
+            to be created
+        :type training_id: str
+        :return: training diary view or form view with error massages
+        :rtype: HttpResponse
+        """
+        new_diary_entry = TrainingDiary()
+        form = DiaryEntryForm(data=request.POST, instance=new_diary_entry)
+        if form.is_valid():
+            form.instance.user = request.user
+            form.save()
+            training = Training.objects.get(id=training_id)
+            training.accomplished = True
+            training.save()
+            return redirect('/')
+        return render(request, 'RunScheduleApp/diary_entry_add.html', {'form': form})
+
     @staticmethod
     def calculate_distance(training):
+        """Calculate the distance for a given training.
+
+        :param training: training
+        :type training: Training
+        :return: sum of all distances or nothing if there are none
+        :rtype: decimal or None
+        """
         if training.distance_main and training.distance_additional:
             distance = training.distance_main + training.distance_additional
         elif training.distance_main:
@@ -795,6 +834,13 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
 
     @staticmethod
     def calculate_time(training):
+        """Calculate duration of a given training.
+
+        :param training: training
+        :type training: Training
+        :return: duration of training
+        :rtype: int or None
+        """
         if training.time_main and training.time_additional:
             time = training.time_main + training.time_additional
         elif training.time_main:

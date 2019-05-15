@@ -4,7 +4,7 @@ from django.contrib.auth.models import User, Permission
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from RunScheduleApp.models import WorkoutPlan, Training
+from RunScheduleApp.models import WorkoutPlan, Training, TrainingDiary
 from RunScheduleApp.forms import DiaryEntryForm
 from RunScheduleApp.views import TrainingDiaryEntryAdd
 
@@ -297,6 +297,34 @@ class TrainingDiaryEntryAddTest(PermissionRequiredViewTest):
         self.assertEqual(form.initial['training_distance'], distance, 'No training_distance in initial data')
         time = TrainingDiaryEntryAdd.calculate_time(self.training)
         self.assertEqual(form.initial['training_time'], time, 'No training_time in initial data')
+
+    def test_view_diary_entry_created_in_post(self):
+        self.log_user_with_permission()
+        number_of_diary_entries = TrainingDiary.objects.count()
+        data = {'date': '2018-01-01', 'training_info': 'test training info', 'training_distance': 8.5,
+                'training_time': 70, 'comments': 'test comment'}
+        response = self.client.post(reverse('diary_entry_add', kwargs={'training_id': self.training.id}), data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(number_of_diary_entries + 1, TrainingDiary.objects.count())
+        self.assertRedirects(response, '/')
+
+    def test_view_returns_the_form_if_data_not_valid(self):
+        self.log_user_with_permission()
+        data = {'date': '2020-01-01', 'training_info': 'test training info', 'training_distance': 8.5,
+                'training_time': 70, 'comments': 'test comment'}
+        response = self.client.post(reverse('diary_entry_add', kwargs={'training_id': self.training.id}), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'RunScheduleApp/diary_entry_add.html', 'Wrong template used')
+        self.assertIn('form', response.context, 'No form in context dictionary')
+        self.assertTrue(isinstance(response.context['form'], DiaryEntryForm), 'Wrong form returned in context')
+
+    def test_view_set_training_as_accomplished(self):
+        self.log_user_with_permission()
+        data = {'date': '2018-01-01', 'training_info': 'test training info', 'training_distance': 8.5,
+                'training_time': 70, 'comments': 'test comment'}
+        self.client.post(reverse('diary_entry_add', kwargs={'training_id': self.training.id}), data)
+        training = Training.objects.get(id=self.training.id)
+        self.assertTrue(training.accomplished)
 
     def test_calculate_distance_and_calculate_time_methods(self):
         training_1 = Training.objects.get(training_main='test training 1')
