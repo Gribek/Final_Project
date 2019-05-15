@@ -43,4 +43,5 @@ urlpatterns = [
     url(r'^password_change$', PasswordChangeView.as_view()),
     url(r'^select_active_plan$', SelectActivePlanView.as_view()),
     url(r'^training_diary_entry_add/(?P<training_id>\d+)$', TrainingDiaryEntryAdd.as_view(), name='diary_entry_add'),
+    url(r'^training_diary$', TrainingDiaryView.as_view(), name='training_diary'),
 ]

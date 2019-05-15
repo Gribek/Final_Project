@@ -769,6 +769,23 @@ def set_active_workout_plan(new_active_plan_id, user):
     return None
 
 
+class TrainingDiaryView(PermissionRequiredMixin, View):
+    """The class view that shows entries in training diary."""
+
+    permission_required = 'RunScheduleApp.view_trainingdiary'
+
+    def get(self, request):
+        """Display user's training diary.
+
+        :param request: request object
+        :return: view of training diary belonging to logged user
+        :rtype: HttpResponse
+        """
+        user = User.objects.get(id=request.user.id)
+        diary_entries = user.trainingdiary_set.all()
+        return render(request, 'RunScheduleApp/training_diary_view.html', {'diary_entries': diary_entries})
+
+
 class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
     """The class that creates a new entry to training diary."""
 

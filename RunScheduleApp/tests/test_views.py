@@ -234,6 +234,60 @@ class WorkoutPlanEditTest(PermissionRequiredViewTest):
         self.assertTemplateUsed(response, 'RunScheduleApp/workout_plan_edit.html')
 
 
+class TrainingDiaryViewTest(PermissionRequiredViewTest):
+    @classmethod
+    def setUpTestData(cls):
+        super(TrainingDiaryViewTest, cls).setUpTestData()
+        user = User.objects.get(username='user_with_permission')
+        other_user = User.objects.get(username='non_permission_user')
+        user.user_permissions.add(Permission.objects.get(codename='view_trainingdiary'))
+        TrainingDiary.objects.create(date='2019-03-01', training_info='test training info', training_distance=12.5,
+                                     training_time=70, comments='test comments', user=user)
+        TrainingDiary.objects.create(date='2019-03-03', training_info='test training info', training_distance=12.5,
+                                     training_time=70, comments='test comments', user=user)
+        TrainingDiary.objects.create(date='2019-03-07', training_info='test training info', training_distance=12.5,
+                                     training_time=70, comments='test comments', user=user)
+        TrainingDiary.objects.create(date='2019-03-10', training_info='test training info', training_distance=12.5,
+                                     training_time=70, comments='test comments', user=user)
+        TrainingDiary.objects.create(date='2019-03-20', training_info='test training info', training_distance=12.5,
+                                     training_time=70, comments='test comments', user=other_user)
+        TrainingDiary.objects.create(date='2019-03-30', training_info='test training info', training_distance=12.5,
+                                     training_time=70, comments='test comments', user=other_user)
+
+    def test_view_url_exist_at_desired_location(self):
+        response = self.client.get('/training_diary')
+        self.assertNotEqual(response.status_code, 404)
+
+    def test_view_redirects_if_user_not_logged_in(self):
+        response = self.client.get('/training_diary')
+        self.assertTrue(response.url.startswith('/login'))
+
+    def test_view_url_has_name_attribute(self):
+        response = self.client.get(reverse('training_diary'))
+        self.assertTrue(response.status_code)
+
+    def test_view_checks_if_user_has_proper_permission(self):
+        self.log_non_permission_user()
+        response = self.client.get(reverse('training_diary'))
+        self.assertEqual(response.status_code, 403)
+
+    def test_view_uses_correct_template(self):
+        self.log_user_with_permission()
+        response = self.client.get(reverse('training_diary'))
+        self.assertTemplateUsed(response, 'RunScheduleApp/training_diary_view.html')
+
+    def test_view_returns_correct_diary_entries_in_context(self):
+        self.log_user_with_permission()
+        response = self.client.get(reverse('training_diary'))
+        self.assertIn('diary_entries', response.context, 'Key not found in context dictionary')
+        number_of_entries = TrainingDiary.objects.filter(user__username='user_with_permission').count()
+        self.assertEqual(len(response.context['diary_entries']), number_of_entries,
+                         'Context does not contain all user plans')
+        other_users_entries = TrainingDiary.objects.exclude(user__username='user_with_permission')
+        self.assertTrue(all(entry not in response.context['diary_entries'] for entry in other_users_entries),
+                        'Context contains entries belonging to other user')
+
+
 class TrainingDiaryEntryAddTest(PermissionRequiredViewTest):
     @classmethod
     def setUpTestData(cls):
