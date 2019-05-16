@@ -293,7 +293,8 @@ class TrainingDiaryEntryAddTest(PermissionRequiredViewTest):
     def setUpTestData(cls):
         super(TrainingDiaryEntryAddTest, cls).setUpTestData()
         user = User.objects.get(username='user_with_permission')
-        user.user_permissions.add(Permission.objects.get(codename='add_trainingdiary'))
+        user.user_permissions.set([Permission.objects.get(codename='add_trainingdiary'),
+                                   Permission.objects.get(codename='view_workoutplan')])
         workout_plan = WorkoutPlan.objects.get(name='setUp plan 1')
         Training.objects.create(
             day='2018-01-01', training_main='test training 1', distance_main=10,
@@ -360,7 +361,7 @@ class TrainingDiaryEntryAddTest(PermissionRequiredViewTest):
         response = self.client.post(reverse('diary_entry_add', kwargs={'training_id': self.training.id}), data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(number_of_diary_entries + 1, TrainingDiary.objects.count())
-        self.assertRedirects(response, '/')
+        self.assertRedirects(response, f'/plan_details/{self.training.workout_plan.id}')
 
     def test_view_returns_the_form_if_data_not_valid(self):
         self.log_user_with_permission()

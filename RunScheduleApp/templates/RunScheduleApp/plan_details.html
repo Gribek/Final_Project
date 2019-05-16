@@ -29,11 +29,22 @@
                    href="/training_edit/{{ workout_plan.id }}/{{ training.id }}">
                     <div class="list-group-item list-group-item-primary">
                         {{ training.day|date:"d.m.Y" }}; {{ training }}
-                        <form class="inline">
-                            <button formmethod="get" formaction="/training_delete/{{ training.id }}"
-                                    class="btn btn-danger btn-sm">Delete
-                            </button>
-                        </form>
+                        {% if training.accomplished %}
+                            <i class="fas fa-check"></i>
+                        {% else %}
+                            {% if training.day <= date_today %}
+                                <form class="inline">
+                                    <button formmethod="get" formaction="/training_diary_entry_add/{{ training.id }}"
+                                            class="btn btn-success btn-sm">Add to diary
+                                    </button>
+                                </form>
+                            {% endif %}
+                            <form class="inline">
+                                <button formmethod="get" formaction="/training_delete/{{ training.id }}"
+                                        class="btn btn-danger btn-sm">Delete
+                                </button>
+                            </form>
+                        {% endif %}
                     </div>
                 </a>
             {% empty %}

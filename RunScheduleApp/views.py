@@ -114,7 +114,9 @@ class PlanDetailsView(PermissionRequiredMixin, View):
         """
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
-        return render(request, 'RunScheduleApp/plan_details.html', {'workout_plan': workout_plan})
+        date_today = datetime.today().date()
+        return render(request, 'RunScheduleApp/plan_details.html',
+                      {'workout_plan': workout_plan, 'date_today': date_today})
 
 
 class WorkoutsList(LoginRequiredMixin, View):
@@ -827,7 +829,7 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
             training = Training.objects.get(id=training_id)
             training.accomplished = True
             training.save()
-            return redirect('/')
+            return redirect(f'/plan_details/{training.workout_plan.id}')
         return render(request, 'RunScheduleApp/diary_entry_add.html', {'form': form})
 
     @staticmethod
