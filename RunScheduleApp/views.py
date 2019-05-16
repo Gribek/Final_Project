@@ -784,7 +784,7 @@ class TrainingDiaryView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         user = User.objects.get(id=request.user.id)
-        diary_entries = user.trainingdiary_set.all()
+        diary_entries = user.trainingdiary_set.all().order_by('date')
         return render(request, 'RunScheduleApp/training_diary_view.html', {'diary_entries': diary_entries})
 
 

@@ -1,5 +1,10 @@
 {% extends "RunScheduleApp/base.html" %}
 
 {% block content %}
-
+    <div class="text_blue">
+        {% for entry in diary_entries %}
+            {{ entry.date }} {{ entry.training_info }} {{ entry.training_distance }}
+            {{ entry.training_time }} {{ entry.comments }} <br>
+        {% endfor %}
+    </div>
 {% endblock %}

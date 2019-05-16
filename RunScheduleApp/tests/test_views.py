@@ -287,6 +287,12 @@ class TrainingDiaryViewTest(PermissionRequiredViewTest):
         self.assertTrue(all(entry not in response.context['diary_entries'] for entry in other_users_entries),
                         'Context contains entries belonging to other user')
 
+    def test_view_diary_entries_sorted_ascending_by_date(self):
+        self.log_user_with_permission()
+        response = self.client.get(reverse('training_diary'))
+        entries = response.context['diary_entries']
+        self.assertTrue(all([entries[i - 1].date < entries[i].date for i in range(1, len(entries))]))
+
 
 class TrainingDiaryEntryAddTest(PermissionRequiredViewTest):
     @classmethod
