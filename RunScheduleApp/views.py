@@ -407,7 +407,7 @@ class WorkoutPlanView(LoginRequiredMixin, View):
 class WorkoutCalendar(HTMLCalendar):
     """A class used to create monthly workout calendar in HTML"""
 
-    css_class_month = 'month table'
+    css_class_month = 'month table calendar'
 
     def __init__(self, workout_plan, month, year, month_number_requested):
         """

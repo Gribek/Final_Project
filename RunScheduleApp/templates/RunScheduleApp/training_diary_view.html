@@ -2,9 +2,24 @@
 
 {% block content %}
     <div class="text_blue">
-        {% for entry in diary_entries %}
-            {{ entry.date }} {{ entry.training_info }} {{ entry.training_distance }}
-            {{ entry.training_time }} {{ entry.comments }} <br>
-        {% endfor %}
+        <table class="table">
+            <tr>
+                <th>Date</th>
+                <th>Training</th>
+                <th>Distance</th>
+                <th>Time</th>
+                <th>Comments</th>
+            </tr>
+            {% for entry in diary_entries %}
+                <tr>
+                    <td>{{ entry.date }}</td>
+                    <td>{{ entry.training_info }}</td>
+                    <td>{{ entry.training_distance }}</td>
+                    <td>{{ entry.training_time }}</td>
+                    <td>{{ entry.comments }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
     </div>
 {% endblock %}

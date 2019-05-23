@@ -25,12 +25,12 @@ table th {
     background-color: #0A2299;
 }
 
-.table tbody td:hover {
+.calendar tbody td:hover {
     border: solid 1px #0A2299;
     background-color: #183BF0;
 }
 
-.table tbody td a:hover {
+.calendar tbody td a:hover {
     color: #DDE3FD;
 }
 
