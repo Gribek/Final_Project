@@ -2,7 +2,8 @@ from datetime import datetime
 from calendar import HTMLCalendar
 
 from django.contrib.auth import login, logout
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import Permission, User
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
@@ -40,7 +41,8 @@ class WorkoutPlanAdd(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         form = WorkoutPlanForm()
-        return render(request, 'RunScheduleApp/workout_plan_add.html', {'form': form})
+        return render(request, 'RunScheduleApp/workout_plan_add.html',
+                      {'form': form})
 
     def post(self, request):
         """Create a new workout plan.
@@ -58,7 +60,8 @@ class WorkoutPlanAdd(PermissionRequiredMixin, View):
             if form.instance.is_active:
                 set_active_workout_plan(new_plan.id, request.user)
             return redirect('/workout_list')
-        return render(request, 'RunScheduleApp/workout_plan_add.html', {'form': form})
+        return render(request, 'RunScheduleApp/workout_plan_add.html',
+                      {'form': form})
 
 
 class WorkoutPlanEdit(PermissionRequiredMixin, View):
@@ -78,7 +81,8 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
         form = WorkoutPlanEditForm(instance=workout_plan)
-        return render(request, 'RunScheduleApp/workout_plan_edit.html', {'form': form, 'plan_id': plan_id})
+        return render(request, 'RunScheduleApp/workout_plan_edit.html',
+                      {'form': form, 'plan_id': plan_id})
 
     def post(self, request, plan_id):
         """Save changes to a selected workout plan.
@@ -95,7 +99,8 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
         if form.is_valid():
             form.save()
             return redirect(f'/plan_details/{plan_id}')
-        return render(request, 'RunScheduleApp/workout_plan_edit.html', {'form': form, 'plan_id': plan_id})
+        return render(request, 'RunScheduleApp/workout_plan_edit.html',
+                      {'form': form, 'plan_id': plan_id})
 
 
 class PlanDetailsView(PermissionRequiredMixin, View):
@@ -115,8 +120,8 @@ class PlanDetailsView(PermissionRequiredMixin, View):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
         date_today = datetime.today().date()
-        return render(request, 'RunScheduleApp/plan_details.html',
-                      {'workout_plan': workout_plan, 'date_today': date_today})
+        ctx = {'workout_plan': workout_plan, 'date_today': date_today}
+        return render(request, 'RunScheduleApp/plan_details.html', ctx)
 
 
 class WorkoutsList(LoginRequiredMixin, View):
@@ -130,7 +135,8 @@ class WorkoutsList(LoginRequiredMixin, View):
         :rtype: HttpResponse
         """
         workout_plans = WorkoutPlan.objects.filter(owner=request.user)
-        return render(request, 'RunScheduleApp/workoutplan_list.html', {'workout_plans': workout_plans})
+        return render(request, 'RunScheduleApp/workoutplan_list.html',
+                      {'workout_plans': workout_plans})
 
 
 class TrainingAdd(PermissionRequiredMixin, View):
@@ -156,9 +162,11 @@ class TrainingAdd(PermissionRequiredMixin, View):
         workout_plan = WorkoutPlan.objects.get(pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
-        form = TrainingForm(initial={'day': date, 'start_date': start_date, 'end_date': end_date})
-        return render(request, 'RunScheduleApp/training_add.html', {'form': form, 'plan_id': workout_plan.id,
-                                                                    'date': date, 'month_number': month_number})
+        form = TrainingForm(initial={'day': date, 'start_date': start_date,
+                                     'end_date': end_date})
+        ctx = {'form': form, 'plan_id': workout_plan.id,
+               'date': date, 'month_number': month_number}
+        return render(request, 'RunScheduleApp/training_add.html', ctx)
 
     def post(self, request, plan_id, month_number=None):
         """Create a new training.
@@ -184,8 +192,9 @@ class TrainingAdd(PermissionRequiredMixin, View):
             if month_number is None:
                 return redirect(f'/plan_details/{plan_id}')
             return redirect(f'/workout/{month_number}')
-        return render(request, 'RunScheduleApp/training_add.html', {'form': form, 'plan_id': workout_plan.id,
-                                                                    'month_number': month_number})
+        ctx = {'form': form, 'plan_id': workout_plan.id,
+               'month_number': month_number}
+        return render(request, 'RunScheduleApp/training_add.html', ctx)
 
 
 class TrainingEdit(PermissionRequiredMixin, View):
@@ -212,9 +221,10 @@ class TrainingEdit(PermissionRequiredMixin, View):
         check_workout_plan_owner(workout_plan, request.user)
         training_to_edit = Training.objects.get(pk=training_id)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
-        form = TrainingForm(instance=training_to_edit, initial={'start_date': start_date, 'end_date': end_date})
-        return render(request, 'RunScheduleApp/training_add.html', {'form': form, 'plan_id': plan_id,
-                                                                    'month_number': month_number})
+        form = TrainingForm(instance=training_to_edit, initial={
+            'start_date': start_date, 'end_date': end_date})
+        ctx = {'form': form, 'plan_id': plan_id, 'month_number': month_number}
+        return render(request, 'RunScheduleApp/training_add.html', ctx)
 
     def post(self, request, plan_id, training_id, month_number=None):
         """Save changes to a selected training.
@@ -240,8 +250,8 @@ class TrainingEdit(PermissionRequiredMixin, View):
             if month_number is None:
                 return redirect(f'/plan_details/{plan_id}')
             return redirect(f'/workout/{month_number}')
-        return render(request, 'RunScheduleApp/training_add.html', {'form': form, 'plan_id': plan_id,
-                                                                    'month_number': month_number})
+        ctx = {'form': form, 'plan_id': plan_id, 'month_number': month_number}
+        return render(request, 'RunScheduleApp/training_add.html', ctx)
 
 
 class TrainingDelete(PermissionRequiredMixin, View):
@@ -260,7 +270,8 @@ class TrainingDelete(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         training_to_delete = Training.objects.get(pk=training_id)
-        check_workout_plan_owner(training_to_delete.workout_plan, request.user)
+        check_workout_plan_owner(training_to_delete.workout_plan,
+                                 request.user)
         training_to_delete.delete()
         return redirect(f'/plan_details/{training_to_delete.workout_plan.id}')
 
@@ -296,7 +307,8 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
         """
         plans_tuple = SelectActivePlanView.get_user_plans(request)
         form = SelectActivePlanFrom(choices=plans_tuple)
-        return render(request, 'RunScheduleApp/select_plan.html', {'form': form})
+        return render(request, 'RunScheduleApp/select_plan.html',
+                      {'form': form})
 
     def post(self, request):
         """Change the user's active workout plan.
@@ -311,7 +323,8 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
             new_active_plan_id = form.cleaned_data.get('active_plan')
             set_active_workout_plan(new_active_plan_id, request.user)
             return redirect('/workout_list')
-        return render(request, 'RunScheduleApp/select_plan.html', {'form': form})
+        return render(request, 'RunScheduleApp/select_plan.html',
+                      {'form': form})
 
 
 class WorkoutPlanView(LoginRequiredMixin, View):
@@ -333,24 +346,34 @@ class WorkoutPlanView(LoginRequiredMixin, View):
             trainings of active workout plan marked on it
         :rtype: HttpResponse
         """
-        active_workout_plan = WorkoutPlan.objects.filter(owner=request.user).filter(is_active=True)
+        active_workout_plan = WorkoutPlan.objects.filter(
+            owner=request.user).filter(is_active=True)
         if not active_workout_plan.exists():
-            return render(request, 'RunScheduleApp/current_workout_plan.html', {'workout_plan': ''})
+            return render(request, 'RunScheduleApp/current_workout_plan.html',
+                          {'workout_plan': ''})
         workout_plan = active_workout_plan[0]
-        plan_start_date, plan_end_date = get_plan_start_and_end_date(workout_plan)
-        present_month_number = WorkoutPlanView.get_present_month_number(plan_start_date)
-        last_month_number = WorkoutPlanView.get_last_month_number(plan_start_date, plan_end_date)
+        plan_start_date, plan_end_date = get_plan_start_and_end_date(
+            workout_plan)
+        present_month_number = WorkoutPlanView.get_present_month_number(
+            plan_start_date)
+        last_month_number = WorkoutPlanView.get_last_month_number(
+            plan_start_date, plan_end_date)
 
-        month, year = WorkoutPlanView.get_month_and_year(month_number_requested, plan_start_date)
-        calendar = WorkoutCalendar(workout_plan, month, year, month_number_requested).formatmonth(year, month)
+        month, year = WorkoutPlanView.get_month_and_year(
+            month_number_requested, plan_start_date)
+        calendar = WorkoutCalendar(workout_plan, month, year,
+                                   month_number_requested).formatmonth(year,
+                                                                       month)
 
-        ctx = {'workout_plan': workout_plan,
-               'calendar': mark_safe(calendar),
-               'month_number_requested': month_number_requested,
-               'last_month_number': str(last_month_number),
-               'present_month_number': present_month_number
-               }
-        return render(request, 'RunScheduleApp/current_workout_plan.html', ctx)
+        ctx = {
+            'workout_plan': workout_plan,
+            'calendar': mark_safe(calendar),
+            'month_number_requested': month_number_requested,
+            'last_month_number': str(last_month_number),
+            'present_month_number': present_month_number
+        }
+        return render(request, 'RunScheduleApp/current_workout_plan.html',
+                      ctx)
 
     @staticmethod
     def get_month_and_year(month_number_requested, plan_start_date):
@@ -368,10 +391,10 @@ class WorkoutPlanView(LoginRequiredMixin, View):
         month = plan_first_month + int(month_number_requested) - 1
         year = plan_first_year
 
-        if month > 12:  # Recalculation mechanism for plans exceeding a calendar year.
+        if month > 12:  # For plans exceeding a calendar year.
             year = plan_first_year + int(month / 12)
             month = month % 12
-            if month == 0:  # Amendment for december, for which the rest from dividing by 12 is always 0
+            if month == 0:  # Amendment for december, when % 12 == 0
                 month = 12
                 year -= 1
         return month, year
@@ -387,7 +410,8 @@ class WorkoutPlanView(LoginRequiredMixin, View):
         :return: month number for the last month of a plan
         :rtype: int
         """
-        last_month_number = (end_date.year - start_date.year) * 12 + end_date.month - start_date.month + 1
+        last_month_number = ((end_date.year - start_date.year) * 12
+                             + end_date.month - start_date.month + 1)
         return last_month_number
 
     @staticmethod
@@ -400,7 +424,8 @@ class WorkoutPlanView(LoginRequiredMixin, View):
         :rtype: int
         """
         day_now = datetime.today().date()
-        month_number = (day_now.year - plan_start_date.year) * 12 + day_now.month - plan_start_date.month + 1
+        month_number = ((day_now.year - plan_start_date.year) * 12
+                        + day_now.month - plan_start_date.month + 1)
         return month_number
 
 
@@ -425,7 +450,8 @@ class WorkoutCalendar(HTMLCalendar):
         self.month = month
         self.year = year
         self.workout_plan = workout_plan
-        self.workout_plan_start_date, self.workout_plan_end_date = get_plan_start_and_end_date(workout_plan)
+        self.workout_plan_start_date, self.workout_plan_end_date = \
+            get_plan_start_and_end_date(workout_plan)
         self.training_dict = self.get_trainings_dict()
         self.month_number_requested = month_number_requested
 
@@ -446,13 +472,16 @@ class WorkoutCalendar(HTMLCalendar):
         if str(day) in self.training_dict:  # Training days.
             css_class = self.set_css_class(day, weekday, is_training_day=True)
             edit_training_link = self.create_training_edit_link(day)
-            return '<td class="%s"><a href="%s">%d<br><div class="training_info">%s</div></a></td>' % (
-                css_class, edit_training_link, day, self.training_dict[str(day)])
+            return '<td class="%s"><a href="%s">%d<br>' \
+                   '<div class="training_info">%s</div></a></td>' % (
+                       css_class, edit_training_link, day,
+                       self.training_dict[str(day)])
 
         else:  # Non-training days.
             css_class = self.set_css_class(day, weekday, is_training_day=False)
-            date = self.create_date(day)
-            add_training_link = f"/training_add/{self.workout_plan.id}/{self.month_number_requested}/{date}"
+            link_date = self.create_date(day)
+            add_training_link = f"/training_add/{self.workout_plan.id}/" \
+                f"{self.month_number_requested}/{link_date}"
             return '<td class="%s"><a href="%s">%d</a></td>' % (
                 css_class, add_training_link, day)
 
@@ -471,8 +500,8 @@ class WorkoutCalendar(HTMLCalendar):
         """
         v = []
         a = v.append
-        a(
-            '<table id="fixedheight" style="table-layout: fixed" border="0" cellpadding="0" cellspacing="0" class="%s">'
+        a('<table id="fixedheight" style="table-layout: fixed" border="0"'
+          ' cellpadding="0" cellspacing="0" class="%s">'
             % self.css_class_month)
         a('\n')
         a(self.formatmonthname(theyear, themonth, withyear=withyear))
@@ -494,10 +523,11 @@ class WorkoutCalendar(HTMLCalendar):
         :return: url to edit training on a given day
         :rtype: str
         """
-        date = self.create_date(day)
-        training_id = Training.objects.filter(workout_plan=self.workout_plan).get(
-            day=date).id
-        edit_day_link = f'/training_edit/{self.workout_plan.id}/{training_id}/{self.month_number_requested}'
+        link_date = self.create_date(day)
+        training_id = Training.objects.filter(
+            workout_plan=self.workout_plan).get(day=link_date).id
+        edit_day_link = f'/training_edit/{self.workout_plan.id}/{training_id}/' \
+            f'{self.month_number_requested}'
         return edit_day_link
 
     def create_date(self, day):
@@ -516,8 +546,8 @@ class WorkoutCalendar(HTMLCalendar):
 
         :param day: day number
         :type day: int
-        :param weekday: weekday: day of the week (numbers from 0 to 6, 0 means
-            monday, 6 means sunday)
+        :param weekday: weekday: day of the week (numbers from 0 to 6,
+            0 means monday, 6 means sunday)
         :type weekday: int
         :param is_training_day: indicates if there is a training in
             that day
@@ -546,12 +576,12 @@ class WorkoutCalendar(HTMLCalendar):
             day as value
         :rtype: dict[str, str]
         """
-        trainings = self.workout_plan.training_set.filter(day__year=self.year).filter(
-            day__month=self.month).order_by('day')
-        training_dict = {}
+        trainings = self.workout_plan.training_set.filter(
+            day__year=self.year).filter(day__month=self.month).order_by('day')
+        t_dict = {}
         for training in trainings:
-            training_dict.update({f'{training.day.day}': training.training_info()})
-        return training_dict
+            t_dict.update({f'{training.day.day}': training.training_info()})
+        return t_dict
 
 
 class LoginView(View):
@@ -587,7 +617,8 @@ class LoginView(View):
                     return redirect(next)
                 return redirect('/')
             else:
-                return render(request, 'RunScheduleApp/login.html', {'form': form})
+                return render(request, 'RunScheduleApp/login.html',
+                              {'form': form})
         return render(request, 'RunScheduleApp/login.html', {'form': form})
 
 
@@ -617,7 +648,8 @@ class RegistrationView(View):
         :rtype: HttpResponse
         """
         form = RegistrationForm()
-        return render(request, 'RunScheduleApp/registration.html', {'form': form})
+        return render(request, 'RunScheduleApp/registration.html',
+                      {'form': form})
 
     def post(self, request):
         """Register a new user.
@@ -634,7 +666,8 @@ class RegistrationView(View):
             name = form.cleaned_data.get('name')
             surname = form.cleaned_data.get('surname')
             email = form.cleaned_data.get('email')
-            User.objects.create_user(username=username, password=password, email=email, first_name=name,
+            User.objects.create_user(username=username, password=password,
+                                     email=email, first_name=name,
                                      last_name=surname)
             new_user = User.objects.get(username=username)
             permission_list = [
@@ -646,12 +679,15 @@ class RegistrationView(View):
                 'change_workoutplan',
                 'delete_workoutplan',
                 'view_workoutplan',
+                'add_trainingdiary',
+                'change_trainingdiary',
+                'view_trainingdiary',
             ]
-            permissions = [Permission.objects.get(codename=i) for i in
-                           permission_list]  # Create list of permission type objects.
-            new_user.user_permissions.set(permissions)
+            p = [Permission.objects.get(codename=i) for i in permission_list]
+            new_user.user_permissions.set(p)
             return redirect('/login')
-        return render(request, 'RunScheduleApp/registration.html', {'form': form})
+        return render(request, 'RunScheduleApp/registration.html',
+                      {'form': form})
 
 
 class UserProfileView(LoginRequiredMixin, View):
@@ -678,7 +714,8 @@ class PasswordChangeView(LoginRequiredMixin, View):
         :rtype: HttpResponse
         """
         form = PasswordChangeForm()
-        return render(request, 'RunScheduleApp/password_change.html', {'form': form})
+        return render(request, 'RunScheduleApp/password_change.html',
+                      {'form': form})
 
     def post(self, request):
         """Change user password.
@@ -696,7 +733,8 @@ class PasswordChangeView(LoginRequiredMixin, View):
             current_user.set_password(new_password)
             current_user.save()
             return redirect('/login')
-        return render(request, 'RunScheduleApp/password_change.html', {'form': form})
+        return render(request, 'RunScheduleApp/password_change.html',
+                      {'form': form})
 
 
 class EditUserView(LoginRequiredMixin, View):
@@ -711,7 +749,8 @@ class EditUserView(LoginRequiredMixin, View):
         """
         current_user = request.user
         form = EditUserForm(instance=current_user)
-        return render(request, 'RunScheduleApp/edit_user_profile.html', {'form': form})
+        return render(request, 'RunScheduleApp/edit_user_profile.html',
+                      {'form': form})
 
     def post(self, request):
         """Save changes to user data.
@@ -725,7 +764,8 @@ class EditUserView(LoginRequiredMixin, View):
         if form.is_valid():
             form.save()
             return redirect('/profile')
-        return render(request, 'RunScheduleApp/edit_user_profile.html', {'form': form})
+        return render(request, 'RunScheduleApp/edit_user_profile.html',
+                      {'form': form})
 
 
 def get_plan_start_and_end_date(workout_plan):
@@ -764,7 +804,8 @@ def set_active_workout_plan(new_active_plan_id, user):
     :type user: User
     :return: None
     """
-    WorkoutPlan.objects.filter(owner=user).filter(is_active=True).update(is_active=False)
+    WorkoutPlan.objects.filter(owner=user).filter(is_active=True).update(
+        is_active=False)
     new_active_plan = WorkoutPlan.objects.get(pk=new_active_plan_id)
     new_active_plan.is_active = True
     new_active_plan.save()
@@ -785,7 +826,8 @@ class TrainingDiaryView(PermissionRequiredMixin, View):
         """
         user = User.objects.get(id=request.user.id)
         diary_entries = user.trainingdiary_set.all().order_by('date')
-        return render(request, 'RunScheduleApp/training_diary_view.html', {'diary_entries': diary_entries})
+        return render(request, 'RunScheduleApp/training_diary_view.html',
+                      {'diary_entries': diary_entries})
 
 
 class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
@@ -809,7 +851,8 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
         form = DiaryEntryForm(initial={
             'date': training.day, 'training_info': training.training_info(),
             'training_distance': distance, 'training_time': time})
-        return render(request, 'RunScheduleApp/diary_entry_add.html', {'form': form})
+        return render(request, 'RunScheduleApp/diary_entry_add.html',
+                      {'form': form})
 
     def post(self, request, training_id):
         """Create a new diary entry.
@@ -830,7 +873,8 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
             training.accomplished = True
             training.save()
             return redirect(f'/plan_details/{training.workout_plan.id}')
-        return render(request, 'RunScheduleApp/diary_entry_add.html', {'form': form})
+        return render(request, 'RunScheduleApp/diary_entry_add.html',
+                      {'form': form})
 
     @staticmethod
     def calculate_distance(training):

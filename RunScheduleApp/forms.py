@@ -48,15 +48,18 @@ class TrainingForm(ModelForm):
         end_date = cleaned_data.get('end_date')
         day = cleaned_data.get('day')
         if day < start_date:
-            self.add_error('day', 'The training date cannot be earlier than the workout plan start date')
+            self.add_error('day', 'The training date cannot be earlier than'
+                                  'the workout plan start date')
         if day > end_date:
-            self.add_error('day', 'The training date cannot be later than the workout plan end date')
+            self.add_error('day', 'The training date cannot be later than the'
+                                  'workout plan end date')
         distance_main = cleaned_data.get('distance_main')
         if distance_main is not None and distance_main <= 0:
             self.add_error('distance_main', 'Distance must be greater than 0')
         distance_additional = cleaned_data.get('distance_additional')
         if distance_additional is not None and distance_additional <= 0:
-            self.add_error('distance_additional', 'Distance must be greater than 0')
+            self.add_error('distance_additional',
+                           'Distance must be greater than 0')
         time_additional = cleaned_data.get('time_additional')
         if time_additional is not None and time_additional <= 0:
             self.add_error('time_additional', 'Time must be greater than 0')
@@ -79,7 +82,8 @@ class LoginForm(forms.Form):
 class RegistrationForm(forms.Form):
     username = forms.CharField(label='Username')
     password = forms.CharField(label='Password', widget=forms.PasswordInput)
-    repeat_password = forms.CharField(label='Repeat password', widget=forms.PasswordInput)
+    repeat_password = forms.CharField(label='Repeat password',
+                                      widget=forms.PasswordInput)
     name = forms.CharField(label='First name')
     surname = forms.CharField(label='Last name')
     email = forms.EmailField(label='E-mail address:', widget=forms.EmailInput)
@@ -92,14 +96,16 @@ class RegistrationForm(forms.Form):
         if User.objects.filter(username=username).exists():
             self.add_error('username', 'Username already exists')
         if field1 != field2:
-            self.add_error('repeat_password', 'Password and Repeat password must be the same')
-
+            self.add_error('repeat_password',
+                           'Password and Repeat password must be the same')
         return cleaned_data
 
 
 class PasswordChangeForm(forms.Form):
-    new_password = forms.CharField(label='New password', widget=forms.PasswordInput)
-    repeat_password = forms.CharField(label='Repeat new password', widget=forms.PasswordInput)
+    new_password = forms.CharField(label='New password',
+                                   widget=forms.PasswordInput)
+    repeat_password = forms.CharField(label='Repeat new password',
+                                      widget=forms.PasswordInput)
 
     def clean(self):
         cleaned_date = super().clean()
@@ -129,7 +135,8 @@ class SelectActivePlanFrom(forms.Form):
         super(SelectActivePlanFrom, self).__init__(*args, **kwargs)
         self.fields['active_plan'].choices = self.choices
 
-    active_plan = forms.ChoiceField(choices=[], label='Select active workout plan')
+    active_plan = forms.ChoiceField(choices=[],
+                                    label='Select active workout plan')
 
 
 class DiaryEntryForm(ModelForm):
