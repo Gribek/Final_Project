@@ -346,12 +346,10 @@ class WorkoutPlanView(LoginRequiredMixin, View):
             trainings of active workout plan marked on it
         :rtype: HttpResponse
         """
-        active_workout_plan = WorkoutPlan.objects.filter(
-            owner=request.user).filter(is_active=True)
-        if not active_workout_plan.exists():
+        workout_plan = WorkoutPlanView.get_active_workout_plan(request.user)
+        if not workout_plan:
             return render(request, 'RunScheduleApp/current_workout_plan.html',
                           {'workout_plan': ''})
-        workout_plan = active_workout_plan[0]
         plan_start_date, plan_end_date = get_plan_start_and_end_date(
             workout_plan)
         present_month_number = WorkoutPlanView.get_present_month_number(
@@ -428,6 +426,23 @@ class WorkoutPlanView(LoginRequiredMixin, View):
                         + day_now.month - plan_start_date.month + 1)
         return month_number
 
+    @staticmethod
+    def get_active_workout_plan(user):
+        """Get user's active workout plan.
+
+        :param user: user, owner of a workout plan
+        :type user: User
+        :return: active workout plan for the user or None if it does
+            not exist
+        :rtype: WorkoutPlan or None
+        """
+        workout_plan = WorkoutPlan.objects.filter(owner=user).filter(
+            is_active=True)
+        if workout_plan.exists():
+            return workout_plan[0]
+        else:
+            return None
+
 
 class WorkoutCalendar(HTMLCalendar):
     """A class used to create monthly workout calendar in HTML"""
@@ -481,7 +496,7 @@ class WorkoutCalendar(HTMLCalendar):
             css_class = self.set_css_class(day, weekday, is_training_day=False)
             link_date = self.create_date(day)
             add_training_link = f"/training_add/{self.workout_plan.id}/" \
-                f"{self.month_number_requested}/{link_date}"
+                                f"{self.month_number_requested}/{link_date}"
             return '<td class="%s"><a href="%s">%d</a></td>' % (
                 css_class, add_training_link, day)
 
@@ -502,7 +517,7 @@ class WorkoutCalendar(HTMLCalendar):
         a = v.append
         a('<table id="fixedheight" style="table-layout: fixed" border="0"'
           ' cellpadding="0" cellspacing="0" class="%s">'
-            % self.css_class_month)
+          % self.css_class_month)
         a('\n')
         a(self.formatmonthname(theyear, themonth, withyear=withyear))
         a('\n')
@@ -527,7 +542,7 @@ class WorkoutCalendar(HTMLCalendar):
         training_id = Training.objects.filter(
             workout_plan=self.workout_plan).get(day=link_date).id
         edit_day_link = f'/training_edit/{self.workout_plan.id}/{training_id}/' \
-            f'{self.month_number_requested}'
+                        f'{self.month_number_requested}'
         return edit_day_link
 
     def create_date(self, day):
