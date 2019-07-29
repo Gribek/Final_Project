@@ -1,17 +1,14 @@
 from RunScheduleApp.views import WorkoutPlanView
-from RunScheduleApp.models import WorkoutPlan
 
 
 def pass_month_counter_to_base_html(request):
-    if request.user.is_anonymous:
-        ctx = {'get_month_counter': 1}
-        return ctx
-    if not WorkoutPlan.objects.filter(owner=request.user).filter(
-            is_active=True).exists():
-        ctx = {'get_month_counter': 1}
-        return ctx
-    plan_start_date = WorkoutPlan.objects.filter(owner=request.user).filter(
-        is_active=True)[0].date_range.lower
-    ctx = {'get_month_counter': WorkoutPlanView.get_present_month_number(
-            plan_start_date)}
+    current_user = request.user
+    ctx = {'get_month_counter': 1}
+    if not current_user.is_anonymous:
+        workout_plan = WorkoutPlanView.get_active_workout_plan(current_user)
+        if workout_plan:
+            plan_start_date = workout_plan.date_range.lower
+            month_number = WorkoutPlanView.get_present_month_number(
+                plan_start_date)
+            ctx['get_month_counter'] = month_number
     return ctx
