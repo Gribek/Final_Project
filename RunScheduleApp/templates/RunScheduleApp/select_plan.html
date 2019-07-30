@@ -5,7 +5,7 @@
         <form class="text_blue" method="post">
             {{ form.as_p }}
             <input class="btn btn-primary" type="submit" value="Select">
-            <a href="/workout_list" class="btn btn-primary">Cancel</a>
+            <a href="{% url 'workout_plans' %}" class="btn btn-primary">Cancel</a>
             {% csrf_token %}
         </form>
     </div>

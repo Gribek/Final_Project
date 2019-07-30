@@ -15,8 +15,8 @@
             E-mail address: {{ request.user.email }}
         </p>
         <p>
-            <a href="/edit_profile" class="btn btn-primary">Edit profile</a>
-            <a href="/password_change" class="btn btn-primary">Change your password</a>
+            <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit profile</a>
+            <a href="{% url 'change_password' %}" class="btn btn-primary">Change your password</a>
         </p>
     </div>
 {% endblock %}

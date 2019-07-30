@@ -21,15 +21,15 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="/"><i class="fas fa-home"></i> Home page<span class="sr-only">
+                    <a class="nav-link" href="{% url 'home_page' %}"><i class="fas fa-home"></i> Home page<span class="sr-only">
                         (current)</span></a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="/workout/{{ get_month_counter }}"><i class="far fa-calendar-alt"></i>
+                    <a class="nav-link" href="{% url 'current_workout' get_month_counter %}"><i class="far fa-calendar-alt"></i>
                         Current workout plan<span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="/workout_list"><i class="fas fa-running"></i>
+                    <a class="nav-link" href="{% url 'workout_plans' %}"><i class="fas fa-running"></i>
                         My plans<span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item active">
@@ -37,16 +37,16 @@
                         (current)</span></a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="/profile"><i class="fas fa-user"></i> Profile<span class="sr-only">
+                    <a class="nav-link" href="{% url 'profile' %}"><i class="fas fa-user"></i> Profile<span class="sr-only">
                         (current)</span></a>
                 </li>
             </ul>
         </div>
         <div class="right">
             {% if request.user.is_authenticated %}
-                Hello, {{ request.user.username }} <a href="/logout" class="btn btn-danger">Sign out</a>
+                Hello, {{ request.user.username }} <a href="{% url 'logout' %}" class="btn btn-danger">Sign out</a>
             {% else %}
-                You're not sign in <a href="/login" class="btn btn-success">Sign in</a>
+                You're not sign in <a href="{% url 'login' %}" class="btn btn-success">Sign in</a>
             {% endif %}
         </div>
     </nav>

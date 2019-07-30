@@ -882,15 +882,15 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
         """
         new_diary_entry = TrainingDiary()
         form = DiaryEntryForm(data=request.POST, instance=new_diary_entry)
+        training = Training.objects.get(id=training_id)
         if form.is_valid():
             form.instance.user = request.user
             form.save()
-            training = Training.objects.get(id=training_id)
             training.accomplished = True
             training.save()
             return redirect(f'/plan_details/{training.workout_plan.id}')
         return render(request, 'RunScheduleApp/diary_entry_add.html',
-                      {'form': form})
+                      {'form': form, 'training': training})
 
     @staticmethod
     def calculate_distance(training):

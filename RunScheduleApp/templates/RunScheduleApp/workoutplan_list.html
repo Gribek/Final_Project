@@ -4,7 +4,7 @@
     <div class="text_blue">
         {% for plan in workout_plans %}
             <div class="list-group">
-                <a href="/plan_details/{{ plan.id }} " class="btn btn-primary">
+                <a href="{% url 'plan_details' plan.id %}" class="btn btn-primary">
                     <div class="list-group-item">{{ plan.name }} {{ plan.date_range.lower|date:"d.m.Y" }}
                         - {{ plan.date_range.upper|date:"d.m.Y" }}
                         {% if plan.is_active %} <span class="active_plan">Your current workout plan</span> {% endif %}
@@ -13,14 +13,14 @@
             </div>
         {% empty %}
             <p class="form">
-                <a href="/workout_plan_add" class="btn btn-primary">No workout plans added, create new one</a>
+                <a href="{% url 'workout_plan_add' %}" class="btn btn-primary">No workout plans added, create new one</a>
             </p>
         {% endfor %}
     </div>
     <div class="form">
         {% if workout_plans %}
-            <a href="/workout_plan_add" class="btn btn-primary">Create new plan</a>
-            <a href="/select_active_plan" class="btn btn-primary">Change current workout plan</a>
+            <a href="{% url 'workout_plan_add' %}" class="btn btn-primary">Create new plan</a>
+            <a href="{% url 'select_active_plan' %}" class="btn btn-primary">Change current workout plan</a>
         {% endif %}
     </div>
 {% endblock %}

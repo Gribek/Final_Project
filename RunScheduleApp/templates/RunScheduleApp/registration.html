@@ -6,7 +6,7 @@
             {{ form.as_p }}
             {% csrf_token %}
             <input class="btn btn-primary" type="submit" value="Sing up">
-            <a href="/" class="btn btn-primary">Cancel</a>
+            <a href="{% url 'home_page' %}" class="btn btn-primary">Cancel</a>
         </form>
     </div>
 {% endblock %}

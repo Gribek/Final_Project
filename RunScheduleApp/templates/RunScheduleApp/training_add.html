@@ -32,9 +32,9 @@
             {% csrf_token %}
             <button class="btn btn-primary" type="reset">Reset</button>
             {% if month_number %}
-                <a class="btn btn-primary" href="/workout/{{ month_number }}">Cancel</a>
+                <a class="btn btn-primary" href="{% url 'current_workout' month_number %}">Cancel</a>
             {% else %}
-                <a class="btn btn-primary" href="/plan_details/{{ plan_id }}">Cancel</a>
+                <a class="btn btn-primary" href="{% url 'plan_details' plan_id %}">Cancel</a>
             {% endif %}
         </form>
     </div>

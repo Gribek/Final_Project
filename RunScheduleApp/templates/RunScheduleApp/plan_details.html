@@ -15,10 +15,10 @@
             Plan end date: {{ workout_plan.date_range.upper|date:"d.m.Y" }}
         </p>
         <p>
-            <a class="btn btn-primary" href="/training_add/{{ workout_plan.id }}">Add new training</a>
-            <a class="btn btn-primary" href="/workout_plan_edit/{{ workout_plan.id }}">Edit plan</a>
-            <a class="btn btn-primary" href="/workout/{{ get_month_counter }}">Return to calendar</a>
-            <a class="btn btn-primary" href="/workout_list">Return to plan list</a>
+            <a class="btn btn-primary" href="{% url 'add_training' workout_plan.id %}">Add new training</a>
+            <a class="btn btn-primary" href="{% url 'workout_plan_edit' workout_plan.id %}">Edit plan</a>
+            <a class="btn btn-primary" href="{% url 'current_workout' get_month_counter %}">Return to calendar</a>
+            <a class="btn btn-primary" href="{% url 'workout_plans' %}">Return to your plans</a>
         </p>
     </div>
     <div class="text_blue">
@@ -26,7 +26,7 @@
         <div class="text_blue list-group">
             {% for training in workout_plan.training_set.all|dictsort:"day" %}
                 <a class="btn btn-primary btn-sm"
-                   href="/training_edit/{{ workout_plan.id }}/{{ training.id }}">
+                   href="{% url 'edit_training' workout_plan.id training.id %}">
                     <div class="list-group-item list-group-item-primary">
                         {{ training.day|date:"d.m.Y" }}; {{ training }}
                         {% if training.accomplished %}
@@ -34,13 +34,13 @@
                         {% else %}
                             {% if training.day <= date_today %}
                                 <form class="inline">
-                                    <button formmethod="get" formaction="/training_diary_entry_add/{{ training.id }}"
+                                    <button formmethod="get" formaction="{% url 'diary_entry_add' training.id %}"
                                             class="btn btn-success btn-sm">Add to diary
                                     </button>
                                 </form>
                             {% endif %}
                             <form class="inline">
-                                <button formmethod="get" formaction="/training_delete/{{ training.id }}"
+                                <button formmethod="get" formaction="{% url 'delete_training' training.id %}"
                                         class="btn btn-danger btn-sm">Delete
                                 </button>
                             </form>

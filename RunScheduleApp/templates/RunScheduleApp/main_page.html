@@ -5,10 +5,10 @@
     {% if not request.user.is_authenticated %}
         <div class="text_blue">
             <p>
-                <a href="/login" class="btn btn-primary btn-lg btn-block">To fully use the website you must sign in</a>
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg btn-block">To fully use the website you must sign in</a>
             </p>
             <p>
-                <a href="/registration" class="btn btn-primary btn-lg btn-block">
+                <a href="{% url 'registration' %}" class="btn btn-primary btn-lg btn-block">
                     If you do not have an account yet, sign up</a>
             </p>
         </div>
