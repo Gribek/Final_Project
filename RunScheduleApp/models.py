@@ -40,9 +40,9 @@ class Training(models.Model):
     accomplished = models.BooleanField(default=False)
 
     def training_info(self):
-        """Prepare info about training to display on the calendar.
+        """Prepare information about a training.
 
-        :return: information about object
+        :return: training info
         :rtype: str
         """
         info = f'{self.training_main}'
@@ -56,7 +56,7 @@ class Training(models.Model):
         return info
 
     def __str__(self):
-        """Return training information"""
+        """Return a string representation of the model."""
         return self.training_info()
 
 
