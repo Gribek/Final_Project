@@ -867,7 +867,7 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
             'date': training.day, 'training_info': training.training_info(),
             'training_distance': distance, 'training_time': time})
         return render(request, 'RunScheduleApp/diary_entry_add.html',
-                      {'form': form})
+                      {'form': form, 'training': training})
 
     def post(self, request, training_id):
         """Create a new diary entry.
