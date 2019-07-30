@@ -8,6 +8,7 @@ from django.contrib.auth.models import Permission, User
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views import View
 
@@ -495,8 +496,8 @@ class WorkoutCalendar(HTMLCalendar):
         else:  # Non-training days.
             css_class = self.set_css_class(day, weekday, is_training_day=False)
             link_date = self.create_date(day)
-            add_training_link = f"/training_add/{self.workout_plan.id}/" \
-                                f"{self.month_number_requested}/{link_date}"
+            add_training_link = reverse('add_training_date', args=[
+                self.workout_plan.id, self.month_number_requested, link_date])
             return '<td class="%s"><a href="%s">%d</a></td>' % (
                 css_class, add_training_link, day)
 
@@ -541,8 +542,8 @@ class WorkoutCalendar(HTMLCalendar):
         link_date = self.create_date(day)
         training_id = Training.objects.filter(
             workout_plan=self.workout_plan).get(day=link_date).id
-        edit_day_link = f'/training_edit/{self.workout_plan.id}/{training_id}/' \
-                        f'{self.month_number_requested}'
+        edit_day_link = reverse('edit_training_month', args=[
+            self.workout_plan.id, training_id, self.month_number_requested])
         return edit_day_link
 
     def create_date(self, day):
