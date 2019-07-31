@@ -66,7 +66,7 @@ class WorkoutsListTest(PermissionRequiredViewTest):
         self.log_user_with_permission()
         response = self.client.get('/workout_list')
         self.assertTemplateUsed(response,
-                                'RunScheduleApp/workoutplan_list.html')
+                                'RunScheduleApp/workout_plan_list.html')
 
     def test_view_returns_correct_workout_plans_list_in_context(self):
         self.log_user_with_permission()
