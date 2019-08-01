@@ -43,8 +43,8 @@
             </ul>
         </div>
         <div class="right">
-            {% if request.user.is_authenticated %}
-                Hello, {{ request.user.username }} <a href="{% url 'logout' %}" class="btn btn-danger">Sign out</a>
+            {% if user.is_authenticated %}
+                Hello, {{ user.username }} <a href="{% url 'logout' %}" class="btn btn-danger">Sign out</a>
             {% else %}
                 You're not sign in <a href="{% url 'login' %}" class="btn btn-success">Sign in</a>
             {% endif %}
