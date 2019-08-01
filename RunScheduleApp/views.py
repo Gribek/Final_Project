@@ -612,6 +612,9 @@ class WorkoutCalendar(HTMLCalendar):
 class LoginView(View):
     """The class view to log users in."""
 
+    form_class = LoginForm
+    template_name = 'RunScheduleApp/login.html'
+
     def get(self, request):
         """Display login form.
 
@@ -619,8 +622,8 @@ class LoginView(View):
         :return: login page view
         :rtype: HttpResponse
         """
-        form = LoginForm()
-        return render(request, 'RunScheduleApp/login.html', {'form': form})
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request):
         """Log a user in.
@@ -630,21 +633,18 @@ class LoginView(View):
             login page view with error massage
         :rtype: HttpResponse
         """
-        form = LoginForm(request.POST)
+        form = self.form_class(request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('user')
             password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                next = request.GET.get('next')
-                if next is not None:
-                    return redirect(next)
-                return redirect('/')
-            else:
-                return render(request, 'RunScheduleApp/login.html',
-                              {'form': form})
-        return render(request, 'RunScheduleApp/login.html', {'form': form})
+                next_page = request.GET.get('next')
+                if next_page is not None:
+                    return redirect(next_page)
+                return redirect('home_page')
+        return render(request, self.template_name, {'form': form})
 
 
 class LogoutView(View):
@@ -659,11 +659,14 @@ class LogoutView(View):
         """
         if request.user.is_authenticated:
             logout(request)
-        return redirect('/')
+        return redirect('home_page')
 
 
 class RegistrationView(View):
     """The class view to register new users."""
+
+    form_class = RegistrationForm
+    template_name = 'RunScheduleApp/registration.html'
 
     def get(self, request):
         """Display registration form.
@@ -672,9 +675,8 @@ class RegistrationView(View):
         :return: registration form view
         :rtype: HttpResponse
         """
-        form = RegistrationForm()
-        return render(request, 'RunScheduleApp/registration.html',
-                      {'form': form})
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request):
         """Register a new user.
@@ -684,35 +686,28 @@ class RegistrationView(View):
             registration form view with error massages
         :rtype: HttpResponse
         """
-        form = RegistrationForm(request.POST)
+        form = self.form_class(request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             name = form.cleaned_data.get('name')
             surname = form.cleaned_data.get('surname')
             email = form.cleaned_data.get('email')
-            User.objects.create_user(username=username, password=password,
-                                     email=email, first_name=name,
-                                     last_name=surname)
-            new_user = User.objects.get(username=username)
+            new_user = User.objects.create_user(
+                username=username, password=password, email=email,
+                first_name=name, last_name=surname)
             permission_list = [
-                'add_training',
-                'change_training',
-                'delete_training',
-                'view_training',
-                'add_workoutplan',
-                'change_workoutplan',
-                'delete_workoutplan',
-                'view_workoutplan',
-                'add_trainingdiary',
-                'change_trainingdiary',
+                'add_training', 'change_training',
+                'delete_training', 'view_training',
+                'add_workoutplan', 'change_workoutplan',
+                'delete_workoutplan', 'view_workoutplan',
+                'add_trainingdiary', 'change_trainingdiary',
                 'view_trainingdiary',
             ]
             p = [Permission.objects.get(codename=i) for i in permission_list]
             new_user.user_permissions.set(p)
-            return redirect('/login')
-        return render(request, 'RunScheduleApp/registration.html',
-                      {'form': form})
+            return redirect('login')
+        return render(request, self.template_name, {'form': form})
 
 
 class UserProfileView(LoginRequiredMixin, View):
@@ -731,6 +726,9 @@ class UserProfileView(LoginRequiredMixin, View):
 class PasswordChangeView(LoginRequiredMixin, View):
     """The class view for changing user password"""
 
+    form_class = PasswordChangeForm
+    template_name = 'RunScheduleApp/password_change.html'
+
     def get(self, request):
         """Display a password change form.
 
@@ -738,9 +736,8 @@ class PasswordChangeView(LoginRequiredMixin, View):
         :return: password change form view
         :rtype: HttpResponse
         """
-        form = PasswordChangeForm()
-        return render(request, 'RunScheduleApp/password_change.html',
-                      {'form': form})
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request):
         """Change user password.
@@ -749,21 +746,23 @@ class PasswordChangeView(LoginRequiredMixin, View):
         :return: login page view (if form filled out correctly) or
             password change form view with error massage
         """
-        form = PasswordChangeForm(request.POST)
+        form = self.form_class(request.POST)
         if form.is_valid():
             new_password = form.cleaned_data.get('new_password')
             if not request.user.is_authenticated:
-                return redirect('/')
+                return redirect('login')
             current_user = request.user
             current_user.set_password(new_password)
             current_user.save()
-            return redirect('/login')
-        return render(request, 'RunScheduleApp/password_change.html',
-                      {'form': form})
+            return redirect('login')
+        return render(request, self.template_name, {'form': form})
 
 
 class EditUserView(LoginRequiredMixin, View):
     """The class view for changing user data"""
+
+    form_class = EditUserForm
+    template_name = 'RunScheduleApp/edit_user_profile.html'
 
     def get(self, request):
         """Display user data edit form.
@@ -773,9 +772,8 @@ class EditUserView(LoginRequiredMixin, View):
         :rtype: HttpResponse
         """
         current_user = request.user
-        form = EditUserForm(instance=current_user)
-        return render(request, 'RunScheduleApp/edit_user_profile.html',
-                      {'form': form})
+        form = self.form_class(instance=current_user)
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request):
         """Save changes to user data.
@@ -785,12 +783,11 @@ class EditUserView(LoginRequiredMixin, View):
             or user data edit form view with error massages
         :rtype: HttpResponse
         """
-        form = EditUserForm(request.POST, instance=request.user)
+        form = self.form_class(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            return redirect('/profile')
-        return render(request, 'RunScheduleApp/edit_user_profile.html',
-                      {'form': form})
+            return redirect('profile')
+        return render(request, self.template_name, {'form': form})
 
 
 def get_plan_start_and_end_date(workout_plan):
@@ -859,6 +856,8 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
     """The class that creates a new entry to training diary."""
 
     permission_required = 'RunScheduleApp.add_trainingdiary'
+    form_class = DiaryEntryForm
+    template_name = 'RunScheduleApp/diary_entry_add.html'
 
     def get(self, request, training_id):
         """Display the form for creating a new diary entry.
@@ -873,11 +872,11 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
         training = Training.objects.get(id=training_id)
         distance = TrainingDiaryEntryAdd.calculate_distance(training)
         time = TrainingDiaryEntryAdd.calculate_time(training)
-        form = DiaryEntryForm(initial={
+        form = self.form_class(initial={
             'date': training.day, 'training_info': training.training_info(),
             'training_distance': distance, 'training_time': time})
-        return render(request, 'RunScheduleApp/diary_entry_add.html',
-                      {'form': form, 'training': training})
+        ctx = {'form': form, 'training': training}
+        return render(request, self.template_name, ctx)
 
     def post(self, request, training_id):
         """Create a new diary entry.
@@ -890,16 +889,16 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         new_diary_entry = TrainingDiary()
-        form = DiaryEntryForm(data=request.POST, instance=new_diary_entry)
+        form = self.form_class(data=request.POST, instance=new_diary_entry)
         training = Training.objects.get(id=training_id)
         if form.is_valid():
             form.instance.user = request.user
             form.save()
             training.accomplished = True
             training.save()
-            return redirect(f'/plan_details/{training.workout_plan.id}')
-        return render(request, 'RunScheduleApp/diary_entry_add.html',
-                      {'form': form, 'training': training})
+            return redirect('plan_details', training.workout_plan.id)
+        ctx = {'form': form, 'training': training}
+        return render(request, self.template_name, ctx)
 
     @staticmethod
     def calculate_distance(training):
