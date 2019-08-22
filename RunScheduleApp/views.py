@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import Permission, User
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views import View
@@ -81,7 +81,7 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
         :return: view of the edit form
         :rtype: HttpResponse
         """
-        workout_plan = WorkoutPlan.objects.get(pk=plan_id)
+        workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
         form = self.form_class(instance=workout_plan)
         return render(request, self.template_name,
@@ -97,7 +97,7 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
             form view with error massages
         :rtype: HttpResponse
         """
-        workout_plan = WorkoutPlan.objects.get(pk=plan_id)
+        workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
         form = self.form_class(request.POST, instance=workout_plan)
         if form.is_valid():
             form.save()
@@ -120,7 +120,7 @@ class PlanDetailsView(PermissionRequiredMixin, View):
         :return: view of the workout plan details
         :rtype: HttpResponse
         """
-        workout_plan = WorkoutPlan.objects.get(pk=plan_id)
+        workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
         date_today = datetime.today().date()
         ctx = {'workout_plan': workout_plan, 'date_today': date_today}
@@ -164,7 +164,7 @@ class TrainingAdd(PermissionRequiredMixin, View):
         :return: form view
         :rtype: HttpResponse
         """
-        workout_plan = WorkoutPlan.objects.get(pk=plan_id)
+        workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = self.form_class(initial={'day': date, 'start_date': start_date,
@@ -187,7 +187,7 @@ class TrainingAdd(PermissionRequiredMixin, View):
             form view with error massages
         :rtype: HttpResponse
         """
-        workout_plan = WorkoutPlan.objects.get(pk=plan_id)
+        workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
         form = self.form_class(request.POST)
         if form.is_valid():
             form.instance.workout_plan = workout_plan
@@ -222,9 +222,9 @@ class TrainingEdit(PermissionRequiredMixin, View):
         :return: view of the edit form
         :rtype: HttpResponse
         """
-        workout_plan = WorkoutPlan.objects.get(pk=plan_id)
+        workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
-        training = Training.objects.get(pk=training_id)
+        training = get_object_or_404(Training, pk=training_id)
         start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = self.form_class(instance=training, initial={
             'start_date': start_date, 'end_date': end_date})
@@ -248,7 +248,7 @@ class TrainingEdit(PermissionRequiredMixin, View):
             massages
         :rtype: HttpResponse
         """
-        training_to_edit = Training.objects.get(pk=training_id)
+        training_to_edit = get_object_or_404(Training, pk=training_id)
         form = self.form_class(request.POST, instance=training_to_edit)
         if form.is_valid():
             form.save()
@@ -274,7 +274,7 @@ class TrainingDelete(PermissionRequiredMixin, View):
             plan to which the deleted training belonged
         :rtype: HttpResponse
         """
-        training = Training.objects.get(pk=training_id)
+        training = get_object_or_404(Training, pk=training_id)
         check_workout_plan_owner(training.workout_plan, request.user)
         training.delete()
         return redirect('plan_details', training.workout_plan.id)
@@ -828,7 +828,7 @@ def set_active_workout_plan(new_active_plan_id, user):
     """
     WorkoutPlan.objects.filter(owner=user).filter(is_active=True).update(
         is_active=False)
-    new_active_plan = WorkoutPlan.objects.get(pk=new_active_plan_id)
+    new_active_plan = get_object_or_404(WorkoutPlan, pk=new_active_plan_id)
     new_active_plan.is_active = True
     new_active_plan.save()
     return None
@@ -869,7 +869,7 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
         :return: form view
         :rtype: HttpResponse
         """
-        training = Training.objects.get(id=training_id)
+        training = get_object_or_404(Training, pk=training_id)
         distance = TrainingDiaryEntryAdd.calculate_distance(training)
         time = TrainingDiaryEntryAdd.calculate_time(training)
         form = self.form_class(initial={
@@ -890,7 +890,7 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
         """
         new_diary_entry = TrainingDiary()
         form = self.form_class(data=request.POST, instance=new_diary_entry)
-        training = Training.objects.get(id=training_id)
+        training = get_object_or_404(Training, pk=training_id)
         if form.is_valid():
             form.instance.user = request.user
             form.save()
