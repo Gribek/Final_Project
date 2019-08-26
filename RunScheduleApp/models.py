@@ -45,15 +45,18 @@ class Training(models.Model):
         :return: training info
         :rtype: str
         """
-        info = f'{self.training_main}'
-        info += f' {self.distance_main}km' if self.distance_main else ''
-        info += f' {self.time_main}min' if self.time_main else ''
-        info += f' {self.training_additional}' if self.training_additional \
-            else ''
-        info += f' {self.distance_additional}km' if self.distance_additional \
-            else ''
-        info += f' {self.time_additional}min' if self.time_additional else ''
-        return info
+        info = [self.training_main]
+        if self.distance_main:
+            info.append(f'{self.distance_main}km')
+        if self.time_main:
+            info.append(f'{self.time_main}min')
+        if self.training_additional:
+            info.append(self.training_additional)
+        if self.distance_additional:
+            info.append(f'{self.distance_additional}km')
+        if self.time_additional:
+            info.append(f'{self.time_additional}min')
+        return ' '.join(info)
 
     def __str__(self):
         """Return a string representation of the model."""
