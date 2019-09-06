@@ -166,9 +166,7 @@ class TrainingAdd(PermissionRequiredMixin, View):
         """
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
-        start_date, end_date = get_plan_start_and_end_date(workout_plan)
-        form = self.form_class(initial={'day': date, 'start_date': start_date,
-                                        'end_date': end_date})
+        form = self.form_class(initial={'day': date, 'plan_id': plan_id})
         ctx = {'form': form, 'plan_id': workout_plan.id,
                'date': date, 'month_number': month_number}
         return render(request, self.template_name, ctx)
@@ -225,9 +223,8 @@ class TrainingEdit(PermissionRequiredMixin, View):
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
         training = get_object_or_404(Training, pk=training_id)
-        start_date, end_date = get_plan_start_and_end_date(workout_plan)
         form = self.form_class(instance=training, initial={
-            'start_date': start_date, 'end_date': end_date})
+            'plan_id': plan_id, 'initial_training_date': training.day})
         ctx = {'form': form, 'plan_id': plan_id, 'month_number': month_number}
         return render(request, self.template_name, ctx)
 

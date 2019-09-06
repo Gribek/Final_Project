@@ -32,8 +32,9 @@ class WorkoutPlanEditForm(ModelForm):
 
 
 class TrainingForm(ModelForm):
-    start_date = forms.DateField(widget=forms.HiddenInput)
-    end_date = forms.DateField(widget=forms.HiddenInput)
+    plan_id = forms.IntegerField(widget=forms.HiddenInput)
+    initial_training_date = forms.DateField(widget=forms.HiddenInput,
+                                            required=False)
 
     class Meta:
         model = Training
@@ -44,22 +45,35 @@ class TrainingForm(ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        start_date = cleaned_data.get('start_date')
-        end_date = cleaned_data.get('end_date')
-        day = cleaned_data.get('day')
-        if day < start_date:
+        workout_plan = WorkoutPlan.objects.get(id=cleaned_data.get('plan_id'))
+        # date given by user in the form
+        training_date = cleaned_data.get('day')
+        # initial date in case of editing an existing training,
+        # value equals to None when creating new Training object
+        initial_training_date = cleaned_data.get('initial_training_date')
+
+        if training_date != initial_training_date:
+            if workout_plan.training_set.filter(day=training_date):
+                self.add_error('day', 'You have already scheduled training'
+                                      ' for this day')
+
+        plan_date_range = workout_plan.date_range
+        if training_date < plan_date_range.lower:
             self.add_error('day', 'The training date cannot be earlier than'
-                                  'the workout plan start date')
-        if day > end_date:
+                                  ' the workout plan start date')
+        if training_date > plan_date_range.upper:
             self.add_error('day', 'The training date cannot be later than the'
-                                  'workout plan end date')
+                                  ' workout plan end date')
+
         distance_main = cleaned_data.get('distance_main')
         if distance_main is not None and distance_main <= 0:
             self.add_error('distance_main', 'Distance must be greater than 0')
+
         distance_additional = cleaned_data.get('distance_additional')
         if distance_additional is not None and distance_additional <= 0:
             self.add_error('distance_additional',
                            'Distance must be greater than 0')
+
         time_additional = cleaned_data.get('time_additional')
         if time_additional is not None and time_additional <= 0:
             self.add_error('time_additional', 'Time must be greater than 0')

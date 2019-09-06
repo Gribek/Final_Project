@@ -26,7 +26,7 @@
                 {{ form.distance_additional.label_tag }}{{ form.distance_additional }} and/or
                 {{ form.time_additional.label_tag }}{{ form.time_additional }}
             </p>
-            {{ form.start_date }}{{ form.end_date }}
+            {{ form.plan_id }}{{ form.initial_training_date }}
 
             <input class="btn btn-primary" type="submit" value="Save training">
             {% csrf_token %}
