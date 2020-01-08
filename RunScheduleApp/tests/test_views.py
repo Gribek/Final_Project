@@ -461,7 +461,7 @@ class TrainingDiaryEntryAddTest(PermissionRequiredViewTest):
 
     def test_view_returns_the_form_if_data_not_valid(self):
         self.log_user_with_permission()
-        data = {'date': '2020-01-01', 'training_info': 'test training info',
+        data = {'date': '2120-01-01', 'training_info': 'test training info',
                 'training_distance': 8.5, 'training_time': 70,
                 'comments': 'test comment'}
         response = self.client.post(reverse('diary_entry_add', kwargs={
