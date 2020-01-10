@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -86,6 +87,11 @@ DATABASES = {
         'HOST': '127.0.0.1',
     }
 }
+
+DATABASE_URL = os.environ.get('DATABASE_URL')
+db_heroku = dj_database_url.config(default=DATABASE_URL, conn_max_age=500,
+                                   ssl_require=True)
+DATABASES['default'].update(db_heroku)
 
 
 # Password validation
