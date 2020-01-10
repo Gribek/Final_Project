@@ -26,7 +26,7 @@ SECRET_KEY = '+@!x4otft^d@go_^uh6tnmdz%8%*x1za5dt9q!l)*37a#327^m'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get('DEBUG', default=1))
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'dry-hollows-80156.herokuapp.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'run-schedules.herokuapp.com']
 
 
 # Application definition
@@ -83,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'run_schedule_app',
         'USER': 'postgres',
-        'PASSWORD': 'coderslab',
+        'PASSWORD': 'postgres',
         'HOST': '127.0.0.1',
     }
 }
