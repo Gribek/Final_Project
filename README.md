@@ -69,6 +69,6 @@ After that go to http://127.0.0.1:8000/. If all the steps were successful, the m
 
 ### Code documentation
 Here is the basic documentation of the project's code:
-https://runschedules.readthedocs.io/en/latest/
+https://runschedules.readthedocs.io/en/latest/.
 
 
