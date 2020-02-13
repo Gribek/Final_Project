@@ -21,7 +21,7 @@ https://run-schedules.herokuapp.com/
 * CSS3
 
 ### Setup
-The RunSchedules application has been deployed on heroku. Here's a direct link: https://run-schedules.herokuapp.com/. Feel free to use or test it the way you want.
+The RunSchedules application has been deployed on heroku. Here's a direct link: https://run-schedules.herokuapp.com/. Feel free to use it or test it the way you want.
 
 
 To set up a project on your device, follow the steps below.
@@ -34,7 +34,7 @@ Create a virtual environment for the project.
 ```
 $ virtualenv -p python3 env
 ```
-Then ctivate it.
+Then activate it.
 ```
 $ source env/bin/activate
 ```
