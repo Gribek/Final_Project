@@ -26,10 +26,8 @@ The RunSchedules application has been deployed on heroku. Here's a direct link: 
 
 To set up a project on your device, follow the steps below.
 
-Download the repository to the selected folder using git clone.
-```
-$ git clone https://github.com/Gribek/RunSchedules.git
-```
+Fork and/or clone the repository to the selected folder using git clone command.
+
 Create a virtual environment for the project. 
 ```
 $ virtualenv -p python3 env
