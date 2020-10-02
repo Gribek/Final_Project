@@ -24,7 +24,7 @@ urlpatterns = [
     path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
     url(r'^$', MainPageView.as_view(), name='home_page'),
-    url(r'^workout/(?P<month>\d+)/(?P<year>\d+)$',
+    path('workout/<int:month>/<int:year>)',
         WorkoutPlanView.as_view(), name='current_workout'),
     url(r'^workout_list$', WorkoutsList.as_view(), name='workout_plans'),
     url(r'^workout_plan_add', WorkoutPlanAdd.as_view(),

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from calendar import HTMLCalendar
 
 from django.contrib.auth import login, logout
@@ -352,26 +352,49 @@ class WorkoutPlanView(LoginRequiredMixin, View):
         if not workout_plan:
             return render(request, 'RunScheduleApp/current_workout_plan.html',
                           {'workout_plan': ''})
-        # plan_start_date, plan_end_date = get_plan_start_and_end_date(
-        #     workout_plan)
-        # present_month_number = WorkoutPlanView.get_present_month_number(
-        #     plan_start_date)
-        # last_month_number = WorkoutPlanView.get_last_month_number(
-        #     plan_start_date, plan_end_date)
-
-        # month, year = WorkoutPlanView.get_month_and_year(
-        #     month_number_requested, plan_start_date)
+        workout_start_date, workout_end_date = get_plan_start_and_end_date(
+            workout_plan)
+        prev_month, next_month = WorkoutPlanView.previous_and_next_month(
+            workout_plan, month, year)
         calendar = WorkoutCalendar(workout_plan, month, year).formatmonth(
-            int(year), int(month))
+            year, month)
         ctx = {
             'workout_plan': workout_plan,
             'calendar': mark_safe(calendar),
-            # 'month_number_requested': month_number_requested,
-            # 'last_month_number': str(last_month_number),
-            # 'present_month_number': present_month_number
+            'prev_month': prev_month,
+            'next_month': next_month,
+            'first_month': {'month': workout_start_date.month,
+                            'year': workout_start_date.year},
+            'last_month': {'month': workout_end_date.month,
+                           'year': workout_end_date.year}
         }
         return render(request, 'RunScheduleApp/current_workout_plan.html',
                       ctx)
+
+    @staticmethod
+    def previous_and_next_month(workout_plan, month, year):
+        workout_first_day, workout_last_day = get_plan_start_and_end_date(
+            workout_plan)
+        today = datetime.today().date()
+        first_day_in_month = today.replace(day=1).replace(month=month).replace(
+            year=year)
+        last_day_prev_month = first_day_in_month - timedelta(days=1)
+        first_day_next_month = (
+                first_day_in_month + timedelta(days=32)).replace(day=1)
+
+        if workout_first_day <= last_day_prev_month:
+            prev_month = {'month': last_day_prev_month.month,
+                          'year': last_day_prev_month.year}
+        else:
+            prev_month = None
+
+        if workout_last_day >= first_day_next_month:
+            next_month = {'month': first_day_next_month.month,
+                          'year': first_day_next_month.year}
+        else:
+            next_month = None
+
+        return prev_month, next_month
 
     @staticmethod
     def get_month_and_year(month_number_requested, plan_start_date):

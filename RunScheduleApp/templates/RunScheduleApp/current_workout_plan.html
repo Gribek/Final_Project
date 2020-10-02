@@ -20,17 +20,17 @@
                     {{ calendar }}
                 </div>
                 <div>
-                {% if month_number_requested != '1' %}
-                    <a href="{% url 'current_workout' 1 %}" class="btn btn-primary">
+                {% if prev_month %}
+                    <a href="{% url 'current_workout' first_month.month first_month.year %}" class="btn btn-primary">
                         <i class="fas fa-angle-double-left"></i> First month</a>
-                    <a href="{% url 'current_workout' month_number_requested|add:'-1' %}" class="btn btn-primary">
+                    <a href="{% url 'current_workout' prev_month.month prev_month.year %}" class="btn btn-primary">
                         <i class="fas fa-angle-left"></i> Previous month</a>
                 {% endif %}
-                <a href="{% url 'current_workout' present_month_number %}" class="btn btn-primary">Current month</a>
-                {% if month_number_requested != last_month_number %}
-                    <a href="{% url 'current_workout' month_number_requested|add:'1' %}" class="btn btn-primary">Next month
+                <a href="{% url 'current_workout' month year %}" class="btn btn-primary">Current month</a>
+                {% if next_month %}
+                    <a href="{% url 'current_workout' next_month.month next_month.year %}" class="btn btn-primary">Next month
                         <i class="fas fa-angle-right"></i></a>
-                    <a href="{% url 'current_workout' last_month_number %}" class="btn btn-primary">Last month
+                    <a href="{% url 'current_workout' last_month.month last_month.year %}" class="btn btn-primary">Last month
                         <i class="fas fa-angle-double-right"></i></a>
                 {% endif %}
             {% endif %}
