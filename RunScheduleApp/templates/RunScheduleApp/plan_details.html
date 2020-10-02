@@ -17,7 +17,7 @@
         <p>
             <a class="btn btn-primary" href="{% url 'add_training' workout_plan.id %}">Add new training</a>
             <a class="btn btn-primary" href="{% url 'workout_plan_edit' workout_plan.id %}">Edit plan</a>
-            <a class="btn btn-primary" href="{% url 'current_workout' get_month_counter %}">Return to calendar</a>
+            <a class="btn btn-primary" href="{% url 'current_workout' month year %}">Return to calendar</a>
             <a class="btn btn-primary" href="{% url 'workout_plans' %}">Return to your plans</a>
         </p>
     </div>
