@@ -338,7 +338,7 @@ class WorkoutPlanView(LoginRequiredMixin, View):
     equal to 1. Number of the second month is 2, the third is 3, etc.
     """
 
-    def get(self, request, month_number_requested):
+    def get(self, request, month, year):
         """Display a calendar for a given month.
 
         :param request: request object
@@ -352,24 +352,23 @@ class WorkoutPlanView(LoginRequiredMixin, View):
         if not workout_plan:
             return render(request, 'RunScheduleApp/current_workout_plan.html',
                           {'workout_plan': ''})
-        plan_start_date, plan_end_date = get_plan_start_and_end_date(
-            workout_plan)
-        present_month_number = WorkoutPlanView.get_present_month_number(
-            plan_start_date)
-        last_month_number = WorkoutPlanView.get_last_month_number(
-            plan_start_date, plan_end_date)
+        # plan_start_date, plan_end_date = get_plan_start_and_end_date(
+        #     workout_plan)
+        # present_month_number = WorkoutPlanView.get_present_month_number(
+        #     plan_start_date)
+        # last_month_number = WorkoutPlanView.get_last_month_number(
+        #     plan_start_date, plan_end_date)
 
-        month, year = WorkoutPlanView.get_month_and_year(
-            month_number_requested, plan_start_date)
-        calendar = WorkoutCalendar(
-            workout_plan, month, year, month_number_requested).formatmonth(
-            year, month)
+        # month, year = WorkoutPlanView.get_month_and_year(
+        #     month_number_requested, plan_start_date)
+        calendar = WorkoutCalendar(workout_plan, month, year).formatmonth(
+            int(year), int(month))
         ctx = {
             'workout_plan': workout_plan,
             'calendar': mark_safe(calendar),
-            'month_number_requested': month_number_requested,
-            'last_month_number': str(last_month_number),
-            'present_month_number': present_month_number
+            # 'month_number_requested': month_number_requested,
+            # 'last_month_number': str(last_month_number),
+            # 'present_month_number': present_month_number
         }
         return render(request, 'RunScheduleApp/current_workout_plan.html',
                       ctx)
@@ -450,7 +449,7 @@ class WorkoutCalendar(HTMLCalendar):
 
     css_class_month = 'month table calendar'
 
-    def __init__(self, workout_plan, month, year, month_number_requested):
+    def __init__(self, workout_plan, month, year):
         """
         :param workout_plan: workout plan
         :type workout_plan: WorkoutPlan
@@ -469,7 +468,7 @@ class WorkoutCalendar(HTMLCalendar):
         self.workout_plan_start_date, self.workout_plan_end_date = \
             get_plan_start_and_end_date(workout_plan)
         self.training_dict = self.get_trainings_dict()
-        self.month_number_requested = month_number_requested
+        self.month_number_requested = 1  # TODO: Remove variable
 
     def formatday(self, day, weekday):
         """Return a day as a table cell.
@@ -531,13 +530,13 @@ class WorkoutCalendar(HTMLCalendar):
         a('\n')
         return ''.join(v)
 
-    def create_training_add_link(self, day):
+    def create_training_add_link(self, day):  # TODO: fix link
         link_date = self.create_date(day)
         link = reverse('add_training_date', args=[
             self.workout_plan.id, self.month_number_requested, link_date])
         return link
 
-    def create_training_edit_link(self, day):
+    def create_training_edit_link(self, day):  # TODO: fix link
         """Create a link to edit a training.
 
         :param day: day number
