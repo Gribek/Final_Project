@@ -330,20 +330,16 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
 
 
 class WorkoutPlanView(LoginRequiredMixin, View):
-    """The class view displaying a calendar with training marked.
-
-    Within that class, all variables and methods names containing the
-    phrase 'month_number' refers to the numbers of the following months
-    in a workout plan. Number of the first month in a workout plan is
-    equal to 1. Number of the second month is 2, the third is 3, etc.
-    """
+    """Display a calendar with training days marked"""
 
     def get(self, request, month, year):
         """Display a calendar for a given month.
 
         :param request: request object
-        :param month_number_requested: month number in a workout plan
-        :type month_number_requested: str
+        :param month: month number
+        :type month: int
+        :param year: year number
+        :type year: int
         :return: calendar view for the selected month with all
             trainings of active workout plan marked on it
         :rtype: HttpResponse
@@ -373,6 +369,18 @@ class WorkoutPlanView(LoginRequiredMixin, View):
 
     @staticmethod
     def previous_and_next_month(workout_plan, month, year):
+        """Calculate previous and next month and year
+
+        :param workout_plan: month number in a workout plan
+        :type workout_plan: WorkoutPlan
+        :param month: month number
+        :type month: int
+        :param year: year number
+        :type year: int
+        :return: month and year number of previous and next month if
+            they are part of the plan else None
+        :rtype: tuple[dict, dict]
+        """
         workout_first_day, workout_last_day = get_plan_start_and_end_date(
             workout_plan)
         today = datetime.today().date()
@@ -480,9 +488,6 @@ class WorkoutCalendar(HTMLCalendar):
         :type month: int
         :param year: year number
         :type year: int
-        :param month_number_requested: month number according to
-            workout plan numbering
-        :type month_number_requested: str
         """
         super(WorkoutCalendar, self).__init__()
         self.month = month
