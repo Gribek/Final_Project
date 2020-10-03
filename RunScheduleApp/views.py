@@ -413,59 +413,6 @@ class WorkoutPlanView(LoginRequiredMixin, View):
         return prev_month, next_month
 
     @staticmethod
-    def get_month_and_year(month_number_requested, plan_start_date):
-        """Calculate month and year for formatmonth method.
-
-        :param month_number_requested: month number in a workout plan
-        :type month_number_requested: str
-        :param plan_start_date: workout plan start date
-        :type plan_start_date: datetime
-        :return: number of month and year
-        :rtype: tuple[int, int]
-        """
-        plan_first_month = plan_start_date.month
-        plan_first_year = plan_start_date.year
-        month = plan_first_month + int(month_number_requested) - 1
-        year = plan_first_year
-
-        if month > 12:  # For plans exceeding a calendar year.
-            year = plan_first_year + int(month / 12)
-            month = month % 12
-            if month == 0:  # Amendment for december, when % 12 == 0
-                month = 12
-                year -= 1
-        return month, year
-
-    @staticmethod
-    def get_last_month_number(start_date, end_date):
-        """Calculate month number for the last month in workout plan.
-
-        :param start_date: first day of a plan
-        :type start_date: datetime
-        :param end_date: last day of a plan
-        :type end_date: datetime
-        :return: month number for the last month of a plan
-        :rtype: int
-        """
-        last_month_number = ((end_date.year - start_date.year) * 12
-                             + end_date.month - start_date.month + 1)
-        return last_month_number
-
-    @staticmethod
-    def get_present_month_number(plan_start_date):
-        """Calculate month number for present month (according to date).
-
-        :param plan_start_date: first day of a plan
-        :type plan_start_date: datetime
-        :return: month number of the present month in workout plan
-        :rtype: int
-        """
-        day_now = datetime.today().date()
-        month_number = ((day_now.year - plan_start_date.year) * 12
-                        + day_now.month - plan_start_date.month + 1)
-        return month_number
-
-    @staticmethod
     def get_active_workout_plan(user):
         """Get user's active workout plan.
 
