@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from calendar import HTMLCalendar
 
 from django.contrib.auth import login, logout
@@ -149,38 +149,42 @@ class TrainingAdd(PermissionRequiredMixin, View):
     form_class = TrainingForm
     template_name = 'RunScheduleApp/training_add.html'
 
-    def get(self, request, plan_id, month_number=None, date=None):
+    def get(self, request, plan_id, month=None, year=None, training_date=None):
         """Display the form for creating a new training.
 
         :param request: request object
         :param plan_id: id of a workout plan to which a new training is
             to be added
-        :type plan_id: str
-        :param month_number: month number according to workout plan
-            numbering
-        :type month_number: str
-        :param date: date of training, optional (default = None)
-        :type date: str
+        :type plan_id: int
+        :param month: month number
+        :type month: int
+        :param year: year number
+        :type year: int
+        :param training_date: date of training, optional (default = None)
+        :type training_date: str
         :return: form view
         :rtype: HttpResponse
         """
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
-        form = self.form_class(initial={'day': date, 'plan_id': plan_id})
+        form = self.form_class(initial={'day': training_date,
+                                        'plan_id': plan_id})
         ctx = {'form': form, 'plan_id': workout_plan.id,
-               'date': date, 'month_number': month_number}
+               'training_date': training_date, 'month_number': month,
+               'year_number': year}
         return render(request, self.template_name, ctx)
 
-    def post(self, request, plan_id, month_number=None):
+    def post(self, request, plan_id, month=None, year=None):
         """Create a new training.
 
         :param request: request object
         :param plan_id: id of a workout plan to which a new training is
             to be added
-        :type plan_id: str
-        :param month_number: month number according to workout plan
-            numbering
-        :type month_number: str
+        :type plan_id: int
+        :param month: month number
+        :type month: int
+        :param year: year number
+        :type year: int
         :return: list view of all trainings in a given training plan or
             form view with error massages
         :rtype: HttpResponse
@@ -190,11 +194,11 @@ class TrainingAdd(PermissionRequiredMixin, View):
         if form.is_valid():
             form.instance.workout_plan = workout_plan
             form.save()
-            if month_number is None:
+            if month is None or year is None:
                 return redirect('plan_details', plan_id)
-            return redirect('current_workout', month_number)
+            return redirect('current_workout', month, year)
         ctx = {'form': form, 'plan_id': workout_plan.id,
-               'month_number': month_number}
+               'month_number': month, 'year_number': year}
         return render(request, self.template_name, ctx)
 
 
@@ -205,18 +209,19 @@ class TrainingEdit(PermissionRequiredMixin, View):
     form_class = TrainingForm
     template_name = 'RunScheduleApp/training_add.html'
 
-    def get(self, request, plan_id, training_id, month_number=None):
+    def get(self, request, plan_id, training_id, month=None, year=None):
         """Display edit form for a selected training.
 
         :param request: request object
         :param plan_id: id of a workout plan to which a training
             belongs
-        :type plan_id: str
+        :type plan_id: int
         :param training_id: id of a training to edit
-        :type training_id: str
-        :param month_number: month number according to workout plan
-            numbering
-        :type month_number: str
+        :type training_id: int
+        :param month: month number
+        :type month: int
+        :param year: year number
+        :type year: int
         :return: view of the edit form
         :rtype: HttpResponse
         """
@@ -225,21 +230,23 @@ class TrainingEdit(PermissionRequiredMixin, View):
         training = get_object_or_404(Training, pk=training_id)
         form = self.form_class(instance=training, initial={
             'plan_id': plan_id, 'initial_training_date': training.day})
-        ctx = {'form': form, 'plan_id': plan_id, 'month_number': month_number}
+        ctx = {'form': form, 'plan_id': plan_id, 'month_number': month,
+               'year_number': year}
         return render(request, self.template_name, ctx)
 
-    def post(self, request, plan_id, training_id, month_number=None):
+    def post(self, request, plan_id, training_id, month=None, year=None):
         """Save changes to a selected training.
 
         :param request: request object
         :param plan_id: id of a workout plan to which a training
             belongs
-        :type plan_id: str
+        :type plan_id: int
         :param training_id: id of a training to edit
-        :type training_id: str
-        :param month_number: month number according to workout plan
-            numbering
-        :type month_number: str
+        :type training_id: int
+        :param month: month number
+        :type month: int
+        :param year: year number
+        :type year: int
         :return: list view of all trainings in a given training plan
             (if form filled out correctly) or form view with error
             massages
@@ -249,10 +256,11 @@ class TrainingEdit(PermissionRequiredMixin, View):
         form = self.form_class(request.POST, instance=training_to_edit)
         if form.is_valid():
             form.save()
-            if month_number is None:
+            if month is None or year is None:
                 return redirect('plan_details', plan_id)
-            return redirect('current_workout', month_number)
-        ctx = {'form': form, 'plan_id': plan_id, 'month_number': month_number}
+            return redirect('current_workout', month, year)
+        ctx = {'form': form, 'plan_id': plan_id, 'month_number': month,
+               'year_number': year}
         return render(request, self.template_name, ctx)
 
 
@@ -330,20 +338,16 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
 
 
 class WorkoutPlanView(LoginRequiredMixin, View):
-    """The class view displaying a calendar with training marked.
+    """Display a calendar with training days marked"""
 
-    Within that class, all variables and methods names containing the
-    phrase 'month_number' refers to the numbers of the following months
-    in a workout plan. Number of the first month in a workout plan is
-    equal to 1. Number of the second month is 2, the third is 3, etc.
-    """
-
-    def get(self, request, month_number_requested):
+    def get(self, request, month, year):
         """Display a calendar for a given month.
 
         :param request: request object
-        :param month_number_requested: month number in a workout plan
-        :type month_number_requested: str
+        :param month: month number
+        :type month: int
+        :param year: year number
+        :type year: int
         :return: calendar view for the selected month with all
             trainings of active workout plan marked on it
         :rtype: HttpResponse
@@ -352,80 +356,61 @@ class WorkoutPlanView(LoginRequiredMixin, View):
         if not workout_plan:
             return render(request, 'RunScheduleApp/current_workout_plan.html',
                           {'workout_plan': ''})
-        plan_start_date, plan_end_date = get_plan_start_and_end_date(
+        workout_start_date, workout_end_date = get_plan_start_and_end_date(
             workout_plan)
-        present_month_number = WorkoutPlanView.get_present_month_number(
-            plan_start_date)
-        last_month_number = WorkoutPlanView.get_last_month_number(
-            plan_start_date, plan_end_date)
-
-        month, year = WorkoutPlanView.get_month_and_year(
-            month_number_requested, plan_start_date)
-        calendar = WorkoutCalendar(
-            workout_plan, month, year, month_number_requested).formatmonth(
+        prev_month, next_month = WorkoutPlanView.previous_and_next_month(
+            workout_plan, month, year)
+        calendar = WorkoutCalendar(workout_plan, month, year).formatmonth(
             year, month)
         ctx = {
             'workout_plan': workout_plan,
             'calendar': mark_safe(calendar),
-            'month_number_requested': month_number_requested,
-            'last_month_number': str(last_month_number),
-            'present_month_number': present_month_number
+            'prev_month': prev_month,
+            'next_month': next_month,
+            'first_month': {'month': workout_start_date.month,
+                            'year': workout_start_date.year},
+            'last_month': {'month': workout_end_date.month,
+                           'year': workout_end_date.year}
         }
         return render(request, 'RunScheduleApp/current_workout_plan.html',
                       ctx)
 
     @staticmethod
-    def get_month_and_year(month_number_requested, plan_start_date):
-        """Calculate month and year for formatmonth method.
+    def previous_and_next_month(workout_plan, month, year):
+        """Calculate previous and next month and year
 
-        :param month_number_requested: month number in a workout plan
-        :type month_number_requested: str
-        :param plan_start_date: workout plan start date
-        :type plan_start_date: datetime
-        :return: number of month and year
-        :rtype: tuple[int, int]
+        :param workout_plan: month number in a workout plan
+        :type workout_plan: WorkoutPlan
+        :param month: month number
+        :type month: int
+        :param year: year number
+        :type year: int
+        :return: month and year number of previous and next month if
+            they are part of the plan else None
+        :rtype: tuple[dict, dict]
         """
-        plan_first_month = plan_start_date.month
-        plan_first_year = plan_start_date.year
-        month = plan_first_month + int(month_number_requested) - 1
-        year = plan_first_year
+        workout_first_day, workout_last_day = get_plan_start_and_end_date(
+            workout_plan)
+        today = datetime.today().date()
+        first_day_in_month = today.replace(day=1).replace(month=month).replace(
+            year=year)
+        last_day_prev_month = first_day_in_month - timedelta(days=1)
+        first_day_next_month = (
+                first_day_in_month + timedelta(days=32)).replace(day=1)
 
-        if month > 12:  # For plans exceeding a calendar year.
-            year = plan_first_year + int(month / 12)
-            month = month % 12
-            if month == 0:  # Amendment for december, when % 12 == 0
-                month = 12
-                year -= 1
-        return month, year
+        if workout_first_day <= last_day_prev_month:
+            prev_month = {'month': last_day_prev_month.month,
+                          'year': last_day_prev_month.year}
+        else:
+            prev_month = None
 
-    @staticmethod
-    def get_last_month_number(start_date, end_date):
-        """Calculate month number for the last month in workout plan.
+        if workout_last_day >= first_day_next_month:
+            next_month = {'month': first_day_next_month.month,
+                          'year': first_day_next_month.year}
+        else:
+            next_month = None
 
-        :param start_date: first day of a plan
-        :type start_date: datetime
-        :param end_date: last day of a plan
-        :type end_date: datetime
-        :return: month number for the last month of a plan
-        :rtype: int
-        """
-        last_month_number = ((end_date.year - start_date.year) * 12
-                             + end_date.month - start_date.month + 1)
-        return last_month_number
-
-    @staticmethod
-    def get_present_month_number(plan_start_date):
-        """Calculate month number for present month (according to date).
-
-        :param plan_start_date: first day of a plan
-        :type plan_start_date: datetime
-        :return: month number of the present month in workout plan
-        :rtype: int
-        """
-        day_now = datetime.today().date()
-        month_number = ((day_now.year - plan_start_date.year) * 12
-                        + day_now.month - plan_start_date.month + 1)
-        return month_number
+        return prev_month, next_month
 
     @staticmethod
     def get_active_workout_plan(user):
@@ -450,7 +435,7 @@ class WorkoutCalendar(HTMLCalendar):
 
     css_class_month = 'month table calendar'
 
-    def __init__(self, workout_plan, month, year, month_number_requested):
+    def __init__(self, workout_plan, month, year):
         """
         :param workout_plan: workout plan
         :type workout_plan: WorkoutPlan
@@ -458,9 +443,6 @@ class WorkoutCalendar(HTMLCalendar):
         :type month: int
         :param year: year number
         :type year: int
-        :param month_number_requested: month number according to
-            workout plan numbering
-        :type month_number_requested: str
         """
         super(WorkoutCalendar, self).__init__()
         self.month = month
@@ -469,7 +451,6 @@ class WorkoutCalendar(HTMLCalendar):
         self.workout_plan_start_date, self.workout_plan_end_date = \
             get_plan_start_and_end_date(workout_plan)
         self.training_dict = self.get_trainings_dict()
-        self.month_number_requested = month_number_requested
 
     def formatday(self, day, weekday):
         """Return a day as a table cell.
@@ -534,7 +515,7 @@ class WorkoutCalendar(HTMLCalendar):
     def create_training_add_link(self, day):
         link_date = self.create_date(day)
         link = reverse('add_training_date', args=[
-            self.workout_plan.id, self.month_number_requested, link_date])
+            self.workout_plan.id, self.month, self.year, link_date])
         return link
 
     def create_training_edit_link(self, day):
@@ -549,7 +530,7 @@ class WorkoutCalendar(HTMLCalendar):
         training_id = Training.objects.filter(
             workout_plan=self.workout_plan).get(day=link_date).id
         link = reverse('edit_training_month', args=[
-            self.workout_plan.id, training_id, self.month_number_requested])
+            self.workout_plan.id, training_id, self.month, self.year])
         return link
 
     def create_date(self, day):

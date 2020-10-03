@@ -2,8 +2,8 @@
 
 {% block content %}
     <div class="form">
-        <form class="text_blue" method="post" {% if date %}
-              action="/training_add/{{ plan_id }}/{{ month_number }}" {% endif %}>
+        <form class="text_blue" method="post" {% if training_date %}
+              action="/training_add/{{ plan_id }}/{{ month_number }}/{{ year_number }}" {% endif %}>
             <p>
                 {{ form.day.errors }}
                 {{ form.day.label_tag }} {{ form.day }}
@@ -31,8 +31,8 @@
             <input class="btn btn-primary" type="submit" value="Save training">
             {% csrf_token %}
             <button class="btn btn-primary" type="reset">Reset</button>
-            {% if month_number %}
-                <a class="btn btn-primary" href="{% url 'current_workout' month_number %}">Cancel</a>
+            {% if month_number and year_number %}
+                <a class="btn btn-primary" href="{% url 'current_workout' month_number year_number %}">Cancel</a>
             {% else %}
                 <a class="btn btn-primary" href="{% url 'plan_details' plan_id %}">Cancel</a>
             {% endif %}
