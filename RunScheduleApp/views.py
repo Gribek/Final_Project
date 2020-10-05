@@ -411,7 +411,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
 class WorkoutCalendar(HTMLCalendar):
     """A class used to create monthly workout calendar in HTML"""
 
-    css_class_month = 'month table calendar'
+    table_css_class = 'month table calendar'
 
     def __init__(self, workout_plan, month, year):
         """
@@ -444,17 +444,16 @@ class WorkoutCalendar(HTMLCalendar):
         if day == 0:  # Table cells for days 'outside' the month.
             return '<td class="noday">&nbsp;</td>'
 
-        if str(day) in self.training_dict:  # Training days.
+        if day in self.training_dict:  # Training days.
             css_class = self.set_css_class(day, weekday, is_training_day=True)
             link = self.create_training_edit_link(day)
             result = f'<td class="{css_class}"><a href="{link}">{day}' \
                      f'<br><div class="training_info">' \
-                     f'{self.training_dict[str(day)]}</div></a></td>'
+                     f'{self.training_dict.get(day)}</div></a></td>'
             return result
 
         else:  # Non-training days.
-            css_class = self.set_css_class(day, weekday,
-                                           is_training_day=False)
+            css_class = self.set_css_class(day, weekday, is_training_day=False)
             link = self.create_training_add_link(day)
             result = f'<td class="{css_class}"><a href="{link}">{day}' \
                      f'</a></td>'
@@ -477,7 +476,7 @@ class WorkoutCalendar(HTMLCalendar):
         a = v.append
         a('<table id="fixedheight" style="table-layout: fixed" border="0"'
           ' cellpadding="0" cellspacing="0" class="%s">'
-          % self.css_class_month)
+          % self.table_css_class)
         a('\n')
         a(self.formatmonthname(theyear, themonth, withyear=withyear))
         a('\n')
@@ -491,6 +490,13 @@ class WorkoutCalendar(HTMLCalendar):
         return ''.join(v)
 
     def create_training_add_link(self, day):
+        """Create a link to add a training.
+
+        :param day: day number
+        :type day: int
+        :return: url to add training on a given day
+        :rtype: str
+        """
         link_date = self.create_date(day)
         link = reverse('add_training_date', args=[
             self.workout_plan.id, self.month, self.year, link_date])
@@ -512,15 +518,14 @@ class WorkoutCalendar(HTMLCalendar):
         return link
 
     def create_date(self, day):
-        """Create full date in datatime format.
+        """Create full date in datetime format.
 
         :param day: day number
         :return: date
         :rtype: datetime
         """
-        date = f"{self.year}-{self.month}-{day}"
-        date_format_datetime = datetime.strptime(date, "%Y-%m-%d").date()
-        return date_format_datetime
+        full_date = f"{self.year}-{self.month}-{day}"
+        return datetime.strptime(full_date, "%Y-%m-%d").date()
 
     def set_css_class(self, day, weekday, is_training_day):
         """Set css classes for table cell.
@@ -536,13 +541,13 @@ class WorkoutCalendar(HTMLCalendar):
         :return: background color
         :rtype: str
         """
-        date = self.create_date(day)
+        full_date = self.create_date(day)
         css_class = self.cssclasses[weekday]
-        if date == get_today_date():
+        if full_date == get_today_date():
             return css_class + ' today'
-        if date == self.workout_plan_start_date:
+        if full_date == self.workout_plan_start_date:
             return css_class + ' plan_start_day'
-        elif date == self.workout_plan_end_date:
+        elif full_date == self.workout_plan_end_date:
             return css_class + ' plan_end_day'
         if is_training_day:
             return css_class + ' training_day'
@@ -559,10 +564,7 @@ class WorkoutCalendar(HTMLCalendar):
         """
         trainings = self.workout_plan.training_set.filter(
             day__year=self.year).filter(day__month=self.month).order_by('day')
-        t_dict = {}
-        for training in trainings:
-            t_dict.update({f'{training.day.day}': training.training_info()})
-        return t_dict
+        return {t.day.day: t.training_info() for t in trainings}
 
 
 class LoginView(View):
