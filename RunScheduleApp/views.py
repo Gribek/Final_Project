@@ -122,7 +122,7 @@ class WorkoutPlanDetailsView(PermissionRequiredMixin, View):
         """
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
-        date_today = datetime.today().date()
+        date_today = get_today_date()
         ctx = {'workout_plan': workout_plan, 'date_today': date_today}
         return render(request, 'RunScheduleApp/plan_details.html', ctx)
 
@@ -285,30 +285,12 @@ class TrainingDeleteView(PermissionRequiredMixin, View):
         return redirect('plan_details', training.workout_plan.id)
 
 
-class SelectActiveWorkoutPlanView(PermissionRequiredMixin, View):
+class SelectCurrentPlanView(PermissionRequiredMixin, View):
     """The class view for selecting an active workout plan"""
 
     permission_required = 'RunScheduleApp.view_workoutplan'
     form_class = SelectActivePlanFrom
     template_name = 'RunScheduleApp/select_plan.html'
-
-    @staticmethod
-    def get_user_plans(user):
-        """Get all training plans belonging to the current user.
-
-        :param user: current user
-        :return: a tuple of paired workout plan ids with workout plan
-            names
-        :rtype: tuple[tuple[int, str]]
-        """
-        all_user_plans = WorkoutPlan.objects.filter(owner=user)
-        plan_names = []
-        plan_ids = []
-        for plan in all_user_plans:
-            plan_ids.append(plan.id)
-            plan_names.append(plan.name)
-        result = tuple(zip(plan_ids, plan_names))
-        return result
 
     def get(self, request):
         """Display the form for selecting an active workout plan.
@@ -317,8 +299,7 @@ class SelectActiveWorkoutPlanView(PermissionRequiredMixin, View):
         :return: form view
         :rtype: HttpResponse
         """
-        plans = SelectActiveWorkoutPlanView.get_user_plans(request.user)
-        form = self.form_class(choices=plans)
+        form = self.form_class(user=request.user)
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
@@ -328,8 +309,7 @@ class SelectActiveWorkoutPlanView(PermissionRequiredMixin, View):
         :return: list view of all user plans
         :rtype: HttpResponse
         """
-        plans = SelectActiveWorkoutPlanView.get_user_plans(request.user)
-        form = self.form_class(request.POST, choices=plans)
+        form = self.form_class(user=request.user, data=request.POST)
         if form.is_valid():
             new_active_plan_id = form.cleaned_data.get('active_plan')
             set_active_workout_plan(new_active_plan_id, request.user)
@@ -352,12 +332,12 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             trainings of active workout plan marked on it
         :rtype: HttpResponse
         """
-        workout_plan = CurrentWorkoutPlanView.get_active_workout_plan(request.user)
+        workout_plan = CurrentWorkoutPlanView.get_active_workout_plan(
+            request.user)
         if not workout_plan:
             return render(request, 'RunScheduleApp/current_workout_plan.html',
                           {'workout_plan': ''})
-        workout_start_date, workout_end_date = get_plan_start_and_end_date(
-            workout_plan)
+        start_date, end_date = get_plan_start_and_end_date(workout_plan)
         prev_month, next_month = CurrentWorkoutPlanView.previous_and_next_month(
             workout_plan, month, year)
         calendar = WorkoutCalendar(workout_plan, month, year).formatmonth(
@@ -367,10 +347,8 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             'calendar': mark_safe(calendar),
             'prev_month': prev_month,
             'next_month': next_month,
-            'first_month': {'month': workout_start_date.month,
-                            'year': workout_start_date.year},
-            'last_month': {'month': workout_end_date.month,
-                           'year': workout_end_date.year}
+            'start_date': start_date,
+            'end_date': end_date
         }
         return render(request, 'RunScheduleApp/current_workout_plan.html',
                       ctx)
@@ -391,7 +369,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
         """
         workout_first_day, workout_last_day = get_plan_start_and_end_date(
             workout_plan)
-        today = datetime.today().date()
+        today = get_today_date()
         first_day_in_month = today.replace(day=1).replace(month=month).replace(
             year=year)
         last_day_prev_month = first_day_in_month - timedelta(days=1)
@@ -433,7 +411,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
 class WorkoutCalendar(HTMLCalendar):
     """A class used to create monthly workout calendar in HTML"""
 
-    css_class_month = 'month table calendar'
+    table_css_class = 'month table calendar'
 
     def __init__(self, workout_plan, month, year):
         """
@@ -466,17 +444,16 @@ class WorkoutCalendar(HTMLCalendar):
         if day == 0:  # Table cells for days 'outside' the month.
             return '<td class="noday">&nbsp;</td>'
 
-        if str(day) in self.training_dict:  # Training days.
+        if day in self.training_dict:  # Training days.
             css_class = self.set_css_class(day, weekday, is_training_day=True)
             link = self.create_training_edit_link(day)
             result = f'<td class="{css_class}"><a href="{link}">{day}' \
                      f'<br><div class="training_info">' \
-                     f'{self.training_dict[str(day)]}</div></a></td>'
+                     f'{self.training_dict.get(day)}</div></a></td>'
             return result
 
         else:  # Non-training days.
-            css_class = self.set_css_class(day, weekday,
-                                           is_training_day=False)
+            css_class = self.set_css_class(day, weekday, is_training_day=False)
             link = self.create_training_add_link(day)
             result = f'<td class="{css_class}"><a href="{link}">{day}' \
                      f'</a></td>'
@@ -499,7 +476,7 @@ class WorkoutCalendar(HTMLCalendar):
         a = v.append
         a('<table id="fixedheight" style="table-layout: fixed" border="0"'
           ' cellpadding="0" cellspacing="0" class="%s">'
-          % self.css_class_month)
+          % self.table_css_class)
         a('\n')
         a(self.formatmonthname(theyear, themonth, withyear=withyear))
         a('\n')
@@ -513,6 +490,13 @@ class WorkoutCalendar(HTMLCalendar):
         return ''.join(v)
 
     def create_training_add_link(self, day):
+        """Create a link to add a training.
+
+        :param day: day number
+        :type day: int
+        :return: url to add training on a given day
+        :rtype: str
+        """
         link_date = self.create_date(day)
         link = reverse('add_training_date', args=[
             self.workout_plan.id, self.month, self.year, link_date])
@@ -534,15 +518,14 @@ class WorkoutCalendar(HTMLCalendar):
         return link
 
     def create_date(self, day):
-        """Create full date in datatime format.
+        """Create full date in datetime format.
 
         :param day: day number
         :return: date
         :rtype: datetime
         """
-        date = f"{self.year}-{self.month}-{day}"
-        date_format_datetime = datetime.strptime(date, "%Y-%m-%d").date()
-        return date_format_datetime
+        full_date = f"{self.year}-{self.month}-{day}"
+        return datetime.strptime(full_date, "%Y-%m-%d").date()
 
     def set_css_class(self, day, weekday, is_training_day):
         """Set css classes for table cell.
@@ -558,13 +541,13 @@ class WorkoutCalendar(HTMLCalendar):
         :return: background color
         :rtype: str
         """
-        date = self.create_date(day)
+        full_date = self.create_date(day)
         css_class = self.cssclasses[weekday]
-        if date == datetime.today().date():
+        if full_date == get_today_date():
             return css_class + ' today'
-        if date == self.workout_plan_start_date:
+        if full_date == self.workout_plan_start_date:
             return css_class + ' plan_start_day'
-        elif date == self.workout_plan_end_date:
+        elif full_date == self.workout_plan_end_date:
             return css_class + ' plan_end_day'
         if is_training_day:
             return css_class + ' training_day'
@@ -581,10 +564,7 @@ class WorkoutCalendar(HTMLCalendar):
         """
         trainings = self.workout_plan.training_set.filter(
             day__year=self.year).filter(day__month=self.month).order_by('day')
-        t_dict = {}
-        for training in trainings:
-            t_dict.update({f'{training.day.day}': training.training_info()})
-        return t_dict
+        return {t.day.day: t.training_info() for t in trainings}
 
 
 class LoginView(View):
@@ -618,10 +598,10 @@ class LoginView(View):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                next_page = request.GET.get('next')
-                if next_page is not None:
+                if (next_page := request.GET.get('next')) is not None:
                     return redirect(next_page)
                 return redirect('home_page')
+
         return render(request, self.template_name, {'form': form})
 
 
@@ -915,3 +895,12 @@ class DiaryEntryAddView(PermissionRequiredMixin, View):
         else:
             time = None
         return time
+
+
+def get_today_date():
+    """Get today's date
+
+    :return: today's year, month and day
+    :rtype: datetime
+    """
+    return datetime.today().date()
