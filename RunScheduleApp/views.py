@@ -122,7 +122,7 @@ class WorkoutPlanDetailsView(PermissionRequiredMixin, View):
         """
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
         check_workout_plan_owner(workout_plan, request.user)
-        date_today = datetime.today().date()
+        date_today = get_today_date()
         ctx = {'workout_plan': workout_plan, 'date_today': date_today}
         return render(request, 'RunScheduleApp/plan_details.html', ctx)
 
@@ -372,7 +372,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
         """
         workout_first_day, workout_last_day = get_plan_start_and_end_date(
             workout_plan)
-        today = datetime.today().date()
+        today = get_today_date()
         first_day_in_month = today.replace(day=1).replace(month=month).replace(
             year=year)
         last_day_prev_month = first_day_in_month - timedelta(days=1)
@@ -541,7 +541,7 @@ class WorkoutCalendar(HTMLCalendar):
         """
         date = self.create_date(day)
         css_class = self.cssclasses[weekday]
-        if date == datetime.today().date():
+        if date == get_today_date():
             return css_class + ' today'
         if date == self.workout_plan_start_date:
             return css_class + ' plan_start_day'
@@ -896,3 +896,12 @@ class DiaryEntryAddView(PermissionRequiredMixin, View):
         else:
             time = None
         return time
+
+
+def get_today_date():
+    """Get today's date
+
+    :return: today's year, month and day
+    :rtype: datetime
+    """
+    return datetime.today().date()
