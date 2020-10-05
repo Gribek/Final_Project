@@ -337,8 +337,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
         if not workout_plan:
             return render(request, 'RunScheduleApp/current_workout_plan.html',
                           {'workout_plan': ''})
-        workout_start_date, workout_end_date = get_plan_start_and_end_date(
-            workout_plan)
+        start_date, end_date = get_plan_start_and_end_date(workout_plan)
         prev_month, next_month = CurrentWorkoutPlanView.previous_and_next_month(
             workout_plan, month, year)
         calendar = WorkoutCalendar(workout_plan, month, year).formatmonth(
@@ -348,10 +347,8 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             'calendar': mark_safe(calendar),
             'prev_month': prev_month,
             'next_month': next_month,
-            'first_month': {'month': workout_start_date.month,
-                            'year': workout_start_date.year},
-            'last_month': {'month': workout_end_date.month,
-                           'year': workout_end_date.year}
+            'start_date': start_date,
+            'end_date': end_date
         }
         return render(request, 'RunScheduleApp/current_workout_plan.html',
                       ctx)
