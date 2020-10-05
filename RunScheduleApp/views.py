@@ -29,7 +29,7 @@ class MainPageView(View):
         return render(request, 'RunScheduleApp/main_page.html')
 
 
-class WorkoutPlanAdd(PermissionRequiredMixin, View):
+class WorkoutPlanAddView(PermissionRequiredMixin, View):
     """The class that creates a new workout plan."""
 
     permission_required = 'RunScheduleApp.add_workoutplan'
@@ -65,7 +65,7 @@ class WorkoutPlanAdd(PermissionRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 
-class WorkoutPlanEdit(PermissionRequiredMixin, View):
+class WorkoutPlanEditView(PermissionRequiredMixin, View):
     """The class that edits an existing workout plan."""
 
     permission_required = 'RunScheduleApp.change_workoutplan'
@@ -106,7 +106,7 @@ class WorkoutPlanEdit(PermissionRequiredMixin, View):
                       {'form': form, 'plan_id': plan_id})
 
 
-class PlanDetailsView(PermissionRequiredMixin, View):
+class WorkoutPlanDetailsView(PermissionRequiredMixin, View):
     """The class view that shows information about a workout plan."""
 
     permission_required = 'RunScheduleApp.view_workoutplan'
@@ -127,7 +127,7 @@ class PlanDetailsView(PermissionRequiredMixin, View):
         return render(request, 'RunScheduleApp/plan_details.html', ctx)
 
 
-class WorkoutsList(LoginRequiredMixin, View):
+class WorkoutPlanListView(LoginRequiredMixin, View):
     """The class view that shows list of all created workout plans."""
 
     def get(self, request):
@@ -142,7 +142,7 @@ class WorkoutsList(LoginRequiredMixin, View):
                       {'workout_plans': workout_plans})
 
 
-class TrainingAdd(PermissionRequiredMixin, View):
+class TrainingAddView(PermissionRequiredMixin, View):
     """The class that creates a new training."""
 
     permission_required = 'RunScheduleApp.add_training'
@@ -202,7 +202,7 @@ class TrainingAdd(PermissionRequiredMixin, View):
         return render(request, self.template_name, ctx)
 
 
-class TrainingEdit(PermissionRequiredMixin, View):
+class TrainingEditView(PermissionRequiredMixin, View):
     """The class that edits an existing training."""
 
     permission_required = 'RunScheduleApp.change_training'
@@ -264,7 +264,7 @@ class TrainingEdit(PermissionRequiredMixin, View):
         return render(request, self.template_name, ctx)
 
 
-class TrainingDelete(PermissionRequiredMixin, View):
+class TrainingDeleteView(PermissionRequiredMixin, View):
     """The class that deletes an existing training."""
 
     permission_required = 'RunScheduleApp.delete_training'
@@ -285,7 +285,7 @@ class TrainingDelete(PermissionRequiredMixin, View):
         return redirect('plan_details', training.workout_plan.id)
 
 
-class SelectActivePlanView(PermissionRequiredMixin, View):
+class SelectActiveWorkoutPlanView(PermissionRequiredMixin, View):
     """The class view for selecting an active workout plan"""
 
     permission_required = 'RunScheduleApp.view_workoutplan'
@@ -317,7 +317,7 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
         :return: form view
         :rtype: HttpResponse
         """
-        plans = SelectActivePlanView.get_user_plans(request.user)
+        plans = SelectActiveWorkoutPlanView.get_user_plans(request.user)
         form = self.form_class(choices=plans)
         return render(request, self.template_name, {'form': form})
 
@@ -328,7 +328,7 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
         :return: list view of all user plans
         :rtype: HttpResponse
         """
-        plans = SelectActivePlanView.get_user_plans(request.user)
+        plans = SelectActiveWorkoutPlanView.get_user_plans(request.user)
         form = self.form_class(request.POST, choices=plans)
         if form.is_valid():
             new_active_plan_id = form.cleaned_data.get('active_plan')
@@ -337,7 +337,7 @@ class SelectActivePlanView(PermissionRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 
-class WorkoutPlanView(LoginRequiredMixin, View):
+class CurrentWorkoutPlanView(LoginRequiredMixin, View):
     """Display a calendar with training days marked"""
 
     def get(self, request, month, year):
@@ -352,13 +352,13 @@ class WorkoutPlanView(LoginRequiredMixin, View):
             trainings of active workout plan marked on it
         :rtype: HttpResponse
         """
-        workout_plan = WorkoutPlanView.get_active_workout_plan(request.user)
+        workout_plan = CurrentWorkoutPlanView.get_active_workout_plan(request.user)
         if not workout_plan:
             return render(request, 'RunScheduleApp/current_workout_plan.html',
                           {'workout_plan': ''})
         workout_start_date, workout_end_date = get_plan_start_and_end_date(
             workout_plan)
-        prev_month, next_month = WorkoutPlanView.previous_and_next_month(
+        prev_month, next_month = CurrentWorkoutPlanView.previous_and_next_month(
             workout_plan, month, year)
         calendar = WorkoutCalendar(workout_plan, month, year).formatmonth(
             year, month)
@@ -736,7 +736,7 @@ class PasswordChangeView(LoginRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 
-class EditUserView(LoginRequiredMixin, View):
+class EditProfileView(LoginRequiredMixin, View):
     """The class view for changing user data"""
 
     form_class = EditUserForm
@@ -830,7 +830,7 @@ class TrainingDiaryView(PermissionRequiredMixin, View):
                       {'diary_entries': diary_entries})
 
 
-class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
+class DiaryEntryAddView(PermissionRequiredMixin, View):
     """The class that creates a new entry to training diary."""
 
     permission_required = 'RunScheduleApp.add_trainingdiary'
@@ -848,8 +848,8 @@ class TrainingDiaryEntryAdd(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         training = get_object_or_404(Training, pk=training_id)
-        distance = TrainingDiaryEntryAdd.calculate_distance(training)
-        time = TrainingDiaryEntryAdd.calculate_time(training)
+        distance = DiaryEntryAddView.calculate_distance(training)
+        time = DiaryEntryAddView.calculate_time(training)
         form = self.form_class(initial={
             'date': training.day, 'training_info': training.training_info(),
             'training_distance': distance, 'training_time': time})
