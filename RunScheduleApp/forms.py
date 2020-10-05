@@ -144,13 +144,12 @@ class EditUserForm(ModelForm):
 
 class SelectActivePlanFrom(forms.Form):
 
-    def __init__(self, *args, **kwargs):
-        self.choices = kwargs.pop('choices')
+    def __init__(self, user, *args, **kwargs):
         super(SelectActivePlanFrom, self).__init__(*args, **kwargs)
-        self.fields['active_plan'].choices = self.choices
-
-    active_plan = forms.ChoiceField(choices=[],
-                                    label='Select active workout plan')
+        user_plans = [(plan.id, plan.name)
+                      for plan in WorkoutPlan.objects.filter(owner=user)]
+        self.fields['active_plan'] = forms.ChoiceField(
+            choices=user_plans, label='Select active workout plan')
 
 
 class DiaryEntryForm(ModelForm):

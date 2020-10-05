@@ -285,30 +285,12 @@ class TrainingDeleteView(PermissionRequiredMixin, View):
         return redirect('plan_details', training.workout_plan.id)
 
 
-class SelectActiveWorkoutPlanView(PermissionRequiredMixin, View):
+class SelectCurrentPlanView(PermissionRequiredMixin, View):
     """The class view for selecting an active workout plan"""
 
     permission_required = 'RunScheduleApp.view_workoutplan'
     form_class = SelectActivePlanFrom
     template_name = 'RunScheduleApp/select_plan.html'
-
-    @staticmethod
-    def get_user_plans(user):
-        """Get all training plans belonging to the current user.
-
-        :param user: current user
-        :return: a tuple of paired workout plan ids with workout plan
-            names
-        :rtype: tuple[tuple[int, str]]
-        """
-        all_user_plans = WorkoutPlan.objects.filter(owner=user)
-        plan_names = []
-        plan_ids = []
-        for plan in all_user_plans:
-            plan_ids.append(plan.id)
-            plan_names.append(plan.name)
-        result = tuple(zip(plan_ids, plan_names))
-        return result
 
     def get(self, request):
         """Display the form for selecting an active workout plan.
@@ -317,8 +299,7 @@ class SelectActiveWorkoutPlanView(PermissionRequiredMixin, View):
         :return: form view
         :rtype: HttpResponse
         """
-        plans = SelectActiveWorkoutPlanView.get_user_plans(request.user)
-        form = self.form_class(choices=plans)
+        form = self.form_class(user=request.user)
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
@@ -328,8 +309,7 @@ class SelectActiveWorkoutPlanView(PermissionRequiredMixin, View):
         :return: list view of all user plans
         :rtype: HttpResponse
         """
-        plans = SelectActiveWorkoutPlanView.get_user_plans(request.user)
-        form = self.form_class(request.POST, choices=plans)
+        form = self.form_class(user=request.user, data=request.POST)
         if form.is_valid():
             new_active_plan_id = form.cleaned_data.get('active_plan')
             set_active_workout_plan(new_active_plan_id, request.user)
@@ -352,7 +332,8 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             trainings of active workout plan marked on it
         :rtype: HttpResponse
         """
-        workout_plan = CurrentWorkoutPlanView.get_active_workout_plan(request.user)
+        workout_plan = CurrentWorkoutPlanView.get_active_workout_plan(
+            request.user)
         if not workout_plan:
             return render(request, 'RunScheduleApp/current_workout_plan.html',
                           {'workout_plan': ''})

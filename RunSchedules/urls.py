@@ -52,7 +52,7 @@ urlpatterns = [
     url(r'^edit_profile$', EditProfileView.as_view(), name='edit_profile'),
     url(r'^password_change$', PasswordChangeView.as_view(),
         name='change_password'),
-    url(r'^select_active_plan$', SelectActiveWorkoutPlanView.as_view(),
+    url(r'^select_active_plan$', SelectCurrentPlanView.as_view(),
         name='select_active_plan'),
     url(r'^training_diary_entry_add/(?P<training_id>\d+)$',
         DiaryEntryAddView.as_view(), name='diary_entry_add'),
