@@ -599,10 +599,10 @@ class LoginView(View):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                next_page = request.GET.get('next')
-                if next_page is not None:
+                if (next_page := request.GET.get('next')) is not None:
                     return redirect(next_page)
                 return redirect('home_page')
+
         return render(request, self.template_name, {'form': form})
 
 
