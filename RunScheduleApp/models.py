@@ -14,6 +14,14 @@ class WorkoutPlan(models.Model):
                                     verbose_name='Set as current')
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def get_start_and_end_date(self):
+        """Get workout plan start date and end date.
+
+        :return: workout plan start date and end date
+        :rtype: tuple[datetime, datetime]
+        """
+        return self.date_range.lower, self.date_range.upper
+
 
 class Training(models.Model):
     """Stores a single training entry."""

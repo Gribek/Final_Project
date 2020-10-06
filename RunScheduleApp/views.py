@@ -337,7 +337,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
         if not workout_plan:
             return render(request, 'RunScheduleApp/current_workout_plan.html',
                           {'workout_plan': ''})
-        start_date, end_date = get_plan_start_and_end_date(workout_plan)
+        start_date, end_date = workout_plan.get_start_and_end_date()
         prev_month, next_month = CurrentWorkoutPlanView.previous_and_next_month(
             workout_plan, month, year)
         calendar = WorkoutCalendar(workout_plan, month, year).formatmonth(
@@ -367,8 +367,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             they are part of the plan else None
         :rtype: tuple[dict, dict]
         """
-        workout_first_day, workout_last_day = get_plan_start_and_end_date(
-            workout_plan)
+        workout_start, workout_end = workout_plan.get_start_and_end_date()
         today = get_today_date()
         first_day_in_month = today.replace(day=1).replace(month=month).replace(
             year=year)
@@ -376,13 +375,13 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
         first_day_next_month = (
                 first_day_in_month + timedelta(days=32)).replace(day=1)
 
-        if workout_first_day <= last_day_prev_month:
+        if workout_start <= last_day_prev_month:
             prev_month = {'month': last_day_prev_month.month,
                           'year': last_day_prev_month.year}
         else:
             prev_month = None
 
-        if workout_last_day >= first_day_next_month:
+        if workout_end >= first_day_next_month:
             next_month = {'month': first_day_next_month.month,
                           'year': first_day_next_month.year}
         else:
@@ -427,7 +426,7 @@ class WorkoutCalendar(HTMLCalendar):
         self.year = year
         self.workout_plan = workout_plan
         self.workout_plan_start_date, self.workout_plan_end_date = \
-            get_plan_start_and_end_date(workout_plan)
+            workout_plan.get_start_and_end_date()
         self.training_dict = self.get_trainings_dict()
 
     def formatday(self, day, weekday):
@@ -746,19 +745,6 @@ class EditProfileView(LoginRequiredMixin, View):
             form.save()
             return redirect('profile')
         return render(request, self.template_name, {'form': form})
-
-
-def get_plan_start_and_end_date(workout_plan):
-    """Get workout plan start and end date.
-
-    :param workout_plan: workout plan
-    :type workout_plan: WorkoutPlan
-    :return: workout plan start date and end date
-    :rtype: tuple[datetime, datetime]
-    """
-    start_date = workout_plan.date_range.lower
-    end_date = workout_plan.date_range.upper
-    return start_date, end_date
 
 
 def check_workout_plan_owner(workout_plan, user):
