@@ -540,7 +540,7 @@ class WorkoutCalendar(HTMLCalendar):
         :return: information about trainings in formatted month,
             day number as key and information about training in that
             day as value
-        :rtype: dict[str, str]
+        :rtype: dict[int, str]
         """
         trainings = self.workout_plan.training_set.filter(
             day__year=self.year).filter(day__month=self.month).order_by('day')
