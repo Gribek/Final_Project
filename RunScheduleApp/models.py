@@ -15,14 +15,6 @@ class WorkoutPlan(models.Model):
                                     verbose_name='Set as current')
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    def get_start_and_end_date(self):
-        """Get workout plan start date and end date.
-
-        :return: workout plan start date and end date
-        :rtype: tuple[datetime, datetime]
-        """
-        return self.date_range.lower, self.date_range.upper
-
     def check_owner(self, user):
         """Check if the user is the owner of the training plan.
 
@@ -33,6 +25,29 @@ class WorkoutPlan(models.Model):
         """
         if self.owner != user:
             raise PermissionDenied
+
+    @classmethod
+    def get_active(cls, user):
+        """Get user's active workout plan.
+
+        :param user: username
+        :type user: User
+        :return: active workout plan for the user or None if it does
+            not exist
+        :rtype: WorkoutPlan or None
+        """
+        workout_plan = cls.objects.filter(owner=user).filter(is_active=True)
+        if workout_plan.exists():
+            return workout_plan[0]
+        return None
+
+    def get_start_and_end_date(self):
+        """Get workout plan start date and end date.
+
+        :return: workout plan start date and end date
+        :rtype: tuple[datetime, datetime]
+        """
+        return self.date_range.lower, self.date_range.upper
 
 
 class Training(models.Model):

@@ -331,8 +331,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             trainings of active workout plan marked on it
         :rtype: HttpResponse
         """
-        workout_plan = CurrentWorkoutPlanView.get_active_workout_plan(
-            request.user)
+        workout_plan = WorkoutPlan.get_active(request.user)
         if not workout_plan:
             return render(request, 'RunScheduleApp/current_workout_plan.html',
                           {'workout_plan': ''})
@@ -387,23 +386,6 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             next_month = None
 
         return prev_month, next_month
-
-    @staticmethod
-    def get_active_workout_plan(user):
-        """Get user's active workout plan.
-
-        :param user: user, owner of a workout plan
-        :type user: User
-        :return: active workout plan for the user or None if it does
-            not exist
-        :rtype: WorkoutPlan or None
-        """
-        workout_plan = WorkoutPlan.objects.filter(owner=user).filter(
-            is_active=True)
-        if workout_plan.exists():
-            return workout_plan[0]
-        else:
-            return None
 
 
 class WorkoutCalendar(HTMLCalendar):
