@@ -764,8 +764,8 @@ class DiaryEntryAddView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         training = get_object_or_404(Training, pk=training_id)
-        distance = DiaryEntryAddView.calculate_distance(training)
-        time = DiaryEntryAddView.calculate_time(training)
+        distance = training.calculate_distance()
+        time = training.calculate_time()
         form = self.form_class(initial={
             'date': training.day, 'training_info': training.training_info(),
             'training_distance': distance, 'training_time': time})
@@ -793,44 +793,6 @@ class DiaryEntryAddView(PermissionRequiredMixin, View):
             return redirect('plan_details', training.workout_plan.id)
         ctx = {'form': form, 'training': training}
         return render(request, self.template_name, ctx)
-
-    @staticmethod
-    def calculate_distance(training):
-        """Calculate the distance for a given training.
-
-        :param training: training
-        :type training: Training
-        :return: sum of all distances or nothing if there are none
-        :rtype: decimal or None
-        """
-        if training.distance_main and training.distance_additional:
-            distance = training.distance_main + training.distance_additional
-        elif training.distance_main:
-            distance = training.distance_main
-        elif training.distance_additional:
-            distance = training.distance_additional
-        else:
-            distance = None
-        return distance
-
-    @staticmethod
-    def calculate_time(training):
-        """Calculate duration of a given training.
-
-        :param training: training
-        :type training: Training
-        :return: duration of training
-        :rtype: int or None
-        """
-        if training.time_main and training.time_additional:
-            time = training.time_main + training.time_additional
-        elif training.time_main:
-            time = training.time_main
-        elif training.time_additional:
-            time = training.time_additional
-        else:
-            time = None
-        return time
 
 
 def get_today_date():

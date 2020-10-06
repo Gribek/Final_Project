@@ -92,6 +92,38 @@ class Training(models.Model):
         verbose_name='Add training to workout plan')
     accomplished = models.BooleanField(default=False)
 
+    def calculate_distance(self):
+        """Calculate training distance
+
+        :return: sum of all distances or nothing if there are none
+        :rtype: decimal or None
+        """
+        distance = 0
+        if self.distance_main:
+            distance += self.distance_main
+        if self.distance_additional:
+            distance += self.distance_additional
+
+        if not distance:
+            return None
+        return distance
+
+    def calculate_time(self):
+        """Calculate training duration
+
+        :return: duration of training or nothing if there is none
+        :rtype: int or None
+        """
+        duration = 0
+        if self.time_main:
+            duration += self.time_main
+        if self.time_additional:
+            duration += self.time_additional
+
+        if not duration:
+            return None
+        return duration
+
     def training_info(self):
         """Prepare information about a training.
 
