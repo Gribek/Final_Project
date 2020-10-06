@@ -4,8 +4,7 @@ from calendar import HTMLCalendar
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.models import Permission, User
-from django.core.exceptions import PermissionDenied
+from django.contrib.auth.models import Permission
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -60,7 +59,7 @@ class WorkoutPlanAddView(PermissionRequiredMixin, View):
             form.instance.owner = user
             new_plan = form.save()
             if new_plan.is_active:
-                set_active_workout_plan(new_plan.id, user)
+                WorkoutPlan.set_active(new_plan.id, user)
             return redirect('workout_plans')
         return render(request, self.template_name, {'form': form})
 
@@ -82,7 +81,7 @@ class WorkoutPlanEditView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
-        check_workout_plan_owner(workout_plan, request.user)
+        workout_plan.check_owner(request.user)
         form = self.form_class(instance=workout_plan)
         return render(request, self.template_name,
                       {'form': form, 'plan_id': plan_id})
@@ -121,7 +120,7 @@ class WorkoutPlanDetailsView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
-        check_workout_plan_owner(workout_plan, request.user)
+        workout_plan.check_owner(request.user)
         date_today = get_today_date()
         ctx = {'workout_plan': workout_plan, 'date_today': date_today}
         return render(request, 'RunScheduleApp/plan_details.html', ctx)
@@ -166,7 +165,7 @@ class TrainingAddView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
-        check_workout_plan_owner(workout_plan, request.user)
+        workout_plan.check_owner(request.user)
         form = self.form_class(initial={'day': training_date,
                                         'plan_id': plan_id})
         ctx = {'form': form, 'plan_id': workout_plan.id,
@@ -226,7 +225,7 @@ class TrainingEditView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
-        check_workout_plan_owner(workout_plan, request.user)
+        workout_plan.check_owner(request.user)
         training = get_object_or_404(Training, pk=training_id)
         form = self.form_class(instance=training, initial={
             'plan_id': plan_id, 'initial_training_date': training.day})
@@ -280,7 +279,7 @@ class TrainingDeleteView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         training = get_object_or_404(Training, pk=training_id)
-        check_workout_plan_owner(training.workout_plan, request.user)
+        training.workout_plan.check_owner(request.user)
         training.delete()
         return redirect('plan_details', training.workout_plan.id)
 
@@ -312,7 +311,7 @@ class SelectCurrentPlanView(PermissionRequiredMixin, View):
         form = self.form_class(user=request.user, data=request.POST)
         if form.is_valid():
             new_active_plan_id = form.cleaned_data.get('active_plan')
-            set_active_workout_plan(new_active_plan_id, request.user)
+            WorkoutPlan.set_active(new_active_plan_id, request.user)
             return redirect('workout_plans')
         return render(request, self.template_name, {'form': form})
 
@@ -332,12 +331,11 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             trainings of active workout plan marked on it
         :rtype: HttpResponse
         """
-        workout_plan = CurrentWorkoutPlanView.get_active_workout_plan(
-            request.user)
+        workout_plan = WorkoutPlan.get_active(request.user)
         if not workout_plan:
             return render(request, 'RunScheduleApp/current_workout_plan.html',
                           {'workout_plan': ''})
-        start_date, end_date = get_plan_start_and_end_date(workout_plan)
+        start_date, end_date = workout_plan.get_start_and_end_date()
         prev_month, next_month = CurrentWorkoutPlanView.previous_and_next_month(
             workout_plan, month, year)
         calendar = WorkoutCalendar(workout_plan, month, year).formatmonth(
@@ -367,8 +365,7 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
             they are part of the plan else None
         :rtype: tuple[dict, dict]
         """
-        workout_first_day, workout_last_day = get_plan_start_and_end_date(
-            workout_plan)
+        workout_start, workout_end = workout_plan.get_start_and_end_date()
         today = get_today_date()
         first_day_in_month = today.replace(day=1).replace(month=month).replace(
             year=year)
@@ -376,36 +373,19 @@ class CurrentWorkoutPlanView(LoginRequiredMixin, View):
         first_day_next_month = (
                 first_day_in_month + timedelta(days=32)).replace(day=1)
 
-        if workout_first_day <= last_day_prev_month:
+        if workout_start <= last_day_prev_month:
             prev_month = {'month': last_day_prev_month.month,
                           'year': last_day_prev_month.year}
         else:
             prev_month = None
 
-        if workout_last_day >= first_day_next_month:
+        if workout_end >= first_day_next_month:
             next_month = {'month': first_day_next_month.month,
                           'year': first_day_next_month.year}
         else:
             next_month = None
 
         return prev_month, next_month
-
-    @staticmethod
-    def get_active_workout_plan(user):
-        """Get user's active workout plan.
-
-        :param user: user, owner of a workout plan
-        :type user: User
-        :return: active workout plan for the user or None if it does
-            not exist
-        :rtype: WorkoutPlan or None
-        """
-        workout_plan = WorkoutPlan.objects.filter(owner=user).filter(
-            is_active=True)
-        if workout_plan.exists():
-            return workout_plan[0]
-        else:
-            return None
 
 
 class WorkoutCalendar(HTMLCalendar):
@@ -427,7 +407,7 @@ class WorkoutCalendar(HTMLCalendar):
         self.year = year
         self.workout_plan = workout_plan
         self.workout_plan_start_date, self.workout_plan_end_date = \
-            get_plan_start_and_end_date(workout_plan)
+            workout_plan.get_start_and_end_date()
         self.training_dict = self.get_trainings_dict()
 
     def formatday(self, day, weekday):
@@ -560,7 +540,7 @@ class WorkoutCalendar(HTMLCalendar):
         :return: information about trainings in formatted month,
             day number as key and information about training in that
             day as value
-        :rtype: dict[str, str]
+        :rtype: dict[int, str]
         """
         trainings = self.workout_plan.training_set.filter(
             day__year=self.year).filter(day__month=self.month).order_by('day')
@@ -748,50 +728,6 @@ class EditProfileView(LoginRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 
-def get_plan_start_and_end_date(workout_plan):
-    """Get workout plan start and end date.
-
-    :param workout_plan: workout plan
-    :type workout_plan: WorkoutPlan
-    :return: workout plan start date and end date
-    :rtype: tuple[datetime, datetime]
-    """
-    start_date = workout_plan.date_range.lower
-    end_date = workout_plan.date_range.upper
-    return start_date, end_date
-
-
-def check_workout_plan_owner(workout_plan, user):
-    """Check if user is owner of given workout plan.
-
-    :param workout_plan: workout plan
-    :type workout_plan: WorkoutPlan
-    :param user: user
-    :type user: User
-    :return: confirmation of ownership
-    :rtype: bool
-    """
-    if workout_plan.owner != user:
-        raise PermissionDenied
-
-
-def set_active_workout_plan(new_active_plan_id, user):
-    """Set workout plan as active.
-
-    :param new_active_plan_id: id of a workout plan to be set as active
-    :type new_active_plan_id: str or int
-    :param user: user for whom new active plan is to be set
-    :type user: User
-    :return: None
-    """
-    WorkoutPlan.objects.filter(owner=user).filter(is_active=True).update(
-        is_active=False)
-    new_active_plan = get_object_or_404(WorkoutPlan, pk=new_active_plan_id)
-    new_active_plan.is_active = True
-    new_active_plan.save()
-    return None
-
-
 class TrainingDiaryView(PermissionRequiredMixin, View):
     """The class view that shows entries in training diary."""
 
@@ -828,8 +764,8 @@ class DiaryEntryAddView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         training = get_object_or_404(Training, pk=training_id)
-        distance = DiaryEntryAddView.calculate_distance(training)
-        time = DiaryEntryAddView.calculate_time(training)
+        distance = training.calculate_distance()
+        time = training.calculate_time()
         form = self.form_class(initial={
             'date': training.day, 'training_info': training.training_info(),
             'training_distance': distance, 'training_time': time})
@@ -857,44 +793,6 @@ class DiaryEntryAddView(PermissionRequiredMixin, View):
             return redirect('plan_details', training.workout_plan.id)
         ctx = {'form': form, 'training': training}
         return render(request, self.template_name, ctx)
-
-    @staticmethod
-    def calculate_distance(training):
-        """Calculate the distance for a given training.
-
-        :param training: training
-        :type training: Training
-        :return: sum of all distances or nothing if there are none
-        :rtype: decimal or None
-        """
-        if training.distance_main and training.distance_additional:
-            distance = training.distance_main + training.distance_additional
-        elif training.distance_main:
-            distance = training.distance_main
-        elif training.distance_additional:
-            distance = training.distance_additional
-        else:
-            distance = None
-        return distance
-
-    @staticmethod
-    def calculate_time(training):
-        """Calculate duration of a given training.
-
-        :param training: training
-        :type training: Training
-        :return: duration of training
-        :rtype: int or None
-        """
-        if training.time_main and training.time_additional:
-            time = training.time_main + training.time_additional
-        elif training.time_main:
-            time = training.time_main
-        elif training.time_additional:
-            time = training.time_additional
-        else:
-            time = None
-        return time
 
 
 def get_today_date():

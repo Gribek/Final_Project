@@ -6,7 +6,6 @@ from django.urls import reverse
 
 from RunScheduleApp.models import WorkoutPlan, Training, TrainingDiary
 from RunScheduleApp.forms import DiaryEntryForm
-from RunScheduleApp.views import DiaryEntryAddView
 
 
 class MainPageViewTest(TestCase):
@@ -438,10 +437,10 @@ class TrainingDiaryEntryAddTest(PermissionRequiredViewTest):
         self.assertEqual(form.initial['training_info'],
                          self.training.training_info(),
                          'No training_info in initial data')
-        distance = DiaryEntryAddView.calculate_distance(self.training)
+        distance = self.training.calculate_distance()
         self.assertEqual(form.initial['training_distance'], distance,
                          'No training_distance in initial data')
-        time = DiaryEntryAddView.calculate_time(self.training)
+        time = self.training.calculate_time()
         self.assertEqual(form.initial['training_time'], time,
                          'No training_time in initial data')
 
@@ -490,14 +489,14 @@ class TrainingDiaryEntryAddTest(PermissionRequiredViewTest):
         training_2 = Training.objects.get(training_main='test training 2')
         training_3 = Training.objects.get(training_main='test training 3')
         training_4 = Training.objects.get(training_main='test training 4')
-        distance_1 = DiaryEntryAddView.calculate_distance(training_1)
-        distance_2 = DiaryEntryAddView.calculate_distance(training_2)
-        distance_3 = DiaryEntryAddView.calculate_distance(training_3)
-        distance_4 = DiaryEntryAddView.calculate_distance(training_4)
-        time_1 = DiaryEntryAddView.calculate_time(training_1)
-        time_2 = DiaryEntryAddView.calculate_time(training_2)
-        time_3 = DiaryEntryAddView.calculate_time(training_3)
-        time_4 = DiaryEntryAddView.calculate_time(training_4)
+        distance_1 = training_1.calculate_distance()
+        distance_2 = training_2.calculate_distance()
+        distance_3 = training_3.calculate_distance()
+        distance_4 = training_4.calculate_distance()
+        time_1 = training_1.calculate_time()
+        time_2 = training_2.calculate_time()
+        time_3 = training_3.calculate_time()
+        time_4 = training_4.calculate_time()
         self.assertEqual(distance_1, 10, 'Wrong distance')
         self.assertEqual(distance_2, 20, 'Wrong distance')
         self.assertEqual(distance_3, None, 'Wrong distance')

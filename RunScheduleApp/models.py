@@ -1,6 +1,8 @@
+from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.contrib.postgres.fields.ranges import DateRangeField
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 
 
 class WorkoutPlan(models.Model):
@@ -13,6 +15,57 @@ class WorkoutPlan(models.Model):
     is_active = models.BooleanField(default=False,
                                     verbose_name='Set as current')
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def check_owner(self, user):
+        """Check if the user is the owner of the training plan.
+
+        :param user: user
+        :type user: User
+        :return: None
+        :rtype: None
+        """
+        if self.owner != user:
+            raise PermissionDenied
+
+    @classmethod
+    def get_active(cls, user):
+        """Get user's active workout plan.
+
+        :param user: username
+        :type user: User
+        :return: active workout plan for the user or None if it does
+            not exist
+        :rtype: WorkoutPlan or None
+        """
+        workout_plan = cls.objects.filter(owner=user).filter(is_active=True)
+        if workout_plan.exists():
+            return workout_plan[0]
+        return None
+
+    def get_start_and_end_date(self):
+        """Get workout plan start date and end date.
+
+        :return: workout plan start date and end date
+        :rtype: tuple[datetime, datetime]
+        """
+        return self.date_range.lower, self.date_range.upper
+
+    @classmethod
+    def set_active(cls, plan_id, user):
+        """Set workout plan as active.
+
+        :param plan_id: id of a workout plan to be set as active
+        :type plan_id: int
+        :param user: user for whom new active plan is to be set
+        :type user: User
+        :return: None
+        """
+        cls.objects.filter(owner=user).filter(is_active=True).update(
+            is_active=False)
+        new_active_plan = get_object_or_404(cls, pk=plan_id)
+        new_active_plan.is_active = True
+        new_active_plan.save()
+        return None
 
 
 class Training(models.Model):
@@ -38,6 +91,38 @@ class Training(models.Model):
         WorkoutPlan, on_delete=models.CASCADE, unique_for_date=day,
         verbose_name='Add training to workout plan')
     accomplished = models.BooleanField(default=False)
+
+    def calculate_distance(self):
+        """Calculate training distance
+
+        :return: sum of all distances or nothing if there are none
+        :rtype: decimal or None
+        """
+        distance = 0
+        if self.distance_main:
+            distance += self.distance_main
+        if self.distance_additional:
+            distance += self.distance_additional
+
+        if not distance:
+            return None
+        return distance
+
+    def calculate_time(self):
+        """Calculate training duration
+
+        :return: duration of training or nothing if there is none
+        :rtype: int or None
+        """
+        duration = 0
+        if self.time_main:
+            duration += self.time_main
+        if self.time_additional:
+            duration += self.time_additional
+
+        if not duration:
+            return None
+        return duration
 
     def training_info(self):
         """Prepare information about a training.

@@ -1,12 +1,13 @@
 from datetime import date
 
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from django.contrib.postgres.forms import RangeWidget
 from django import forms
 from django.forms import ModelForm, DateInput
 from django.core.exceptions import ValidationError
 
-from RunScheduleApp.models import *
+from RunScheduleApp.models import WorkoutPlan, Training, TrainingDiary
 
 
 class DatePicker(DateInput):
