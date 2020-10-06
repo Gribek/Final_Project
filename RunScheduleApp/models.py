@@ -1,3 +1,4 @@
+from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.contrib.postgres.fields.ranges import DateRangeField
 from django.contrib.auth.models import User
@@ -21,6 +22,17 @@ class WorkoutPlan(models.Model):
         :rtype: tuple[datetime, datetime]
         """
         return self.date_range.lower, self.date_range.upper
+
+    def check_owner(self, user):
+        """Check if the user is the owner of the training plan.
+
+        :param user: user
+        :type user: User
+        :return: None
+        :rtype: None
+        """
+        if self.owner != user:
+            raise PermissionDenied
 
 
 class Training(models.Model):

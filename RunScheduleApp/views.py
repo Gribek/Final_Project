@@ -5,7 +5,6 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import Permission, User
-from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -82,7 +81,7 @@ class WorkoutPlanEditView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
-        check_workout_plan_owner(workout_plan, request.user)
+        workout_plan.check_owner(request.user)
         form = self.form_class(instance=workout_plan)
         return render(request, self.template_name,
                       {'form': form, 'plan_id': plan_id})
@@ -121,7 +120,7 @@ class WorkoutPlanDetailsView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
-        check_workout_plan_owner(workout_plan, request.user)
+        workout_plan.check_owner(request.user)
         date_today = get_today_date()
         ctx = {'workout_plan': workout_plan, 'date_today': date_today}
         return render(request, 'RunScheduleApp/plan_details.html', ctx)
@@ -166,7 +165,7 @@ class TrainingAddView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
-        check_workout_plan_owner(workout_plan, request.user)
+        workout_plan.check_owner(request.user)
         form = self.form_class(initial={'day': training_date,
                                         'plan_id': plan_id})
         ctx = {'form': form, 'plan_id': workout_plan.id,
@@ -226,7 +225,7 @@ class TrainingEditView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         workout_plan = get_object_or_404(WorkoutPlan, pk=plan_id)
-        check_workout_plan_owner(workout_plan, request.user)
+        workout_plan.check_owner(request.user)
         training = get_object_or_404(Training, pk=training_id)
         form = self.form_class(instance=training, initial={
             'plan_id': plan_id, 'initial_training_date': training.day})
@@ -280,7 +279,7 @@ class TrainingDeleteView(PermissionRequiredMixin, View):
         :rtype: HttpResponse
         """
         training = get_object_or_404(Training, pk=training_id)
-        check_workout_plan_owner(training.workout_plan, request.user)
+        training.workout_plan.check_owner(request.user)
         training.delete()
         return redirect('plan_details', training.workout_plan.id)
 
@@ -745,20 +744,6 @@ class EditProfileView(LoginRequiredMixin, View):
             form.save()
             return redirect('profile')
         return render(request, self.template_name, {'form': form})
-
-
-def check_workout_plan_owner(workout_plan, user):
-    """Check if user is owner of given workout plan.
-
-    :param workout_plan: workout plan
-    :type workout_plan: WorkoutPlan
-    :param user: user
-    :type user: User
-    :return: confirmation of ownership
-    :rtype: bool
-    """
-    if workout_plan.owner != user:
-        raise PermissionDenied
 
 
 def set_active_workout_plan(new_active_plan_id, user):
