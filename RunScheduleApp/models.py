@@ -2,6 +2,7 @@ from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.contrib.postgres.fields.ranges import DateRangeField
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 
 
 class WorkoutPlan(models.Model):
@@ -48,6 +49,23 @@ class WorkoutPlan(models.Model):
         :rtype: tuple[datetime, datetime]
         """
         return self.date_range.lower, self.date_range.upper
+
+    @classmethod
+    def set_active(cls, plan_id, user):
+        """Set workout plan as active.
+
+        :param plan_id: id of a workout plan to be set as active
+        :type plan_id: int
+        :param user: user for whom new active plan is to be set
+        :type user: User
+        :return: None
+        """
+        cls.objects.filter(owner=user).filter(is_active=True).update(
+            is_active=False)
+        new_active_plan = get_object_or_404(cls, pk=plan_id)
+        new_active_plan.is_active = True
+        new_active_plan.save()
+        return None
 
 
 class Training(models.Model):

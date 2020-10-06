@@ -4,7 +4,7 @@ from calendar import HTMLCalendar
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.models import Permission, User
+from django.contrib.auth.models import Permission
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -59,7 +59,7 @@ class WorkoutPlanAddView(PermissionRequiredMixin, View):
             form.instance.owner = user
             new_plan = form.save()
             if new_plan.is_active:
-                set_active_workout_plan(new_plan.id, user)
+                WorkoutPlan.set_active(new_plan.id, user)
             return redirect('workout_plans')
         return render(request, self.template_name, {'form': form})
 
@@ -311,7 +311,7 @@ class SelectCurrentPlanView(PermissionRequiredMixin, View):
         form = self.form_class(user=request.user, data=request.POST)
         if form.is_valid():
             new_active_plan_id = form.cleaned_data.get('active_plan')
-            set_active_workout_plan(new_active_plan_id, request.user)
+            WorkoutPlan.set_active(new_active_plan_id, request.user)
             return redirect('workout_plans')
         return render(request, self.template_name, {'form': form})
 
@@ -726,23 +726,6 @@ class EditProfileView(LoginRequiredMixin, View):
             form.save()
             return redirect('profile')
         return render(request, self.template_name, {'form': form})
-
-
-def set_active_workout_plan(new_active_plan_id, user):
-    """Set workout plan as active.
-
-    :param new_active_plan_id: id of a workout plan to be set as active
-    :type new_active_plan_id: str or int
-    :param user: user for whom new active plan is to be set
-    :type user: User
-    :return: None
-    """
-    WorkoutPlan.objects.filter(owner=user).filter(is_active=True).update(
-        is_active=False)
-    new_active_plan = get_object_or_404(WorkoutPlan, pk=new_active_plan_id)
-    new_active_plan.is_active = True
-    new_active_plan.save()
-    return None
 
 
 class TrainingDiaryView(PermissionRequiredMixin, View):
